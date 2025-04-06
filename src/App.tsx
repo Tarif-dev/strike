@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from '@/pages/Index';
 import Matches from '@/pages/Matches';
@@ -17,7 +18,7 @@ import ResetPassword from '@/pages/auth/ResetPassword';
 import AuthCallback from '@/pages/auth/AuthCallback';
 import NotFound from '@/pages/NotFound';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { ToastProvider } from '@/hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 
 // Add the ApiSettings page to the imports
 import ApiSettings from "@/pages/ApiSettings";
@@ -26,32 +27,31 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <ToastProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/matches" element={<Matches />} />
-            <Route path="/matches/:id" element={<MatchDetail />} />
-            <Route path="/players" element={<Players />} />
-            <Route path="/players/:id" element={<PlayerDetail />} />
-            <Route path="/leagues" element={<Leagues />} />
-            <Route path="/leagues/:id" element={<LeagueDetail />} />
-            <Route path="/teams/create" element={<CreateTeam />} />
-            <Route path="/teams/:id" element={<TeamDetail />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/api-settings" element={<ApiSettings />} />
-            
-            {/* Authentication routes */}
-            <Route path="/auth/login" element={<Login />} />
-            <Route path="/auth/signup" element={<Signup />} />
-            <Route path="/auth/otp-login" element={<OtpLogin />} />
-            <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-            <Route path="/auth/reset-password" element={<ResetPassword />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            
-            {/* 404 route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </ToastProvider>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/matches" element={<Matches />} />
+          <Route path="/matches/:id" element={<MatchDetail />} />
+          <Route path="/players" element={<Players />} />
+          <Route path="/players/:id" element={<PlayerDetail />} />
+          <Route path="/leagues" element={<Leagues />} />
+          <Route path="/leagues/:id" element={<LeagueDetail />} />
+          <Route path="/teams/create" element={<CreateTeam />} />
+          <Route path="/teams/:id" element={<TeamDetail />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/api-settings" element={<ApiSettings />} />
+          
+          {/* Authentication routes */}
+          <Route path="/auth/login" element={<Login />} />
+          <Route path="/auth/signup" element={<Signup />} />
+          <Route path="/auth/otp-login" element={<OtpLogin />} />
+          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+          <Route path="/auth/reset-password" element={<ResetPassword />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          
+          {/* 404 route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster />
       </AuthProvider>
     </BrowserRouter>
   );

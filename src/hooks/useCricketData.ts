@@ -1,115 +1,66 @@
 
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { cricketApiService } from '@/services/cricketApi';
 
 // Hook for fetching matches
 export const useMatches = () => {
-  const [matches, setMatches] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: matches = [], isLoading: loading, error } = useQuery({
+    queryKey: ['matches'],
+    queryFn: cricketApiService.fetchMatches,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true,
+  });
 
-  useEffect(() => {
-    const fetchMatches = async () => {
-      try {
-        setLoading(true);
-        const data = await cricketApiService.fetchMatches();
-        setMatches(data);
-        setError(null);
-      } catch (err) {
-        setError('Failed to load matches');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMatches();
-  }, []);
-
-  return { matches, loading, error };
+  return { 
+    matches, 
+    loading, 
+    error: error ? 'Failed to load matches' : null 
+  };
 };
 
 // Hook for fetching a single match
 export const useMatch = (matchId: string) => {
-  const [match, setMatch] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: match = null, isLoading: loading, error } = useQuery({
+    queryKey: ['match', matchId],
+    queryFn: () => cricketApiService.fetchMatchDetails(matchId),
+    staleTime: 60 * 1000, // 1 minute
+    enabled: !!matchId,
+  });
 
-  useEffect(() => {
-    const fetchMatch = async () => {
-      try {
-        setLoading(true);
-        const data = await cricketApiService.fetchMatchDetails(matchId);
-        setMatch(data);
-        setError(null);
-      } catch (err) {
-        setError('Failed to load match details');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (matchId) {
-      fetchMatch();
-    }
-  }, [matchId]);
-
-  return { match, loading, error };
+  return { 
+    match, 
+    loading, 
+    error: error ? 'Failed to load match details' : null 
+  };
 };
 
 // Hook for fetching players
 export const usePlayers = () => {
-  const [players, setPlayers] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: players = [], isLoading: loading, error } = useQuery({
+    queryKey: ['players'],
+    queryFn: cricketApiService.fetchPlayers,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
 
-  useEffect(() => {
-    const fetchPlayers = async () => {
-      try {
-        setLoading(true);
-        const data = await cricketApiService.fetchPlayers();
-        setPlayers(data);
-        setError(null);
-      } catch (err) {
-        setError('Failed to load players');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPlayers();
-  }, []);
-
-  return { players, loading, error };
+  return { 
+    players, 
+    loading, 
+    error: error ? 'Failed to load players' : null 
+  };
 };
 
 // Hook for fetching a single player
 export const usePlayer = (playerId: string) => {
-  const [player, setPlayer] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: player = null, isLoading: loading, error } = useQuery({
+    queryKey: ['player', playerId],
+    queryFn: () => cricketApiService.fetchPlayerDetails(playerId),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!playerId,
+  });
 
-  useEffect(() => {
-    const fetchPlayer = async () => {
-      try {
-        setLoading(true);
-        const data = await cricketApiService.fetchPlayerDetails(playerId);
-        setPlayer(data);
-        setError(null);
-      } catch (err) {
-        setError('Failed to load player details');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (playerId) {
-      fetchPlayer();
-    }
-  }, [playerId]);
-
-  return { player, loading, error };
+  return { 
+    player, 
+    loading, 
+    error: error ? 'Failed to load player details' : null 
+  };
 };
