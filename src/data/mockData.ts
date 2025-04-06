@@ -266,7 +266,7 @@ export const matches = [
     venue: "Wankhede Stadium",
     date: "Apr 10, 2023",
     time: "7:30 PM",
-    status: "completed",
+    status: "completed" as const,
     result: "Mumbai Indians won by 5 wickets",
     homeScore: "176/4 (20)",
     awayScore: "174/8 (20)"
@@ -287,7 +287,7 @@ export const matches = [
     venue: "M. Chinnaswamy Stadium",
     date: "Apr 15, 2023",
     time: "3:30 PM",
-    status: "live",
+    status: "live" as const,
     homeScore: "102/3 (12.2)",
     awayScore: "Yet to bat"
   },
@@ -307,7 +307,7 @@ export const matches = [
     venue: "Eden Gardens",
     date: "Apr 20, 2023",
     time: "7:30 PM",
-    status: "upcoming"
+    status: "upcoming" as const
   },
   {
     id: "m4",
@@ -325,7 +325,7 @@ export const matches = [
     venue: "MA Chidambaram Stadium",
     date: "Apr 22, 2023",
     time: "7:30 PM",
-    status: "upcoming"
+    status: "upcoming" as const
   }
 ];
 
