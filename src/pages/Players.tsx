@@ -1,17 +1,18 @@
 
 import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Navbar from '@/components/layout/Navbar';
 import PageContainer from '@/components/layout/PageContainer';
 import PlayerCard from '@/components/cricket/PlayerCard';
 import { Tabs } from '@/components/ui/tab';
-import { players } from '@/data/mockData';
+import { usePlayers } from '@/hooks/useCricketData';
 
 const Players = () => {
   const [activeTab, setActiveTab] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const { players, loading, error } = usePlayers();
   
   const batsmen = players.filter(p => p.position === "Batsman");
   const bowlers = players.filter(p => p.position === "Bowler");
@@ -73,19 +74,30 @@ const Players = () => {
             onChange={setActiveTab}
           />
           
-          <div className="space-y-4 animate-fade-in">
-            {filteredPlayers.length > 0 ? (
-              filteredPlayers.map(player => (
-                <Link key={player.id} to={`/players/${player.id}`}>
-                  <PlayerCard player={player} compact={true} />
-                </Link>
-              ))
-            ) : (
-              <div className="text-center py-10">
-                <p className="text-muted-foreground">No players found</p>
-              </div>
-            )}
-          </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 text-cricket-lime animate-spin" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-400">Error loading players</p>
+              <p className="text-muted-foreground text-sm mt-2">Check your API settings</p>
+            </div>
+          ) : (
+            <div className="space-y-4 animate-fade-in">
+              {filteredPlayers.length > 0 ? (
+                filteredPlayers.map(player => (
+                  <Link key={player.id} to={`/players/${player.id}`}>
+                    <PlayerCard player={player} compact={true} />
+                  </Link>
+                ))
+              ) : (
+                <div className="text-center py-10">
+                  <p className="text-muted-foreground">No players found</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </PageContainer>
       

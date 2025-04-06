@@ -1,29 +1,51 @@
-
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Bell, BellOff } from 'lucide-react';
+import { ArrowLeft, Bell, BellOff, Loader2 } from 'lucide-react';
 import PageContainer from '@/components/layout/PageContainer';
-import { matches, players } from '@/data/mockData';
 import { useState } from 'react';
 import { Tabs } from '@/components/ui/tab';
 import PlayerCard from '@/components/cricket/PlayerCard';
+import { useMatch } from '@/hooks/useCricketData';
+import { players } from '@/data/mockData';
 
 const MatchDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState("Info");
   const [isNotifyOn, setIsNotifyOn] = useState(false);
+  const { match, loading, error } = useMatch(id || "");
   
-  // Find match by ID
-  const match = matches.find(m => m.id === id);
-  
-  // For the demo, we'll just take some random players from our mock data
   const homeTeamPlayers = players.slice(0, 5);
   const awayTeamPlayers = players.slice(5, 10);
   
-  if (!match) {
+  const toggleNotification = () => setIsNotifyOn(!isNotifyOn);
+  
+  if (loading) {
     return (
       <PageContainer>
+        <div className="flex justify-between items-center py-4">
+          <Link to="/matches" className="flex items-center gap-1 text-cricket-lime">
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back</span>
+          </Link>
+        </div>
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 text-cricket-lime animate-spin" />
+        </div>
+      </PageContainer>
+    );
+  }
+  
+  if (error || !match) {
+    return (
+      <PageContainer>
+        <div className="flex justify-between items-center py-4">
+          <Link to="/matches" className="flex items-center gap-1 text-cricket-lime">
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back</span>
+          </Link>
+        </div>
         <div className="text-center py-10">
           <h2 className="text-xl font-bold mb-2">Match Not Found</h2>
+          <p className="text-muted-foreground mb-4">Unable to load match information</p>
           <Link to="/matches" className="text-cricket-lime">Back to Matches</Link>
         </div>
       </PageContainer>
@@ -32,7 +54,6 @@ const MatchDetail = () => {
   
   const isLive = match.status === 'live';
   const isCompleted = match.status === 'completed';
-  const toggleNotification = () => setIsNotifyOn(!isNotifyOn);
   
   return (
     <PageContainer className="pb-6">
@@ -61,22 +82,34 @@ const MatchDetail = () => {
         
         <div className="flex items-center justify-between">
           <div className="flex flex-col items-center">
-            <img src={match.homeTeam.logo} alt={match.homeTeam.name} className="w-14 h-14 mb-2" />
+            <img 
+              src={match.homeTeam.logo} 
+              alt={match.homeTeam.name} 
+              className="w-14 h-14 mb-2" 
+              onError={(e) => {
+                (e.target as HTMLImageElement).onerror = null;
+                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/56?text=' + match.homeTeam.shortName;
+              }}
+            />
             <h3 className="font-bold text-lg">{match.homeTeam.shortName}</h3>
           </div>
           
           <div className="text-center">
             {isLive && <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full animate-pulse block mb-2">LIVE</span>}
-            {isCompleted ? (
-              <span className="text-cricket-dark-green font-medium text-lg mb-1 block">vs</span>
-            ) : (
-              <span className="text-cricket-dark-green font-medium text-lg mb-1 block">vs</span>
-            )}
+            <span className="text-cricket-dark-green font-medium text-lg mb-1 block">vs</span>
             <span className="text-xs text-cricket-dark-green/80">{match.date} • {match.time}</span>
           </div>
           
           <div className="flex flex-col items-center">
-            <img src={match.awayTeam.logo} alt={match.awayTeam.name} className="w-14 h-14 mb-2" />
+            <img 
+              src={match.awayTeam.logo} 
+              alt={match.awayTeam.name} 
+              className="w-14 h-14 mb-2" 
+              onError={(e) => {
+                (e.target as HTMLImageElement).onerror = null;
+                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/56?text=' + match.awayTeam.shortName;
+              }}
+            />
             <h3 className="font-bold text-lg">{match.awayTeam.shortName}</h3>
           </div>
         </div>

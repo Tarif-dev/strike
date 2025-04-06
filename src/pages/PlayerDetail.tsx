@@ -1,31 +1,51 @@
-
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Star } from 'lucide-react';
+import { ArrowLeft, Star, Loader2 } from 'lucide-react';
 import PageContainer from '@/components/layout/PageContainer';
-import { players } from '@/data/mockData';
 import { useState } from 'react';
+import { usePlayer } from '@/hooks/useCricketData';
 
 const PlayerDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [isFollowing, setIsFollowing] = useState(false);
+  const { player, loading, error } = usePlayer(id || "");
   
-  // Find player by ID
-  const player = players.find(p => p.id === id);
+  const toggleFollow = () => {
+    setIsFollowing(!isFollowing);
+  };
   
-  if (!player) {
+  if (loading) {
     return (
       <PageContainer>
-        <div className="text-center py-10">
-          <h2 className="text-xl font-bold mb-2">Player Not Found</h2>
-          <Link to="/" className="text-cricket-lime">Back to Home</Link>
+        <div className="flex justify-between items-center py-4">
+          <Link to="/players" className="flex items-center gap-1 text-cricket-lime">
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back</span>
+          </Link>
+        </div>
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 text-cricket-lime animate-spin" />
         </div>
       </PageContainer>
     );
   }
   
-  const toggleFollow = () => {
-    setIsFollowing(!isFollowing);
-  };
+  if (error || !player) {
+    return (
+      <PageContainer>
+        <div className="flex justify-between items-center py-4">
+          <Link to="/players" className="flex items-center gap-1 text-cricket-lime">
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back</span>
+          </Link>
+        </div>
+        <div className="text-center py-10">
+          <h2 className="text-xl font-bold mb-2">Player Not Found</h2>
+          <p className="text-muted-foreground mb-4">Unable to load player information</p>
+          <Link to="/players" className="text-cricket-lime">Back to Players</Link>
+        </div>
+      </PageContainer>
+    );
+  }
   
   return (
     <PageContainer className="pb-6">
@@ -55,6 +75,10 @@ const PlayerDetail = () => {
                 src={player.image} 
                 alt={player.name} 
                 className="w-full h-full object-cover" 
+                onError={(e) => {
+                  (e.target as HTMLImageElement).onerror = null;
+                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=' + player.name.charAt(0);
+                }}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-xl">
@@ -70,6 +94,10 @@ const PlayerDetail = () => {
                 src={player.countryFlag} 
                 alt={player.country} 
                 className="w-6 h-6 rounded-full" 
+                onError={(e) => {
+                  (e.target as HTMLImageElement).onerror = null;
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
               />
             </div>
             
@@ -78,6 +106,10 @@ const PlayerDetail = () => {
                 src={player.teamLogo} 
                 alt={player.team} 
                 className="w-5 h-5" 
+                onError={(e) => {
+                  (e.target as HTMLImageElement).onerror = null;
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
               />
               <span className="text-sm">{player.team}</span>
             </div>
