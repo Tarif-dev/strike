@@ -139,12 +139,12 @@ const mockFantasyData = {
 };
 
 const Profile = () => {
-  const { user, signOut, isLoading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const [activeTab, setActiveTab] = React.useState("Dashboard");
   const [fantasyData, setFantasyData] = useState(mockFantasyData);
 
   // If not authenticated, redirect to the landing page
-  if (!isLoading && !user) {
+  if (!loading && !user) {
     return <Navigate to="/" replace />;
   }
 
@@ -164,7 +164,7 @@ const Profile = () => {
   const initials = getInitials(displayName);
 
   // Show loading state while checking authentication
-  if (isLoading) {
+  if (loading) {
     return (
       <PageContainer>
         <div className="flex items-center justify-center h-screen">

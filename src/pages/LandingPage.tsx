@@ -21,16 +21,16 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
 const LandingPage = () => {
-  const { user, isLoading } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [scrollY, setScrollY] = useState(0);
 
   // Redirect to home if already logged in
   useEffect(() => {
-    if (!isLoading && user) {
+    if (!loading && user) {
       navigate("/matches");
     }
-  }, [user, isLoading, navigate]);
+  }, [user, loading, navigate]);
 
   // Track scroll for parallax effects
   useEffect(() => {
@@ -71,7 +71,7 @@ const LandingPage = () => {
     },
   };
 
-  if (isLoading) return null;
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gray-950 text-white overflow-hidden">

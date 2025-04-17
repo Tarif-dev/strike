@@ -1,123 +1,97 @@
-
-import { createContext, useContext, useEffect, useState } from "react";
-import { Session, User } from "@supabase/supabase-js";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { Session, User } from "@supabase/supabase-js";
 
-type AuthContextType = {
+interface AuthContextType {
   user: User | null;
   session: Session | null;
-  isLoading: boolean;
-  signInWithEmail: (email: string, password: string) => Promise<{
+  loading: boolean;
+  signIn: (
+    email: string,
+    password: string
+  ) => Promise<{
     error: Error | null;
+    data: any | null;
   }>;
-  signInWithOtp: (email: string) => Promise<{
+  signUp: (
+    email: string,
+    password: string
+  ) => Promise<{
     error: Error | null;
-  }>;
-  verifyOtp: (email: string, token: string) => Promise<{
-    error: Error | null;
-  }>;
-  signInWithGoogle: () => Promise<void>;
-  signInWithApple: () => Promise<void>;
-  signUp: (email: string, password: string, userData?: { 
-    username?: string; 
-    full_name?: string;
-  }) => Promise<{
-    error: Error | null;
+    data: any | null;
   }>;
   signOut: () => Promise<void>;
-};
+  signInWithGoogle: () => Promise<void>;
+  signInWithOtp: (email: string) => Promise<{
+    error: Error | null;
+    data: any | null;
+  }>;
+  resetPassword: (email: string) => Promise<{
+    error: Error | null;
+    data: any | null;
+  }>;
+  updatePassword: (password: string) => Promise<{
+    error: Error | null;
+    data: any | null;
+  }>;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === 'SIGNED_IN') {
-          toast({
-            title: "Signed in successfully",
-            description: "Welcome back!"
-          });
-        } else if (event === 'SIGNED_OUT') {
-          toast({
-            title: "Signed out",
-            description: "See you soon!"
-          });
-        }
-
-        setSession(session);
-        setUser(session?.user ?? null);
-        setIsLoading(false);
-      }
-    );
-
-    // THEN check for existing session
-    const initializeAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-        setUser(session?.user ?? null);
-      } catch (error) {
-        console.error("Error getting session:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    // Check active sessions and set the user
+    const setInitialUser = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setSession(session);
+      setUser(session?.user || null);
+      setLoading(false);
     };
 
-    initializeAuth();
+    setInitialUser();
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [toast]);
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user || null);
+      setLoading(false);
+    });
 
-  const signInWithEmail = async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      return { error };
-    } catch (error) {
-      console.error("Error signing in:", error);
-      return { error: error instanceof Error ? error : new Error("Unknown error") };
-    }
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signIn = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    return { data, error };
   };
 
-  const signInWithOtp = async (email: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: true,
-        },
-      });
-      return { error };
-    } catch (error) {
-      console.error("Error sending OTP:", error);
-      return { error: error instanceof Error ? error : new Error("Unknown error") };
-    }
+  const signUp = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    return { data, error };
   };
 
-  const verifyOtp = async (email: string, token: string) => {
-    try {
-      const { error } = await supabase.auth.verifyOtp({
-        email,
-        token,
-        type: "magiclink",
-      });
-      return { error };
-    } catch (error) {
-      console.error("Error verifying OTP:", error);
-      return { error: error instanceof Error ? error : new Error("Unknown error") };
-    }
+  const signOut = async () => {
+    await supabase.auth.signOut();
   };
 
   const signInWithGoogle = async () => {
@@ -129,61 +103,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  const signInWithApple = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "apple",
+  const signInWithOtp = async (email: string) => {
+    const { data, error } = await supabase.auth.signInWithOtp({
+      email,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
+    return { data, error };
   };
 
-  const signUp = async (
-    email: string, 
-    password: string, 
-    userData?: { 
-      username?: string; 
-      full_name?: string;
-    }
-  ) => {
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: userData,
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-      return { error };
-    } catch (error) {
-      console.error("Error signing up:", error);
-      return { error: error instanceof Error ? error : new Error("Unknown error") };
-    }
+  const resetPassword = async (email: string) => {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    });
+    return { data, error };
   };
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
+  const updatePassword = async (password: string) => {
+    const { data, error } = await supabase.auth.updateUser({
+      password,
+    });
+    return { data, error };
   };
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        session,
-        isLoading,
-        signInWithEmail,
-        signInWithOtp,
-        verifyOtp,
-        signInWithGoogle,
-        signInWithApple,
-        signUp,
-        signOut,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  const value = {
+    user,
+    session,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+    signInWithGoogle,
+    signInWithOtp,
+    resetPassword,
+    updatePassword,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
@@ -16,32 +15,35 @@ export default function AuthCallback() {
       try {
         // Get session from URL
         const { data, error } = await supabase.auth.getSession();
-        
+
         if (error) {
           throw error;
         }
-        
+
         if (data?.session) {
           toast({
             title: "Signed in successfully",
             description: "Welcome back!",
           });
-          
-          // Redirect to home page
-          navigate("/", { replace: true });
+
+          // Redirect to home dashboard instead of landing page
+          navigate("/home", { replace: true });
         } else {
           throw new Error("No session found");
         }
       } catch (err) {
         console.error("Auth callback error:", err);
         setError(err instanceof Error ? err.message : "Authentication failed");
-        
+
         toast({
           variant: "destructive",
           title: "Authentication failed",
-          description: err instanceof Error ? err.message : "Failed to complete authentication",
+          description:
+            err instanceof Error
+              ? err.message
+              : "Failed to complete authentication",
         });
-        
+
         // Redirect to login page after error
         setTimeout(() => {
           navigate("/auth/login", { replace: true });

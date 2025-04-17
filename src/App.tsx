@@ -23,6 +23,7 @@ import LandingPage from "@/pages/LandingPage";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -33,26 +34,8 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/* Landing page as the root */}
+            {/* Public routes */}
             <Route path="/" element={<LandingPage />} />
-
-            {/* Main app routes */}
-            <Route path="/home" element={<Index />} />
-            <Route path="/matches" element={<Matches />} />
-            <Route path="/matches/:id" element={<MatchDetail />} />
-            <Route path="/matches/:id/contests" element={<Contests />} />
-            <Route path="/contests/:matchId" element={<Contests />} />
-            <Route path="/players" element={<Players />} />
-            <Route path="/players/:id" element={<PlayerDetail />} />
-            <Route path="/leagues" element={<Leagues />} />
-            <Route path="/leagues/:id" element={<LeagueDetail />} />
-            <Route path="/teams/create" element={<CreateTeam />} />
-            <Route path="/teams/:id" element={<TeamDetail />} />
-            <Route path="/wallet" element={<Wallet />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/api-settings" element={<ApiSettings />} />
-
-            {/* Authentication routes */}
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/signup" element={<Signup />} />
             <Route path="/auth/otp-login" element={<OtpLogin />} />
@@ -60,7 +43,25 @@ function App() {
             <Route path="/auth/reset-password" element={<ResetPassword />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
 
-            {/* 404 route */}
+            {/* Protected routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/home" element={<Index />} />
+              <Route path="/matches" element={<Matches />} />
+              <Route path="/matches/:id" element={<MatchDetail />} />
+              <Route path="/matches/:id/contests" element={<Contests />} />
+              <Route path="/contests/:matchId" element={<Contests />} />
+              <Route path="/players" element={<Players />} />
+              <Route path="/players/:id" element={<PlayerDetail />} />
+              <Route path="/leagues" element={<Leagues />} />
+              <Route path="/leagues/:id" element={<LeagueDetail />} />
+              <Route path="/teams/create" element={<CreateTeam />} />
+              <Route path="/teams/:id" element={<TeamDetail />} />
+              <Route path="/wallet" element={<Wallet />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/api-settings" element={<ApiSettings />} />
+            </Route>
+
+            {/* Fallback for unknown routes */}
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />
