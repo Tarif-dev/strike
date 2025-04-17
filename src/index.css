@@ -5,44 +5,40 @@
 
 @layer base {
   :root {
-    --background: 147 33% 21%;
+    --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
 
-    --card: 145 33% 17%;
+    --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 147 33% 21%;
+    --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 67 96% 72%;
-    --primary-foreground: 145 33% 17%;
+    --primary: 267 75% 65%;
+    --primary-foreground: 240 10% 3.9%;
 
-    --secondary: 145 40% 25%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 180 100% 60%;
+    --secondary-foreground: 240 10% 3.9%;
 
-    --muted: 145 30% 25%;
-    --muted-foreground: 0 0% 76%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
 
-    --accent: 67 96% 72%;
-    --accent-foreground: 145 33% 17%;
+    --accent: 334 76% 70%;
+    --accent-foreground: 240 10% 3.9%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 145 30% 25%;
-    --input: 145 30% 25%;
-    --ring: 67 96% 72%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 267 75% 65%;
 
     --radius: 1rem;
 
-    --sidebar-background: 145 33% 15%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 67 96% 72%;
-    --sidebar-primary-foreground: 145 33% 17%;
-    --sidebar-accent: 145 30% 20%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 145 30% 22%;
-    --sidebar-ring: 67 96% 72%;
+    --cricket-dark-green: 240 10% 5%;
+    --cricket-medium-green: 240 10% 10%;
+    --cricket-light-green: 267 75% 65%;
+    --cricket-lime: 180 100% 60%;
   }
 }
 
@@ -52,7 +48,10 @@
   }
 
   body {
-    @apply bg-cricket-dark-green text-foreground;
+    @apply bg-gray-950 text-foreground;
+    background-image: 
+      radial-gradient(at 100% 0%, hsla(267, 75%, 65%, 0.15) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(180, 100%, 60%, 0.15) 0px, transparent 50%);
   }
   
   .app-container {
@@ -60,11 +59,11 @@
   }
   
   .lime-card {
-    @apply bg-cricket-lime text-cricket-dark-green rounded-xl p-4;
+    @apply bg-secondary text-gray-950 rounded-xl p-4 shadow-lg shadow-secondary/20;
   }
   
   .dark-card {
-    @apply bg-cricket-medium-green text-foreground rounded-xl p-4;
+    @apply bg-gray-900 text-foreground rounded-xl p-4 border border-gray-800 shadow-lg;
   }
   
   .nav-icon {
@@ -72,10 +71,63 @@
   }
   
   .stat-badge {
-    @apply bg-badge-lime text-cricket-dark-green rounded-full flex items-center justify-center w-8 h-8 font-bold;
+    @apply bg-primary text-gray-950 rounded-full flex items-center justify-center w-8 h-8 font-bold shadow-lg shadow-primary/20;
   }
   
   .country-flag {
     @apply w-6 h-6 rounded-full object-cover;
   }
+
+  /* Animation utilities */
+  .animate-glow {
+    @apply animate-pulse;
+  }
+  
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl shadow-lg;
+  }
+  
+  .neon-border {
+    @apply border border-primary/50 shadow-[0_0_15px_rgba(124,58,237,0.5)];
+  }
+  
+  .neon-text {
+    @apply text-primary drop-shadow-[0_0_8px_rgba(124,58,237,0.8)];
+  }
+  
+  .neon-text-secondary {
+    @apply text-secondary drop-shadow-[0_0_8px_rgba(6,182,212,0.8)];
+  }
+  
+  .neon-text-accent {
+    @apply text-accent drop-shadow-[0_0_8px_rgba(236,72,153,0.8)];
+  }
+  
+  .hover-scale {
+    @apply transition-all duration-300 hover:scale-105;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-1;
+  }
+}
+
+/* Custom animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; filter: brightness(1); }
+  50% { opacity: 0.7; filter: brightness(1.3); }
+}
+
+.animate-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 }

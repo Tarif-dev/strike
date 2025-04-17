@@ -64,14 +64,14 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				cricket: {
-					'lime': '#DCFC74',
-					'dark-green': '#2A533C',
-					'light-green': '#3E7F5B',
-					'medium-green': '#274D37',
+					'lime': 'hsl(var(--cricket-lime))',
+					'dark-green': 'hsl(var(--cricket-dark-green))',
+					'light-green': 'hsl(var(--cricket-light-green))',
+					'medium-green': 'hsl(var(--cricket-medium-green))',
 				},
 				badge: {
-					'lime': '#DCFC74',
-					'lime-dark': '#BED952',
+					'lime': 'hsl(var(--primary))',
+					'lime-dark': 'hsl(var(--secondary))',
 				}
 			},
 			borderRadius: {
@@ -106,11 +106,35 @@ export default {
 						transform: 'translateY(0)'
 					}
 				},
+				'pulse-glow': {
+					'0%, 100%': { 
+						opacity: '1',
+						filter: 'brightness(1)'
+					},
+					'50%': { 
+						opacity: '0.7',
+						filter: 'brightness(1.3)'
+					}
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				'shimmer': {
+					'0%': { backgroundPosition: '-1000px 0' },
+					'100%': { backgroundPosition: '1000px 0' }
+				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.3s ease-out',
+				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+				'float': 'float 3s ease-in-out infinite',
+				'shimmer': 'shimmer 2s linear infinite'
+			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
 			}
 		}
 	},

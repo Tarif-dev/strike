@@ -1,6 +1,6 @@
 
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Navigate, Link } from "react-router-dom";
 import { Settings, LogOut, ChevronRight, Key } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Navbar from "@/components/layout/Navbar";
@@ -11,8 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Tabs } from "@/components/ui/tab";
 
 const Profile = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isLoading } = useAuth();
   const [activeTab, setActiveTab] = React.useState("Personal Info");
+
+  // If not authenticated, redirect to the landing page
+  if (!isLoading && !user) {
+    return <Navigate to="/" replace />;
+  }
 
   // Function to get initials from name or email
   const getInitials = (name: string) => {
@@ -28,6 +33,17 @@ const Profile = () => {
   // Get display name or email
   const displayName = user?.user_metadata?.full_name || user?.email || "User";
   const initials = getInitials(displayName);
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <PageContainer>
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-pulse text-cricket-lime text-xl">Loading profile...</div>
+        </div>
+      </PageContainer>
+    );
+  }
 
   return (
     <>
