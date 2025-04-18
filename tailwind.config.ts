@@ -19,13 +19,28 @@ export default {
     },
     extend: {
       colors: {
-        "neon-green": "#00ff41",
-        "neon-green-dark": "#00cc33",
-        "neon-green-light": "#33ff66",
-        "deep-black": "#000000",
-        "dark-gray": "#111111",
-        "medium-gray": "#222222",
-        "light-gray": "#333333",
+        "midnight-black": "#0D0D0D",
+        "gunmetal-grey": "#2C2C2C",
+        "deep-emerald": "#014421",
+        "royal-gold": "#FFD700",
+        "platinum-silver": "#B0BEC5",
+        "soft-white": "#E0E0E0",
+
+        // Accent colors
+        "crimson-red": "#D72638",
+        "electric-lime": "#A8FF3E",
+        "royal-blue": "#4169E1",
+
+        // Legacy colors with new mappings for compatibility
+        "neon-green": "#FFD700", // Mapped to royal-gold
+        "neon-green-dark": "#014421", // Mapped to deep-emerald
+        "neon-green-light": "#B0BEC5", // Mapped to platinum-silver
+        "deep-black": "#0D0D0D", // Mapped to midnight-black
+        "dark-gray": "#2C2C2C", // Mapped to gunmetal-grey
+        "medium-gray": "#2C2C2C", // Mapped to gunmetal-grey
+        "light-gray": "#B0BEC5", // Mapped to platinum-silver
+
+        // HSL vars mapping
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -60,24 +75,32 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
+          DEFAULT: "hsl(var(--sidebar-background, var(--gunmetal-grey)))",
+          foreground: "hsl(var(--sidebar-foreground, var(--soft-white)))",
+          primary: "hsl(var(--sidebar-primary, var(--deep-emerald)))",
+          "primary-foreground":
+            "hsl(var(--sidebar-primary-foreground, var(--soft-white)))",
+          accent: "hsl(var(--sidebar-accent, var(--royal-gold)))",
+          "accent-foreground":
+            "hsl(var(--sidebar-accent-foreground, var(--midnight-black)))",
+          border: "hsl(var(--sidebar-border, var(--gunmetal-grey)))",
+          ring: "hsl(var(--sidebar-ring, var(--deep-emerald)))",
         },
+        // Cricket theme with new colors
         cricket: {
-          lime: "hsl(var(--cricket-lime))",
-          "dark-green": "hsl(var(--cricket-dark-green))",
-          "light-green": "hsl(var(--cricket-light-green))",
-          "medium-green": "hsl(var(--cricket-medium-green))",
+          dark: "hsl(var(--midnight-black))",
+          medium: "hsl(var(--gunmetal-grey))",
+          emerald: "hsl(var(--deep-emerald))",
+          gold: "hsl(var(--royal-gold))",
+          silver: "hsl(var(--platinum-silver))",
+          white: "hsl(var(--soft-white))",
+          red: "hsl(var(--crimson-red))",
+          lime: "hsl(var(--electric-lime))",
+          blue: "hsl(var(--royal-blue))",
         },
         badge: {
-          lime: "hsl(var(--primary))",
-          "lime-dark": "hsl(var(--secondary))",
+          gold: "hsl(var(--royal-gold))",
+          emerald: "hsl(var(--deep-emerald))",
         },
       },
       borderRadius: {
