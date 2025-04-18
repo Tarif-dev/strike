@@ -31,7 +31,6 @@ export interface MatchData {
     home?: string;
     away?: string;
   };
-  // Fantasy-specific data
   fantasy?: {
     contestCount: number;
     prizePool: string;
@@ -52,7 +51,6 @@ export default function MatchCard({
   match,
   showFantasyFeatures = false,
 }: MatchCardProps) {
-  // Check if match data is properly structured
   if (
     !match ||
     !match.teams ||
@@ -60,11 +58,10 @@ export default function MatchCard({
     !match.teams.away ||
     !match.tournament
   ) {
-    // Return a placeholder or loading state when data is malformed
     return (
-      <Card className="overflow-hidden border-neon-green/20 bg-dark-gray/80 hover:border-neon-green/40 transition-all p-4">
+      <Card className="overflow-hidden transition-all p-4">
         <div className="text-center py-4">
-          <p className="text-neon-green/60">Match data unavailable</p>
+          <p className="text-muted-foreground">Match data unavailable</p>
         </div>
       </Card>
     );
@@ -74,7 +71,6 @@ export default function MatchCard({
   const isCompleted = match.status === "completed";
   const isUpcoming = match.status === "upcoming";
 
-  // Format date and time - add defensive check
   const matchDate = new Date(match.startTime || Date.now());
   const formattedDate = matchDate.toLocaleDateString("en-US", {
     day: "numeric",
@@ -85,7 +81,6 @@ export default function MatchCard({
     minute: "2-digit",
   });
 
-  // Calculate time until match
   const now = new Date();
   const timeUntilMatch = matchDate.getTime() - now.getTime();
   const hoursUntilMatch = Math.floor(timeUntilMatch / (1000 * 60 * 60));
@@ -102,7 +97,6 @@ export default function MatchCard({
     timeDisplay = `${daysLeft}d left`;
   }
 
-  // Default fantasy data for display if not provided
   const fantasyData = match.fantasy || {
     contestCount: Math.floor(Math.random() * 50) + 10,
     prizePool: `₹${Math.floor(Math.random() * 10) + 1}${
@@ -115,27 +109,33 @@ export default function MatchCard({
   };
 
   return (
-    <Card className="overflow-hidden border-neon-green/20 bg-dark-gray/80 hover:border-neon-green/40 transition-all">
-      <div className="bg-gradient-to-r from-deep-black to-dark-gray px-4 py-2 flex justify-between items-center">
+    <Card
+      variant="default"
+      className="overflow-hidden transition-all hover-effect"
+    >
+      <div className="bg-card px-4 py-3 flex justify-between items-center border-b border-border/20">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-neon-green">
+          <span className="text-sm font-medium text-foreground">
             {match.tournament.name}
           </span>
           {match.fantasy?.isHotMatch && (
-            <Badge className="bg-neon-green/20 text-neon-green border-neon-green/20">
-              <Star className="h-3 w-3 mr-1 fill-neon-green" /> Hot
+            <Badge
+              variant="outline"
+              className="bg-gold-100/10 text-gold-500 border-gold-500/20"
+            >
+              <Star className="h-3 w-3 mr-1 fill-gold-500" /> Hot
             </Badge>
           )}
         </div>
         <div>
           {isLive && (
             <div className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-neon-green animate-pulse"></span>
-              <span className="text-xs font-medium text-neon-green">LIVE</span>
+              <span className="h-2 w-2 rounded-full bg-crimson-red animate-pulse"></span>
+              <span className="text-xs font-medium text-crimson-red">LIVE</span>
             </div>
           )}
           {isUpcoming && timeDisplay && (
-            <div className="text-xs font-medium bg-deep-black py-1 px-2 rounded-full text-neon-green">
+            <div className="text-xs font-medium bg-muted py-1 px-2.5 rounded-full text-foreground">
               <Clock className="w-3 h-3 inline mr-1" />
               {timeDisplay}
             </div>
@@ -143,31 +143,31 @@ export default function MatchCard({
         </div>
       </div>
 
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full overflow-hidden bg-deep-black flex items-center justify-center border border-neon-green/20">
+            <div className="h-12 w-12 rounded-full overflow-hidden bg-muted/50 flex items-center justify-center">
               <img
                 src={
                   match.teams.home.logo ||
                   `/team-logos/${match.teams.home.code.toLowerCase()}.png`
                 }
                 alt={match.teams.home.name}
-                className="w-10 h-10"
+                className="w-10 h-10 object-contain"
                 onError={(e) => {
                   e.currentTarget.src = "/placeholder.svg";
                 }}
               />
             </div>
             <div>
-              <p className="font-bold text-neon-green">
+              <p className="font-medium text-foreground">
                 {match.teams.home.name}
               </p>
-              <p className="text-sm text-neon-green/60">
+              <p className="text-sm text-muted-foreground">
                 {match.teams.home.code}
               </p>
               {isCompleted && match.scores?.home && (
-                <p className="text-sm text-neon-green font-medium">
+                <p className="text-sm text-foreground font-medium mt-1">
                   {match.scores.home}
                 </p>
               )}
@@ -175,34 +175,34 @@ export default function MatchCard({
           </div>
 
           <div className="text-center">
-            <span className="text-xs bg-neon-green/20 text-neon-green px-3 py-1 rounded-full font-medium">
+            <span className="text-xs bg-accent/10 text-accent px-3 py-1 rounded-full font-medium">
               VS
             </span>
           </div>
 
           <div className="flex items-center gap-3 flex-row-reverse text-right">
-            <div className="h-12 w-12 rounded-full overflow-hidden bg-deep-black flex items-center justify-center border border-neon-green/20">
+            <div className="h-12 w-12 rounded-full overflow-hidden bg-muted/50 flex items-center justify-center">
               <img
                 src={
                   match.teams.away.logo ||
                   `/team-logos/${match.teams.away.code.toLowerCase()}.png`
                 }
                 alt={match.teams.away.name}
-                className="w-10 h-10"
+                className="w-10 h-10 object-contain"
                 onError={(e) => {
                   e.currentTarget.src = "/placeholder.svg";
                 }}
               />
             </div>
             <div>
-              <p className="font-bold text-neon-green">
+              <p className="font-medium text-foreground">
                 {match.teams.away.name}
               </p>
-              <p className="text-sm text-neon-green/60">
+              <p className="text-sm text-muted-foreground">
                 {match.teams.away.code}
               </p>
               {isCompleted && match.scores?.away && (
-                <p className="text-sm text-neon-green font-medium">
+                <p className="text-sm text-foreground font-medium mt-1">
                   {match.scores.away}
                 </p>
               )}
@@ -210,7 +210,7 @@ export default function MatchCard({
           </div>
         </div>
 
-        <div className="flex justify-between items-center text-sm text-neon-green/60 mt-2">
+        <div className="flex justify-between items-center text-sm text-muted-foreground mt-3">
           <div className="flex items-center gap-1">
             <Calendar className="w-4 h-4" />
             <span>{formattedDate}</span>
@@ -220,25 +220,24 @@ export default function MatchCard({
         </div>
 
         {isCompleted && match.result && (
-          <div className="mt-3 text-center text-sm bg-deep-black/80 py-2 rounded-lg">
-            <span className="text-neon-green">{match.result}</span>
+          <div className="mt-4 text-center text-sm bg-muted/40 py-2 rounded-md">
+            <span className="text-foreground">{match.result}</span>
           </div>
         )}
 
-        {/* Fantasy cricket features */}
         {showFantasyFeatures && !isCompleted && (
-          <div className="mt-4 pt-4 border-t border-neon-green/20">
+          <div className="mt-5 pt-4 border-t border-border/20">
             <div className="flex justify-between items-center mb-3">
-              <div className="flex items-center gap-1">
-                <Trophy className="w-4 h-4 text-neon-green" />
-                <span className="font-medium text-neon-green">
+              <div className="flex items-center gap-1.5">
+                <Trophy className="w-4 h-4 text-accent" />
+                <span className="font-medium text-foreground">
                   Prize Pool:{" "}
-                  <span className="neon-text">{fantasyData.prizePool}</span>
+                  <span className="text-accent">{fantasyData.prizePool}</span>
                 </span>
               </div>
-              <div className="flex items-center gap-1">
-                <Users className="w-4 h-4 text-neon-green/60" />
-                <span className="text-neon-green/60 text-sm">
+              <div className="flex items-center gap-1.5">
+                <Users className="w-4 h-4 text-muted-foreground" />
+                <span className="text-muted-foreground text-sm">
                   {fantasyData.teamsCreated.toLocaleString()} teams
                 </span>
               </div>
@@ -246,33 +245,29 @@ export default function MatchCard({
 
             {isUpcoming && (
               <>
-                <div className="flex items-center justify-between text-xs text-neon-green/60 mb-1">
+                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
                   <span>Contest filling fast</span>
                   <span>{fantasyData.percentageJoined}% Full</span>
                 </div>
                 <Progress
                   value={fantasyData.percentageJoined}
-                  className="h-1.5 mb-3 bg-deep-black [&>div]:bg-neon-green"
+                  className="h-1.5 mb-4 bg-muted/30"
                 />
 
                 <div className="flex flex-wrap gap-2 mb-4">
                   {fantasyData.entryFees.map((fee, index) => (
                     <div
                       key={index}
-                      className="text-xs bg-deep-black text-neon-green px-2 py-1 rounded-full"
+                      className="text-xs bg-muted/50 text-foreground px-2.5 py-1 rounded-full"
                     >
                       ₹{fee}
                     </div>
                   ))}
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <Link to={`/matches/${match.id}`} className="flex-1">
-                    <Button
-                      variant="outline"
-                      className="w-full border-neon-green/40 text-neon-green hover:bg-neon-green/10"
-                      size="sm"
-                    >
+                    <Button variant="outline" className="w-full" size="sm">
                       {fantasyData.contestCount} Contests
                     </Button>
                   </Link>
@@ -280,10 +275,7 @@ export default function MatchCard({
                     to={`/teams/create?match=${match.id}`}
                     className="flex-1"
                   >
-                    <Button
-                      className="w-full bg-neon-green text-deep-black hover:bg-neon-green-light"
-                      size="sm"
-                    >
+                    <Button variant="accent" className="w-full" size="sm">
                       Create Team <ArrowRight className="ml-1 h-3 w-3" />
                     </Button>
                   </Link>
@@ -292,21 +284,14 @@ export default function MatchCard({
             )}
 
             {isLive && (
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <Link to={`/matches/${match.id}`} className="flex-1">
-                  <Button
-                    variant="outline"
-                    className="w-full border-neon-green/40 text-neon-green hover:bg-neon-green/10"
-                    size="sm"
-                  >
+                  <Button variant="outline" className="w-full" size="sm">
                     My Contests
                   </Button>
                 </Link>
                 <Link to={`/matches/${match.id}/live`} className="flex-1">
-                  <Button
-                    className="w-full bg-neon-green hover:bg-neon-green-light text-deep-black"
-                    size="sm"
-                  >
+                  <Button variant="accent" className="w-full" size="sm">
                     Live Score
                   </Button>
                 </Link>

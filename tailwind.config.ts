@@ -31,16 +31,7 @@ export default {
         "electric-lime": "#A8FF3E",
         "royal-blue": "#4169E1",
 
-        // Legacy colors with new mappings for compatibility
-        "neon-green": "#FFD700", // Mapped to royal-gold
-        "neon-green-dark": "#014421", // Mapped to deep-emerald
-        "neon-green-light": "#B0BEC5", // Mapped to platinum-silver
-        "deep-black": "#0D0D0D", // Mapped to midnight-black
-        "dark-gray": "#2C2C2C", // Mapped to gunmetal-grey
-        "medium-gray": "#2C2C2C", // Mapped to gunmetal-grey
-        "light-gray": "#B0BEC5", // Mapped to platinum-silver
-
-        // HSL vars mapping
+        // Semantic HSL vars mapping
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -74,40 +65,68 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background, var(--gunmetal-grey)))",
-          foreground: "hsl(var(--sidebar-foreground, var(--soft-white)))",
-          primary: "hsl(var(--sidebar-primary, var(--deep-emerald)))",
-          "primary-foreground":
-            "hsl(var(--sidebar-primary-foreground, var(--soft-white)))",
-          accent: "hsl(var(--sidebar-accent, var(--royal-gold)))",
-          "accent-foreground":
-            "hsl(var(--sidebar-accent-foreground, var(--midnight-black)))",
-          border: "hsl(var(--sidebar-border, var(--gunmetal-grey)))",
-          ring: "hsl(var(--sidebar-ring, var(--deep-emerald)))",
+
+        // Shades of main colors (for more nuanced design)
+        emerald: {
+          50: "#E6F0EB",
+          100: "#CCE0D6",
+          200: "#99C1AD",
+          300: "#66A285",
+          400: "#33835C",
+          500: "#014421", // base
+          600: "#01371A",
+          700: "#012914",
+          800: "#001C0D",
+          900: "#000E07",
         },
-        // Cricket theme with new colors
-        cricket: {
-          dark: "hsl(var(--midnight-black))",
-          medium: "hsl(var(--gunmetal-grey))",
-          emerald: "hsl(var(--deep-emerald))",
-          gold: "hsl(var(--royal-gold))",
-          silver: "hsl(var(--platinum-silver))",
-          white: "hsl(var(--soft-white))",
-          red: "hsl(var(--crimson-red))",
-          lime: "hsl(var(--electric-lime))",
-          blue: "hsl(var(--royal-blue))",
+        gold: {
+          50: "#FFFBE6",
+          100: "#FFF7CC",
+          200: "#FFEF99",
+          300: "#FFE766",
+          400: "#FFDF33",
+          500: "#FFD700", // base
+          600: "#CCA900",
+          700: "#997F00",
+          800: "#665400",
+          900: "#332A00",
         },
-        badge: {
-          gold: "hsl(var(--royal-gold))",
-          emerald: "hsl(var(--deep-emerald))",
+        grey: {
+          50: "#F2F2F2",
+          100: "#E6E6E6",
+          200: "#CCCCCC",
+          300: "#B3B3B3",
+          400: "#999999",
+          500: "#7F7F7F",
+          600: "#666666",
+          700: "#4D4D4D",
+          800: "#333333", // close to gunmetal-grey
+          900: "#1A1A1A", // lighter gunmetal
+          950: "#0D0D0D", // midnight-black
         },
       },
+
+      // Modern shadows for depth
+      boxShadow: {
+        sm: "0 1px 2px rgba(0, 0, 0, 0.1)",
+        DEFAULT: "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
+        md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+        lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+        xl: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+        "2xl": "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+        "accent-sm": "0 1px 3px rgba(255, 215, 0, 0.1)",
+        accent: "0 4px 6px -1px rgba(255, 215, 0, 0.1)",
+        "primary-sm": "0 1px 3px rgba(1, 68, 33, 0.2)",
+        primary: "0 4px 6px -1px rgba(1, 68, 33, 0.1)",
+      },
+
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+
+      // Animation keyframes
       keyframes: {
         "accordion-down": {
           from: {
@@ -164,6 +183,23 @@ export default {
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        "gradient-subtle":
+          "linear-gradient(to bottom right, transparent 0%, transparent 80%, hsl(var(--deep-emerald) / 0.05) 100%)",
+      },
+
+      // Modern spacing scale
+      spacing: {
+        "4xs": "0.125rem", // 2px
+        "3xs": "0.25rem", // 4px
+        "2xs": "0.375rem", // 6px
+        xs: "0.5rem", // 8px
+        sm: "0.75rem", // 12px
+        md: "1rem", // 16px
+        lg: "1.25rem", // 20px
+        xl: "1.5rem", // 24px
+        "2xl": "2rem", // 32px
+        "3xl": "2.5rem", // 40px
+        "4xl": "3rem", // 48px
       },
     },
   },

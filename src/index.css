@@ -4,37 +4,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 5%;
-    --foreground: 0 0% 88%;
-
-    --card: 0 0% 17%;
-    --card-foreground: 0 0% 88%;
-
-    --popover: 0 0% 17%;
-    --popover-foreground: 0 0% 88%;
-
-    --primary: 147 96% 13%;
-    --primary-foreground: 0 0% 88%;
-
-    --secondary: 0 0% 17%;
-    --secondary-foreground: 0 0% 88%;
-
-    --muted: 0 0% 17%;
-    --muted-foreground: 200 3% 70%;
-
-    --accent: 51 100% 50%;
-    --accent-foreground: 0 0% 5%;
-
-    --destructive: 348 83% 47%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 17%;
-    --input: 0 0% 17%;
-    --ring: 147 96% 13%;
-
-    --radius: 0.5rem;
-
-    /* Cricket theme colors */
+    /* Base palette - Using HSL to enable opacity adjustments */
     --midnight-black: 0 0% 5%;
     --gunmetal-grey: 0 0% 17%;
     --deep-emerald: 147 96% 13%;
@@ -42,10 +12,41 @@
     --platinum-silver: 200 17% 73%;
     --soft-white: 0 0% 88%;
 
-    /* Cricket accent colors */
+    /* Accent colors */
     --crimson-red: 353 72% 50%;
     --electric-lime: 84 100% 62%;
     --royal-blue: 225 73% 57%;
+
+    /* Semantic color mapping - follows modern practices */
+    --background: var(--midnight-black);
+    --foreground: var(--soft-white);
+
+    --card: var(--gunmetal-grey);
+    --card-foreground: var(--soft-white);
+
+    --popover: var(--gunmetal-grey);
+    --popover-foreground: var(--soft-white);
+
+    --primary: var(--deep-emerald);
+    --primary-foreground: var(--soft-white);
+
+    --secondary: var(--gunmetal-grey);
+    --secondary-foreground: var(--soft-white);
+
+    --muted: var(--gunmetal-grey);
+    --muted-foreground: var(--platinum-silver);
+
+    --accent: var(--royal-gold);
+    --accent-foreground: var(--midnight-black);
+
+    --destructive: var(--crimson-red);
+    --destructive-foreground: var(--soft-white);
+
+    --border: var(--gunmetal-grey);
+    --input: var(--gunmetal-grey);
+    --ring: var(--deep-emerald);
+
+    --radius: 0.5rem;
   }
 }
 
@@ -55,102 +56,113 @@
   }
 
   body {
-    @apply bg-midnight-black text-soft-white;
-    background-image: radial-gradient(
-        at 100% 0%,
-        hsla(147, 96%, 13%, 0.15) 0px,
-        transparent 50%
-      ),
-      radial-gradient(at 0% 100%, hsla(51, 100%, 50%, 0.1) 0px, transparent 50%);
+    @apply bg-background text-foreground;
+    background-image: linear-gradient(
+      to bottom right,
+      hsl(var(--background)) 0%,
+      hsl(var(--background)) 80%,
+      hsl(var(--deep-emerald) / 0.05) 100%
+    );
+    min-height: 100vh;
   }
 
+  /* Modern component styling */
   .app-container {
-    @apply max-w-screen-2xl mx-auto p-4;
+    @apply max-w-screen-2xl mx-auto px-4 py-6 md:px-6 lg:px-8;
   }
 
-  .premium-card {
-    @apply bg-deep-emerald text-soft-white rounded-xl p-4 shadow-lg shadow-deep-emerald/20;
+  /* Card variations */
+  .primary-card {
+    @apply bg-card rounded-lg border border-border/40 p-4 shadow-sm;
   }
 
-  .dark-card {
-    @apply bg-gunmetal-grey text-soft-white rounded-xl p-4 border border-gunmetal-grey shadow-lg;
-  }
-
-  .nav-icon {
-    @apply w-6 h-6;
-  }
-
-  .stat-badge {
-    @apply bg-royal-gold text-midnight-black rounded-full flex items-center justify-center w-8 h-8 font-bold shadow-lg shadow-royal-gold/20;
-  }
-
-  .country-flag {
-    @apply w-6 h-6 rounded-full object-cover;
-  }
-
-  /* Animation utilities */
-  .animate-glow {
-    @apply animate-pulse;
+  .accent-card {
+    @apply bg-card rounded-lg border-l-4 border-l-accent border border-border/40 p-4 shadow-sm;
   }
 
   .glass-card {
-    @apply bg-gunmetal-grey/50 backdrop-blur-lg border border-deep-emerald/10 rounded-xl shadow-lg;
+    @apply bg-card/90 backdrop-blur-sm border border-border/30 rounded-lg p-4 shadow-sm;
   }
 
-  .premium-border {
-    @apply border border-royal-gold/50 shadow-[0_0_15px_rgba(255,215,0,0.3)];
+  /* Badge styles */
+  .status-badge {
+    @apply inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-medium;
   }
 
-  .accent-text {
-    @apply text-royal-gold drop-shadow-[0_0_8px_rgba(255,215,0,0.3)];
+  .status-badge.primary {
+    @apply bg-primary/10 text-primary-foreground/90;
   }
 
-  .accent-text-secondary {
-    @apply text-deep-emerald drop-shadow-[0_0_8px_rgba(1,68,33,0.3)];
+  .status-badge.accent {
+    @apply bg-accent/10 text-accent-foreground/90;
   }
 
-  .accent-text-platinum {
-    @apply text-platinum-silver drop-shadow-[0_0_8px_rgba(176,190,197,0.3)];
+  .status-badge.info {
+    @apply bg-royal-blue/10 text-royal-blue;
   }
 
-  .hover-scale {
-    @apply transition-all duration-300 hover:scale-105;
+  .status-badge.success {
+    @apply bg-deep-emerald/10 text-deep-emerald;
   }
 
-  .card-hover {
-    @apply transition-all duration-300 hover:shadow-lg hover:shadow-royal-gold/20 hover:-translate-y-1;
+  .status-badge.warning {
+    @apply bg-royal-gold/10 text-royal-gold;
+  }
+
+  .status-badge.error {
+    @apply bg-crimson-red/10 text-crimson-red;
+  }
+
+  /* Icons */
+  .nav-icon {
+    @apply w-5 h-5 opacity-80;
+  }
+
+  /* Modern subtle interactions */
+  .hover-effect {
+    @apply transition-all duration-200 hover:translate-y-[-2px] hover:shadow-md;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-200;
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 15px hsla(var(--accent) / 0.15);
+  }
+
+  .btn-hover {
+    @apply transition-all duration-200 hover:brightness-110;
   }
 }
 
-/* Custom animations */
-@keyframes float {
-  0% {
-    transform: translateY(0px);
+/* Subtle animations for UI elements */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
-  50% {
-    transform: translateY(-10px);
-  }
-  100% {
-    transform: translateY(0px);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+.fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
 }
 
-@keyframes pulse-glow {
+/* Subtle pulse animation */
+@keyframes subtlePulse {
   0%,
   100% {
     opacity: 1;
-    filter: brightness(1);
   }
   50% {
-    opacity: 0.7;
-    filter: brightness(1.3);
+    opacity: 0.85;
   }
 }
 
-.animate-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+.subtle-pulse {
+  animation: subtlePulse 2s ease-in-out infinite;
 }
