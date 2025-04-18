@@ -1,306 +1,368 @@
-
-import { players, matches, teamLogos, playerImages, countryFlags } from "@/data/mockData";
+import {
+  players,
+  matches,
+  teamLogos,
+  playerImages,
+  countryFlags,
+} from "@/data/mockData";
 import { toast } from "@/hooks/use-toast";
+import axios from "axios";
 
-// API configuration
-const API_BASE_URL = "https://api.cricapi.com/v1";
-// We'll use this key as a fallback when the actual API key is not available
-// In a production app, you'd use environment variables or secrets
-const API_KEY = "YOUR_CRICKET_API_KEY"; 
+// RapidAPI configuration for Cricbuzz
+const RAPIDAPI_BASE_URL = "https://cricbuzz-cricket2.p.rapidapi.com";
+const RAPIDAPI_HOST = "cricbuzz-cricket2.p.rapidapi.com";
+const RAPIDAPI_KEY = "d37917e331mshce264999a10b989p10b553jsn2453aa658d42";
 
 // Types for API responses
-export interface LiveMatch {
-  id: string;
-  name: string;
-  status: string;
-  venue: string;
-  date: string;
-  dateTimeGMT: string;
-  teams: string[];
-  teamInfo: {
-    name: string;
-    shortname: string;
-    img: string;
-  }[];
-  score: {
-    r: number;
-    w: number;
-    o: number;
-    inning: string;
-  }[];
-}
+// Keeping existing types for compatibility with mock data
 
-export interface PlayerInfo {
-  id: string;
-  name: string;
-  country: string;
-  role: string;
-  battingStyle: string;
-  bowlingStyle: string;
-  image: string;
-  stats?: {
-    batting: {
-      matches: number;
-      runs: number;
-      average: number;
-      strikeRate: number;
+// Helper to transform Cricbuzz API match data to our app format
+const transformCricbuzzMatchData = (apiMatch: any) => {
+  try {
+    // Extract teams
+    const homeTeam = apiMatch.team1 || {};
+    const awayTeam = apiMatch.team2 || {};
+
+    // Get team names
+    const homeTeamName = homeTeam.name || homeTeam.teamName || "TBD";
+    const awayTeamName = awayTeam.name || awayTeam.teamName || "TBD";
+    const homeTeamCode =
+      homeTeam.shortName ||
+      homeTeam.teamSName ||
+      homeTeamName.substring(0, 3).toUpperCase();
+    const awayTeamCode =
+      awayTeam.shortName ||
+      awayTeam.teamSName ||
+      awayTeamName.substring(0, 3).toUpperCase();
+
+    // Determine match status
+    let matchStatus: "upcoming" | "live" | "completed" = "upcoming";
+    if (apiMatch.state === "In Progress" || apiMatch.status === "Live") {
+      matchStatus = "live";
+    } else if (
+      apiMatch.state === "Complete" ||
+      apiMatch.status === "Complete"
+    ) {
+      matchStatus = "completed";
+    }
+
+    // Format scores
+    let homeScore, awayScore;
+
+    // Try to extract scores from different possible formats
+    if (apiMatch.scoreCard) {
+      homeScore = apiMatch.scoreCard.teamScores?.[0]?.score
+        ? `${apiMatch.scoreCard.teamScores[0].score}`
+        : undefined;
+
+      awayScore = apiMatch.scoreCard.teamScores?.[1]?.score
+        ? `${apiMatch.scoreCard.teamScores[1].score}`
+        : "Yet to bat";
+    } else if (apiMatch.score) {
+      homeScore = apiMatch.score.team1Score;
+      awayScore = apiMatch.score.team2Score || "Yet to bat";
+    }
+
+    // Construct the match object with the EXACT structure expected by MatchCard
+    return {
+      id:
+        apiMatch.matchId || apiMatch.id || String(apiMatch.matchInfo?.matchId),
+      teams: {
+        home: {
+          name: homeTeamName,
+          code: homeTeamCode,
+          logo: teamLogos[homeTeamName.toLowerCase()] || "",
+        },
+        away: {
+          name: awayTeamName,
+          code: awayTeamCode,
+          logo: teamLogos[awayTeamName.toLowerCase()] || "",
+        },
+      },
+      tournament: {
+        name:
+          apiMatch.seriesName || apiMatch.seriesHash?.name || "Cricket Match",
+        shortName: apiMatch.seriesShortName || "Match",
+      },
+      venue: apiMatch.venueInfo?.ground || apiMatch.venue || "TBD",
+      startTime: (
+        apiMatch.startTime ||
+        apiMatch.matchInfo?.startDate ||
+        new Date()
+      ).toString(),
+      status: matchStatus,
+      result: apiMatch.statusText || apiMatch.status || "",
+      scores: {
+        home: homeScore,
+        away: awayScore,
+      },
+      // Add fantasy data with reasonable defaults
+      fantasy: {
+        contestCount: Math.floor(Math.random() * 50) + 10,
+        prizePool: `₹${Math.floor(Math.random() * 10) + 1} Lakh`,
+        entryFees: [49, 99, 499, 999],
+        teamsCreated: Math.floor(Math.random() * 100000) + 5000,
+        percentageJoined: Math.floor(Math.random() * 70) + 20,
+        isHotMatch: Math.random() > 0.7,
+      },
     };
-    bowling: {
-      matches: number;
-      wickets: number;
-      economy: number;
-      average: number;
-    };
-  };
-}
-
-// Helper to transform API match data to our app format
-const transformMatchData = (apiMatch: LiveMatch) => {
-  // Use existing team logos or fallback to API provided ones
-  const getTeamLogo = (teamName: string) => {
-    const teamKey = Object.keys(teamLogos).find(key => 
-      key.toLowerCase().includes(teamName.toLowerCase())
-    );
-    return teamKey ? teamLogos[teamKey as keyof typeof teamLogos] : 
-      (apiMatch.teamInfo?.find(t => t.name === teamName)?.img || "");
-  };
-
-  // Determine match status
-  let matchStatus: "upcoming" | "live" | "completed" = "upcoming";
-  if (apiMatch.status.toLowerCase().includes("started") || 
-      apiMatch.status.toLowerCase().includes("live")) {
-    matchStatus = "live";
-  } else if (apiMatch.status.toLowerCase().includes("complete") ||
-            apiMatch.status.toLowerCase().includes("finished")) {
-    matchStatus = "completed";
+  } catch (error) {
+    console.error("Error transforming match data:", error);
+    // Return null instead of crashing
+    return null;
   }
-
-  // Format scores
-  const homeScore = apiMatch.score?.length > 0 ? 
-    `${apiMatch.score[0].r}/${apiMatch.score[0].w} (${apiMatch.score[0].o})` : undefined;
-  
-  const awayScore = apiMatch.score?.length > 1 ? 
-    `${apiMatch.score[1].r}/${apiMatch.score[1].w} (${apiMatch.score[1].o})` : "Yet to bat";
-
-  return {
-    id: apiMatch.id,
-    homeTeam: {
-      name: apiMatch.teams[0],
-      shortName: apiMatch.teamInfo?.find(t => t.name === apiMatch.teams[0])?.shortname || 
-                apiMatch.teams[0].substring(0, 3).toUpperCase(),
-      logo: getTeamLogo(apiMatch.teams[0])
-    },
-    awayTeam: {
-      name: apiMatch.teams[1],
-      shortName: apiMatch.teamInfo?.find(t => t.name === apiMatch.teams[1])?.shortname || 
-                apiMatch.teams[1].substring(0, 3).toUpperCase(),
-      logo: getTeamLogo(apiMatch.teams[1])
-    },
-    tournament: apiMatch.name.split(",")[0] || "Cricket Match",
-    venue: apiMatch.venue,
-    date: new Date(apiMatch.dateTimeGMT).toLocaleDateString(),
-    time: new Date(apiMatch.dateTimeGMT).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    status: matchStatus,
-    homeScore,
-    awayScore,
-    result: apiMatch.status
-  };
 };
 
-// Helper to transform API player data to our app format
-const transformPlayerData = (apiPlayer: PlayerInfo) => {
-  // Map player position based on role
-  let position = "Batsman";
-  if (apiPlayer.role?.toLowerCase().includes("bowl")) {
-    position = "Bowler";
-  } else if (apiPlayer.role?.toLowerCase().includes("all")) {
-    position = "All-rounder";
-  }
-
-  // Use existing player images or fallback to API provided ones
-  const playerKey = Object.keys(playerImages).find(key => 
-    key.toLowerCase().includes(apiPlayer.name.toLowerCase().replace(/\s/g, ""))
-  );
-  const playerImage = playerKey ? playerImages[playerKey as keyof typeof playerImages] : apiPlayer.image;
-
-  // Get country flag
-  const countryKey = Object.keys(countryFlags).find(key => 
-    key.toLowerCase() === apiPlayer.country.toLowerCase()
-  );
-  const countryFlag = countryKey ? countryFlags[countryKey as keyof typeof countryFlags] : "";
-
-  // Calculate points (just a sample algorithm)
-  const calculatePoints = () => {
-    let points = 0;
-    const stats = apiPlayer.stats;
-    if (stats) {
-      if (stats.batting) {
-        points += stats.batting.runs / 10;
-        points += stats.batting.average * 2;
-      }
-      if (stats.bowling) {
-        points += stats.bowling.wickets * 20;
-        points += (10 - stats.bowling.economy) * 5;
-      }
+// Helper to transform Cricbuzz API player data to our app format
+const transformCricbuzzPlayerData = (apiPlayer: any) => {
+  try {
+    // Map player position based on role
+    let position = "Batsman";
+    if (apiPlayer.role?.toLowerCase().includes("bowl")) {
+      position = "Bowler";
+    } else if (apiPlayer.role?.toLowerCase().includes("all")) {
+      position = "All-rounder";
     }
-    return Math.round(points);
-  };
 
-  return {
-    id: apiPlayer.id,
-    name: apiPlayer.name,
-    fullName: apiPlayer.name,
-    team: "Team TBD", // This would need to be fetched from another endpoint
-    teamLogo: teamLogos.india, // Default, would need proper mapping
-    position,
-    image: playerImage,
-    country: apiPlayer.country,
-    countryFlag,
-    stats: {
-      matches: apiPlayer.stats?.batting?.matches || 0,
-      runs: apiPlayer.stats?.batting?.runs || 0,
-      wickets: apiPlayer.stats?.bowling?.wickets || 0,
-      average: apiPlayer.stats?.batting?.average || 0,
-      strikeRate: apiPlayer.stats?.batting?.strikeRate || 0,
-      economy: apiPlayer.stats?.bowling?.economy || 0
-    },
-    points: calculatePoints()
-  };
+    // Use existing player images or fallback to API provided ones
+    const playerKey = Object.keys(playerImages).find((key) =>
+      key
+        .toLowerCase()
+        .includes(apiPlayer.name?.toLowerCase().replace(/\s/g, ""))
+    );
+    const playerImage = playerKey
+      ? playerImages[playerKey as keyof typeof playerImages]
+      : apiPlayer.image || "";
+
+    // Get country flag
+    const countryKey = Object.keys(countryFlags).find(
+      (key) => key.toLowerCase() === apiPlayer.country?.toLowerCase()
+    );
+    const countryFlag = countryKey
+      ? countryFlags[countryKey as keyof typeof countryFlags]
+      : "";
+
+    return {
+      id: apiPlayer.id || String(apiPlayer.playerId),
+      name: apiPlayer.name,
+      fullName: apiPlayer.fullName || apiPlayer.name,
+      team: apiPlayer.teamName || "Team TBD",
+      teamLogo: teamLogos.india, // Default, would need proper mapping
+      position,
+      image: playerImage,
+      country: apiPlayer.country || "Unknown",
+      countryFlag,
+      stats: {
+        matches: apiPlayer.battingStats?.matches || 0,
+        runs: apiPlayer.battingStats?.runs || 0,
+        wickets: apiPlayer.bowlingStats?.wickets || 0,
+        average: apiPlayer.battingStats?.average || 0,
+        strikeRate: apiPlayer.battingStats?.strikeRate || 0,
+        economy: apiPlayer.bowlingStats?.economy || 0,
+      },
+      points: 0, // Calculate points if needed
+    };
+  } catch (error) {
+    console.error("Error transforming player data:", error);
+    return null;
+  }
 };
 
 // API Services
 export const cricketApiService = {
-  // Fetch live matches
+  // Fetch matches (live, recent, and upcoming)
   fetchMatches: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/matches?apikey=${API_KEY}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch matches');
+      // Get API key from localStorage or use default
+      const apiKey = localStorage.getItem("cricket_api_key") || RAPIDAPI_KEY;
+
+      // Log the API key being used (masked for security)
+      console.log(
+        `Using API key: ${apiKey.substring(0, 4)}...${apiKey.substring(
+          apiKey.length - 4
+        )}`
+      );
+
+      const options = {
+        method: "GET",
+        url: `${RAPIDAPI_BASE_URL}/matches/v1/recent`,
+        headers: {
+          "x-rapidapi-key": apiKey,
+          "x-rapidapi-host": RAPIDAPI_HOST,
+        },
+      };
+
+      // First validate if we have proper mock data to fall back to
+      if (!Array.isArray(matches) || matches.length === 0) {
+        console.error("Mock match data is invalid");
+        return []; // Return empty array instead of invalid data
       }
-      
-      const data = await response.json();
-      
-      if (data.status !== "success") {
-        throw new Error(data.message || 'API error');
+
+      try {
+        const response = await axios.request(options);
+
+        if (response.status !== 200) {
+          throw new Error(`Failed to fetch matches: Status ${response.status}`);
+        }
+
+        // Transform the data
+        const matchesData = [];
+
+        // Process type matches (international, league, etc.)
+        if (response.data && response.data.typeMatches) {
+          for (const typeMatch of response.data.typeMatches) {
+            if (!typeMatch.seriesMatches) continue;
+
+            for (const seriesMatch of typeMatch.seriesMatches) {
+              if (
+                seriesMatch.seriesAdWrapper &&
+                seriesMatch.seriesAdWrapper.matches &&
+                Array.isArray(seriesMatch.seriesAdWrapper.matches)
+              ) {
+                for (const match of seriesMatch.seriesAdWrapper.matches) {
+                  const transformedMatch = transformCricbuzzMatchData(match);
+                  if (transformedMatch) matchesData.push(transformedMatch);
+                }
+              }
+            }
+          }
+        }
+
+        console.log(`Transformed ${matchesData.length} matches from API`);
+
+        // If we got valid data from API, return it, otherwise fall back to mock data
+        return matchesData.length > 0 ? matchesData : matches;
+      } catch (apiError) {
+        console.error("API request error:", apiError);
+        throw apiError; // Re-throw to be caught by outer catch
       }
-      
-      // Transform the data to match our app's format
-      return data.data.map(transformMatchData);
     } catch (error) {
       console.error("Error fetching matches:", error);
       toast({
         title: "Error fetching matches",
         description: "Using mock data instead. Please check your API key.",
-        variant: "destructive"
+        variant: "destructive",
       });
-      
-      // Fallback to mock data
-      return matches;
+
+      // Ensure we return valid mock data
+      return Array.isArray(matches) ? matches : [];
     }
   },
-  
+
   // Fetch match details
   fetchMatchDetails: async (matchId: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/match_info?id=${matchId}&apikey=${API_KEY}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch match details');
+      // Get API key from localStorage or use default
+      const apiKey = localStorage.getItem("cricket_api_key") || RAPIDAPI_KEY;
+
+      const options = {
+        method: "GET",
+        url: `${RAPIDAPI_BASE_URL}/mcenter/v1/${matchId}/leanback`,
+        headers: {
+          "x-rapidapi-key": apiKey,
+          "x-rapidapi-host": RAPIDAPI_HOST,
+        },
+      };
+
+      const response = await axios.request(options);
+
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch match details");
       }
-      
-      const data = await response.json();
-      
-      if (data.status !== "success") {
-        throw new Error(data.message || 'API error');
-      }
-      
-      // Return transformed data
-      return transformMatchData(data.data);
+
+      // Transform the match data
+      const transformedMatch = transformCricbuzzMatchData({
+        ...response.data.matchHeader,
+        scoreCard: response.data.scoreCard,
+        venue: response.data.venueInfo?.ground,
+        seriesName: response.data.matchHeader?.seriesName,
+      });
+
+      return transformedMatch || matches.find((m) => m.id === matchId);
     } catch (error) {
       console.error("Error fetching match details:", error);
       toast({
         title: "Error fetching match details",
         description: "Using mock data instead. Please check your API key.",
-        variant: "destructive"
+        variant: "destructive",
       });
-      
+
       // Fallback to mock data
-      return matches.find(m => m.id === matchId);
+      return matches.find((m) => m.id === matchId);
     }
   },
-  
+
   // Fetch players
   fetchPlayers: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/players?apikey=${API_KEY}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch players');
-      }
-      
-      const data = await response.json();
-      
-      if (data.status !== "success") {
-        throw new Error(data.message || 'API error');
-      }
-      
-      // Transform the data to match our app's format
-      return data.data.map(transformPlayerData);
+      // Get API key from localStorage or use default
+      const apiKey = localStorage.getItem("cricket_api_key") || RAPIDAPI_KEY;
+
+      // For now, use mock data as Cricbuzz API doesn't have a direct endpoint for all players
+      // In a real implementation, you might need to fetch players from a specific match or team
+      return players;
     } catch (error) {
       console.error("Error fetching players:", error);
       toast({
         title: "Error fetching players",
         description: "Using mock data instead. Please check your API key.",
-        variant: "destructive"
+        variant: "destructive",
       });
-      
+
       // Fallback to mock data
       return players;
     }
   },
-  
+
   // Fetch player details
   fetchPlayerDetails: async (playerId: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/players_info?id=${playerId}&apikey=${API_KEY}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch player details');
+      // Get API key from localStorage or use default
+      const apiKey = localStorage.getItem("cricket_api_key") || RAPIDAPI_KEY;
+
+      const options = {
+        method: "GET",
+        url: `${RAPIDAPI_BASE_URL}/players/v1/${playerId}`,
+        headers: {
+          "x-rapidapi-key": apiKey,
+          "x-rapidapi-host": RAPIDAPI_HOST,
+        },
+      };
+
+      const response = await axios.request(options);
+
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch player details");
       }
-      
-      const data = await response.json();
-      
-      if (data.status !== "success") {
-        throw new Error(data.message || 'API error');
-      }
-      
-      // Return transformed data
-      return transformPlayerData(data.data);
+
+      // Transform player data
+      const transformedPlayer = transformCricbuzzPlayerData(response.data);
+
+      return transformedPlayer || players.find((p) => p.id === playerId);
     } catch (error) {
       console.error("Error fetching player details:", error);
       toast({
         title: "Error fetching player details",
         description: "Using mock data instead. Please check your API key.",
-        variant: "destructive"
+        variant: "destructive",
       });
-      
+
       // Fallback to mock data
-      return players.find(p => p.id === playerId);
+      return players.find((p) => p.id === playerId);
     }
   },
-  
+
   // Set API key programmatically
   setApiKey: (newApiKey: string) => {
-    localStorage.setItem('cricket_api_key', newApiKey);
+    localStorage.setItem("cricket_api_key", newApiKey);
     toast({
       title: "API Key Updated",
-      description: "Your Cricket API key has been updated."
+      description: "Your Cricket API key has been updated.",
     });
   },
-  
+
   // Get the current API key
   getApiKey: () => {
-    return localStorage.getItem('cricket_api_key') || API_KEY;
-  }
+    return localStorage.getItem("cricket_api_key") || RAPIDAPI_KEY;
+  },
 };

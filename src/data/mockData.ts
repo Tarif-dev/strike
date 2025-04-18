@@ -1,4 +1,3 @@
-
 // Mock data for our fantasy cricket app
 // In a real app, this would be fetched from an API
 
@@ -7,17 +6,21 @@ export const teamLogos = {
   india: "https://www.cricbuzz.com/a/img/v1/72x54/i1/c172115/india.jpg",
   australia: "https://www.cricbuzz.com/a/img/v1/72x54/i1/c172119/australia.jpg",
   england: "https://www.cricbuzz.com/a/img/v1/72x54/i1/c172116/england.jpg",
-  newZealand: "https://www.cricbuzz.com/a/img/v1/72x54/i1/c172124/new-zealand.jpg",
-  southAfrica: "https://www.cricbuzz.com/a/img/v1/72x54/i1/c172118/south-africa.jpg",
+  newZealand:
+    "https://www.cricbuzz.com/a/img/v1/72x54/i1/c172124/new-zealand.jpg",
+  southAfrica:
+    "https://www.cricbuzz.com/a/img/v1/72x54/i1/c172118/south-africa.jpg",
   pakistan: "https://www.cricbuzz.com/a/img/v1/72x54/i1/c172122/pakistan.jpg",
-  westIndies: "https://www.cricbuzz.com/a/img/v1/72x54/i1/c172123/west-indies.jpg",
-  bangladesh: "https://www.cricbuzz.com/a/img/v1/72x54/i1/c172120/bangladesh.jpg",
+  westIndies:
+    "https://www.cricbuzz.com/a/img/v1/72x54/i1/c172123/west-indies.jpg",
+  bangladesh:
+    "https://www.cricbuzz.com/a/img/v1/72x54/i1/c172120/bangladesh.jpg",
   rcb: "https://www.cricbuzz.com/a/img/v1/72x54/i1/c180950/royal-challengers-bangalore.jpg",
   csk: "https://www.cricbuzz.com/a/img/v1/72x54/i1/c180951/chennai-super-kings.jpg",
   mi: "https://www.cricbuzz.com/a/img/v1/72x54/i1/c180954/mumbai-indians.jpg",
   kkr: "https://www.cricbuzz.com/a/img/v1/72x54/i1/c180953/kolkata-knight-riders.jpg",
   dc: "https://www.cricbuzz.com/a/img/v1/72x54/i1/c180952/delhi-capitals.jpg",
-  srh: "https://www.cricbuzz.com/a/img/v1/72x54/i1/c180955/sunrisers-hyderabad.jpg"
+  srh: "https://www.cricbuzz.com/a/img/v1/72x54/i1/c180955/sunrisers-hyderabad.jpg",
 };
 
 // Country flags
@@ -29,55 +32,82 @@ export const countryFlags = {
   southAfrica: "https://www.countryflags.io/za/flat/64.png",
   pakistan: "https://www.countryflags.io/pk/flat/64.png",
   westIndies: "https://www.countryflags.io/bb/flat/64.png", // Using Barbados flag for West Indies
-  bangladesh: "https://www.countryflags.io/bd/flat/64.png"
+  bangladesh: "https://www.countryflags.io/bd/flat/64.png",
 };
 
 // Since the country flags API might not work, let's provide fallbacks
 const fallbackFlags = {
-  india: "https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/1200px-Flag_of_India.svg.png",
-  australia: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Flag_of_Australia_%28converted%29.svg/1200px-Flag_of_Australia_%28converted%29.svg.png",
-  england: "https://upload.wikimedia.org/wikipedia/en/thumb/b/be/Flag_of_England.svg/1200px-Flag_of_England.svg.png",
-  newZealand: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Flag_of_New_Zealand.svg/1200px-Flag_of_New_Zealand.svg.png",
-  southAfrica: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Flag_of_South_Africa.svg/1200px-Flag_of_South_Africa.svg.png",
-  pakistan: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Flag_of_Pakistan.svg/1200px-Flag_of_Pakistan.svg.png",
-  westIndies: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Flag_of_the_West_Indies_Cricket_Team.svg/1200px-Flag_of_the_West_Indies_Cricket_Team.svg.png",
-  bangladesh: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Flag_of_Bangladesh.svg/1200px-Flag_of_Bangladesh.svg.png"
+  india:
+    "https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/1200px-Flag_of_India.svg.png",
+  australia:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Flag_of_Australia_%28converted%29.svg/1200px-Flag_of_Australia_%28converted%29.svg.png",
+  england:
+    "https://upload.wikimedia.org/wikipedia/en/thumb/b/be/Flag_of_England.svg/1200px-Flag_of_England.svg.png",
+  newZealand:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Flag_of_New_Zealand.svg/1200px-Flag_of_New_Zealand.svg.png",
+  southAfrica:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Flag_of_South_Africa.svg/1200px-Flag_of_South_Africa.svg.png",
+  pakistan:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Flag_of_Pakistan.svg/1200px-Flag_of_Pakistan.svg.png",
+  westIndies:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Flag_of_the_West_Indies_Cricket_Team.svg/1200px-Flag_of_the_West_Indies_Cricket_Team.svg.png",
+  bangladesh:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Flag_of_Bangladesh.svg/1200px-Flag_of_Bangladesh.svg.png",
 };
 
 // Use the fallback flags instead of API
-Object.keys(countryFlags).forEach(key => {
-  countryFlags[key as keyof typeof countryFlags] = fallbackFlags[key as keyof typeof fallbackFlags];
+Object.keys(countryFlags).forEach((key) => {
+  countryFlags[key as keyof typeof countryFlags] =
+    fallbackFlags[key as keyof typeof fallbackFlags];
 });
 
 // Player images
 export const playerImages = {
-  viratKohli: "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170661/virat-kohli.jpg",
-  rohitSharma: "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170658/rohit-sharma.jpg",
-  jaspritBumrah: "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170685/jasprit-bumrah.jpg",
-  steveSmith: "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170624/steven-smith.jpg",
-  patCummins: "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170651/pat-cummins.jpg",
+  viratKohli:
+    "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170661/virat-kohli.jpg",
+  rohitSharma:
+    "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170658/rohit-sharma.jpg",
+  jaspritBumrah:
+    "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170685/jasprit-bumrah.jpg",
+  steveSmith:
+    "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170624/steven-smith.jpg",
+  patCummins:
+    "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170651/pat-cummins.jpg",
   joeRoot: "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170942/joe-root.jpg",
-  benStokes: "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170845/ben-stokes.jpg",
-  kaneWilliamson: "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170733/kane-williamson.jpg",
-  trentBoult: "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170752/trent-boult.jpg"
+  benStokes:
+    "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170845/ben-stokes.jpg",
+  kaneWilliamson:
+    "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170733/kane-williamson.jpg",
+  trentBoult:
+    "https://www.cricbuzz.com/a/img/v1/152x152/i1/c170752/trent-boult.jpg",
 };
 
 // More realistic player photos in case the above don't work
 const fallbackPlayerImages = {
-  viratKohli: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Virat_Kohli_2018.jpg/330px-Virat_Kohli_2018.jpg",
-  rohitSharma: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Rohit_Sharma_2021.jpg/330px-Rohit_Sharma_2021.jpg",
-  jaspritBumrah: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Jasprit_Bumrah_%28cropped%29.jpg/330px-Jasprit_Bumrah_%28cropped%29.jpg",
-  steveSmith: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Steven_Smith_2014.jpg/330px-Steven_Smith_2014.jpg",
-  patCummins: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Pat_Cummins_2018.jpg/330px-Pat_Cummins_2018.jpg",
-  joeRoot: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Joe_Root_2019.jpg/330px-Joe_Root_2019.jpg",
-  benStokes: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Ben_Stokes_2019.jpg/330px-Ben_Stokes_2019.jpg",
-  kaneWilliamson: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Kane_Williamson_2018.jpg/330px-Kane_Williamson_2018.jpg",
-  trentBoult: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Trent_Boult_2016.jpg/330px-Trent_Boult_2016.jpg"
+  viratKohli:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Virat_Kohli_2018.jpg/330px-Virat_Kohli_2018.jpg",
+  rohitSharma:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Rohit_Sharma_2021.jpg/330px-Rohit_Sharma_2021.jpg",
+  jaspritBumrah:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Jasprit_Bumrah_%28cropped%29.jpg/330px-Jasprit_Bumrah_%28cropped%29.jpg",
+  steveSmith:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Steven_Smith_2014.jpg/330px-Steven_Smith_2014.jpg",
+  patCummins:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Pat_Cummins_2018.jpg/330px-Pat_Cummins_2018.jpg",
+  joeRoot:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Joe_Root_2019.jpg/330px-Joe_Root_2019.jpg",
+  benStokes:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Ben_Stokes_2019.jpg/330px-Ben_Stokes_2019.jpg",
+  kaneWilliamson:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Kane_Williamson_2018.jpg/330px-Kane_Williamson_2018.jpg",
+  trentBoult:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Trent_Boult_2016.jpg/330px-Trent_Boult_2016.jpg",
 };
 
 // Use the fallback player images
-Object.keys(playerImages).forEach(key => {
-  playerImages[key as keyof typeof playerImages] = fallbackPlayerImages[key as keyof typeof fallbackPlayerImages];
+Object.keys(playerImages).forEach((key) => {
+  playerImages[key as keyof typeof playerImages] =
+    fallbackPlayerImages[key as keyof typeof fallbackPlayerImages];
 });
 
 // Mock players data
@@ -98,7 +128,7 @@ export const players = [
       average: 41.95,
       strikeRate: 135.93,
     },
-    points: 837
+    points: 837,
   },
   {
     id: "p2",
@@ -116,7 +146,7 @@ export const players = [
       average: 30.25,
       strikeRate: 130.4,
     },
-    points: 781
+    points: 781,
   },
   {
     id: "p3",
@@ -134,7 +164,7 @@ export const players = [
       economy: 7.42,
       average: 23.27,
     },
-    points: 802
+    points: 802,
   },
   {
     id: "p4",
@@ -152,7 +182,7 @@ export const players = [
       average: 35.25,
       strikeRate: 129.1,
     },
-    points: 721
+    points: 721,
   },
   {
     id: "p5",
@@ -170,7 +200,7 @@ export const players = [
       economy: 8.21,
       average: 27.18,
     },
-    points: 695
+    points: 695,
   },
   {
     id: "p6",
@@ -188,7 +218,7 @@ export const players = [
       average: 37.2,
       strikeRate: 126.5,
     },
-    points: 685
+    points: 685,
   },
   {
     id: "p7",
@@ -208,7 +238,7 @@ export const players = [
       economy: 8.76,
       strikeRate: 134.9,
     },
-    points: 758
+    points: 758,
   },
   {
     id: "p8",
@@ -226,7 +256,7 @@ export const players = [
       average: 39.1,
       strikeRate: 127.2,
     },
-    points: 724
+    points: 724,
   },
   {
     id: "p9",
@@ -244,7 +274,7 @@ export const players = [
       economy: 7.97,
       average: 24.3,
     },
-    points: 713
+    points: 713,
   },
 ];
 
@@ -252,81 +282,133 @@ export const players = [
 export const matches = [
   {
     id: "m1",
-    homeTeam: {
-      name: "Mumbai Indians",
-      shortName: "MI",
-      logo: teamLogos.mi
+    teams: {
+      home: {
+        name: "Mumbai Indians",
+        code: "MI",
+        logo: teamLogos.mi,
+      },
+      away: {
+        name: "Chennai Super Kings",
+        code: "CSK",
+        logo: teamLogos.csk,
+      },
     },
-    awayTeam: {
-      name: "Chennai Super Kings",
-      shortName: "CSK",
-      logo: teamLogos.csk
+    tournament: {
+      name: "IPL 2023",
+      shortName: "IPL",
     },
-    tournament: "IPL 2023",
     venue: "Wankhede Stadium",
-    date: "Apr 10, 2023",
-    time: "7:30 PM",
+    startTime: new Date("Apr 10, 2023 19:30:00").toString(),
     status: "completed" as const,
     result: "Mumbai Indians won by 5 wickets",
-    homeScore: "176/4 (20)",
-    awayScore: "174/8 (20)"
+    scores: {
+      home: "176/4 (20)",
+      away: "174/8 (20)",
+    },
+    fantasy: {
+      contestCount: 32,
+      prizePool: "₹5 Lakh",
+      entryFees: [49, 99, 499, 999],
+      teamsCreated: 28500,
+      percentageJoined: 85,
+      isHotMatch: true,
+    },
   },
   {
     id: "m2",
-    homeTeam: {
-      name: "Royal Challengers Bangalore",
-      shortName: "RCB",
-      logo: teamLogos.rcb
+    teams: {
+      home: {
+        name: "Royal Challengers Bangalore",
+        code: "RCB",
+        logo: teamLogos.rcb,
+      },
+      away: {
+        name: "Delhi Capitals",
+        code: "DC",
+        logo: teamLogos.dc,
+      },
     },
-    awayTeam: {
-      name: "Delhi Capitals",
-      shortName: "DC",
-      logo: teamLogos.dc
+    tournament: {
+      name: "IPL 2023",
+      shortName: "IPL",
     },
-    tournament: "IPL 2023",
     venue: "M. Chinnaswamy Stadium",
-    date: "Apr 15, 2023",
-    time: "3:30 PM",
+    startTime: new Date("Apr 15, 2023 15:30:00").toString(),
     status: "live" as const,
-    homeScore: "102/3 (12.2)",
-    awayScore: "Yet to bat"
+    scores: {
+      home: "102/3 (12.2)",
+      away: "Yet to bat",
+    },
+    fantasy: {
+      contestCount: 45,
+      prizePool: "₹7 Lakh",
+      entryFees: [49, 99, 299, 599, 999],
+      teamsCreated: 42000,
+      percentageJoined: 78,
+      isHotMatch: true,
+    },
   },
   {
     id: "m3",
-    homeTeam: {
-      name: "Kolkata Knight Riders",
-      shortName: "KKR",
-      logo: teamLogos.kkr
+    teams: {
+      home: {
+        name: "Kolkata Knight Riders",
+        code: "KKR",
+        logo: teamLogos.kkr,
+      },
+      away: {
+        name: "Sunrisers Hyderabad",
+        code: "SRH",
+        logo: teamLogos.srh,
+      },
     },
-    awayTeam: {
-      name: "Sunrisers Hyderabad",
-      shortName: "SRH",
-      logo: teamLogos.srh
+    tournament: {
+      name: "IPL 2023",
+      shortName: "IPL",
     },
-    tournament: "IPL 2023",
     venue: "Eden Gardens",
-    date: "Apr 20, 2023",
-    time: "7:30 PM",
-    status: "upcoming" as const
+    startTime: new Date("Apr 20, 2023 19:30:00").toString(),
+    status: "upcoming" as const,
+    fantasy: {
+      contestCount: 28,
+      prizePool: "₹6 Lakh",
+      entryFees: [49, 149, 499],
+      teamsCreated: 15000,
+      percentageJoined: 42,
+      isHotMatch: false,
+    },
   },
   {
     id: "m4",
-    homeTeam: {
-      name: "Chennai Super Kings",
-      shortName: "CSK",
-      logo: teamLogos.csk
+    teams: {
+      home: {
+        name: "Chennai Super Kings",
+        code: "CSK",
+        logo: teamLogos.csk,
+      },
+      away: {
+        name: "Delhi Capitals",
+        code: "DC",
+        logo: teamLogos.dc,
+      },
     },
-    awayTeam: {
-      name: "Delhi Capitals",
-      shortName: "DC",
-      logo: teamLogos.dc
+    tournament: {
+      name: "IPL 2023",
+      shortName: "IPL",
     },
-    tournament: "IPL 2023",
     venue: "MA Chidambaram Stadium",
-    date: "Apr 22, 2023",
-    time: "7:30 PM",
-    status: "upcoming" as const
-  }
+    startTime: new Date("Apr 22, 2023 19:30:00").toString(),
+    status: "upcoming" as const,
+    fantasy: {
+      contestCount: 22,
+      prizePool: "₹4 Lakh",
+      entryFees: [29, 99, 249, 499],
+      teamsCreated: 12000,
+      percentageJoined: 35,
+      isHotMatch: false,
+    },
+  },
 ];
 
 // Mock leagues data
@@ -340,7 +422,7 @@ export const leagues = [
     endDate: "May 28, 2023",
     joined: true,
     position: 456,
-    userPoints: 1245
+    userPoints: 1245,
   },
   {
     id: "l2",
@@ -358,8 +440,8 @@ export const leagues = [
     endDate: "May 28, 2023",
     joined: true,
     position: 3,
-    userPoints: 1567
-  }
+    userPoints: 1567,
+  },
 ];
 
 // Mock teams data
@@ -373,7 +455,7 @@ export const teams = [
     viceCaptainImage: playerImages.rohitSharma,
     points: 1856,
     rank: 14523,
-    totalPlayers: 11
+    totalPlayers: 11,
   },
   {
     id: "t2",
@@ -384,16 +466,40 @@ export const teams = [
     viceCaptainImage: playerImages.benStokes,
     points: 1743,
     rank: 23651,
-    totalPlayers: 11
-  }
+    totalPlayers: 11,
+  },
 ];
 
 // Mock player stats categories
 export const playerStatsCategories = [
-  { name: "Most Runs", players: players.filter(p => p.stats.runs).sort((a, b) => (b.stats.runs || 0) - (a.stats.runs || 0)).slice(0, 5) },
-  { name: "Most Wickets", players: players.filter(p => p.stats.wickets).sort((a, b) => (b.stats.wickets || 0) - (a.stats.wickets || 0)).slice(0, 5) },
-  { name: "Best Batting Average", players: players.filter(p => p.stats.average).sort((a, b) => (b.stats.average || 0) - (a.stats.average || 0)).slice(0, 5) },
-  { name: "Best Bowling Economy", players: players.filter(p => p.stats.economy).sort((a, b) => (a.stats.economy || 0) - (b.stats.economy || 0)).slice(0, 5) },
+  {
+    name: "Most Runs",
+    players: players
+      .filter((p) => p.stats.runs)
+      .sort((a, b) => (b.stats.runs || 0) - (a.stats.runs || 0))
+      .slice(0, 5),
+  },
+  {
+    name: "Most Wickets",
+    players: players
+      .filter((p) => p.stats.wickets)
+      .sort((a, b) => (b.stats.wickets || 0) - (a.stats.wickets || 0))
+      .slice(0, 5),
+  },
+  {
+    name: "Best Batting Average",
+    players: players
+      .filter((p) => p.stats.average)
+      .sort((a, b) => (b.stats.average || 0) - (a.stats.average || 0))
+      .slice(0, 5),
+  },
+  {
+    name: "Best Bowling Economy",
+    players: players
+      .filter((p) => p.stats.economy)
+      .sort((a, b) => (a.stats.economy || 0) - (b.stats.economy || 0))
+      .slice(0, 5),
+  },
 ];
 
 // Mock notifications
@@ -403,20 +509,20 @@ export const notifications = [
     title: "Match Starting",
     message: "RCB vs DC starts in 30 minutes!",
     timestamp: "15 mins ago",
-    read: false
+    read: false,
   },
   {
     id: "n2",
     title: "Player Update",
     message: "Virat Kohli scored 82 runs in 47 balls",
     timestamp: "2 hours ago",
-    read: true
+    read: true,
   },
   {
     id: "n3",
     title: "League Update",
     message: "You moved up 25 positions in IPL Fantasy League",
     timestamp: "5 hours ago",
-    read: true
-  }
+    read: true,
+  },
 ];

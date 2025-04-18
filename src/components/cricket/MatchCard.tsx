@@ -52,12 +52,30 @@ export default function MatchCard({
   match,
   showFantasyFeatures = false,
 }: MatchCardProps) {
+  // Check if match data is properly structured
+  if (
+    !match ||
+    !match.teams ||
+    !match.teams.home ||
+    !match.teams.away ||
+    !match.tournament
+  ) {
+    // Return a placeholder or loading state when data is malformed
+    return (
+      <Card className="overflow-hidden border-neon-green/20 bg-dark-gray/80 hover:border-neon-green/40 transition-all p-4">
+        <div className="text-center py-4">
+          <p className="text-neon-green/60">Match data unavailable</p>
+        </div>
+      </Card>
+    );
+  }
+
   const isLive = match.status === "live";
   const isCompleted = match.status === "completed";
   const isUpcoming = match.status === "upcoming";
 
-  // Format date and time
-  const matchDate = new Date(match.startTime);
+  // Format date and time - add defensive check
+  const matchDate = new Date(match.startTime || Date.now());
   const formattedDate = matchDate.toLocaleDateString("en-US", {
     day: "numeric",
     month: "short",
