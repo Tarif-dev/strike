@@ -25,10 +25,10 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [scrollY, setScrollY] = useState(0);
 
-  // Redirect to home if already logged in
+  // Redirect to /matches only if user is authenticated and not loading
   useEffect(() => {
     if (!loading && user) {
-      navigate("/matches");
+      navigate("/matches", { replace: true });
     }
   }, [user, loading, navigate]);
 
@@ -71,7 +71,14 @@ const LandingPage = () => {
     },
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    // Show a loading spinner or message while auth is loading
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-white overflow-hidden">
@@ -102,7 +109,6 @@ const LandingPage = () => {
           >
             {/* App logo */}
             <div className="mb-8 relative">
-              
               <div className="h-20 w-20 mx-auto rounded-full bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center relative border border-neon-green/30">
                 <span className="font-bold text-4xl bg-clip-text text-transparent bg-gradient-to-r from-neon-green to-cyan-400">
                   S
