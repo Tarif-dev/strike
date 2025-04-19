@@ -102,7 +102,7 @@ const LandingPage = () => {
           >
             {/* App logo */}
             <div className="mb-8 relative">
-              <div className="absolute -inset-2 bg-gradient-to-r from-neon-green/40 to-blue-600/40 rounded-full blur-lg opacity-70"></div>
+              
               <div className="h-20 w-20 mx-auto rounded-full bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center relative border border-neon-green/30">
                 <span className="font-bold text-4xl bg-clip-text text-transparent bg-gradient-to-r from-neon-green to-cyan-400">
                   S
