@@ -14,7 +14,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-deep-black border-t border-neon-green/20 p-2 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-gray-950/95 backdrop-blur-md border-t border-neon-green/20 p-2 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
       <div className="flex items-center justify-between max-w-md mx-auto">
         {navItems.map((item) => {
           const isActive =
