@@ -101,34 +101,6 @@ const LandingPage = () => {
 
         {/* Content */}
         <div className="relative z-10 container mx-auto px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-block"
-          >
-            {/* App logo */}
-            <div className="mb-8 relative">
-              <div className="h-20 w-20 mx-auto rounded-full bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center relative border border-neon-green/30">
-                <span className="font-bold text-4xl bg-clip-text text-transparent bg-gradient-to-r from-neon-green to-cyan-400">
-                  S
-                </span>
-                <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-neon-green animate-pulse"></div>
-              </div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8, duration: 0.5 }}
-                className="mt-4"
-              >
-                <Badge className="text-sm font-medium bg-neon-green/10 text-neon-green border border-neon-green/30 px-3 py-1 rounded-full">
-                  FANTASY CRICKET
-                </Badge>
-              </motion.div>
-            </div>
-          </motion.div>
-
           <motion.h1
             className="text-5xl md:text-8xl font-extrabold mb-6 relative"
             initial={{ opacity: 0, y: 20 }}
@@ -160,13 +132,12 @@ const LandingPage = () => {
           >
             <Button
               asChild
-              className="relative group overflow-hidden bg-neon-green hover:bg-neon-green/90 text-gray-900 rounded-full px-8 py-6 text-lg font-semibold w-full md:w-auto"
+              className="relative bg-[#39FF14] hover:bg-[#39FF14] text-black rounded-full px-8 py-6 text-lg font-bold w-full md:w-auto transition duration-300 transform hover:scale-105 shadow-[0_0_15px_rgba(57,255,20,0.5)]"
             >
               <Link to="/auth/login">
-                <span className="relative z-10 flex items-center justify-center">
+                <span className="flex items-center justify-center">
                   Get Started <ArrowRight className="ml-2 h-5 w-5" />
                 </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-neon-green via-neon-green/80 to-neon-green transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
               </Link>
             </Button>
 

@@ -25,6 +25,7 @@ export default {
         "royal-gold": "#FFD700",
         "platinum-silver": "#B0BEC5",
         "soft-white": "#E0E0E0",
+        "neon-green": "#39FF14", // Adding explicit neon green color
 
         // Accent colors
         "crimson-red": "#D72638",
