@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "@/pages/Index";
+import Home from "@/pages/Home";
 import Matches from "@/pages/Matches";
 import MatchDetail from "@/pages/MatchDetail";
 import Players from "@/pages/Players";
@@ -45,7 +46,7 @@ function App() {
 
             {/* Protected routes */}
             <Route element={<ProtectedRoute />}>
-              <Route path="/home" element={<Index />} />
+              <Route path="/home" element={<Home />} />
               <Route path="/matches" element={<Matches />} />
               <Route path="/matches/:id" element={<MatchDetail />} />
               <Route path="/matches/:id/contests" element={<Contests />} />

@@ -1,0 +1,587 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  Trophy,
+  Calendar,
+  Zap,
+  TrendingUp,
+  User,
+  Clock,
+  Award,
+  ChevronRight,
+  Star,
+  Plus,
+  DollarSign,
+  Bell,
+  Sparkles,
+} from "lucide-react";
+
+// Components
+import PageContainer from "@/components/layout/PageContainer";
+import Header from "@/components/layout/Header";
+import Navbar from "@/components/layout/Navbar";
+import MatchCard from "@/components/cricket/MatchCard";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { Tabs } from "@/components/ui/tabs";
+
+// Hooks and contexts
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
+
+// Data
+import { matches, teams, players, notifications } from "@/data/mockData";
+
+// Animation variants
+const fadeIn = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: { duration: 0.4 } },
+};
+
+const staggerItems = {
+  animate: { transition: { staggerChildren: 0.1 } },
+};
+
+const itemAnimation = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
+const Home = () => {
+  // States
+  const [showNotifications, setShowNotifications] = useState(false);
+  const { user } = useAuth();
+
+  // Get current date for greeting
+  const currentHour = new Date().getHours();
+  const greeting =
+    currentHour < 12
+      ? "Good Morning"
+      : currentHour < 18
+      ? "Good Afternoon"
+      : "Good Evening";
+
+  // Format today's date
+  const today = new Date();
+  const dateOptions: Intl.DateTimeFormatOptions = {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  };
+  const formattedDate = today.toLocaleDateString("en-US", dateOptions);
+
+  // Filter matches by status
+  const liveMatches = matches.filter((m) => m.status === "live");
+  const upcomingMatches = matches
+    .filter((m) => m.status === "upcoming")
+    .slice(0, 3);
+
+  // Top players
+  const topPlayers = players
+    .sort((a, b) => (b.points || 0) - (a.points || 0))
+    .slice(0, 3);
+
+  // Unread notifications
+  const unreadNotifications = notifications.filter((n) => !n.read);
+
+  // Get user display name from metadata or email
+  const getUserDisplayName = () => {
+    if (!user) return "";
+
+    // Try to get name from user metadata
+    const metadata = user.user_metadata;
+    if (metadata?.name) return metadata.name;
+    if (metadata?.full_name) return metadata.full_name;
+
+    // Fallback to email
+    if (user.email) {
+      return user.email.split("@")[0];
+    }
+
+    return "";
+  };
+
+  // Get user photo URL
+  const getUserPhotoURL = () => {
+    if (!user) return null;
+    return user.user_metadata?.avatar_url || null;
+  };
+
+  useEffect(() => {
+    // Show notification toast if there are unread notifications
+    if (unreadNotifications.length > 0) {
+      toast({
+        title: `${unreadNotifications.length} New Notifications`,
+        description: unreadNotifications[0].message,
+        duration: 3000,
+      });
+    }
+  }, []);
+
+  return (
+    <>
+      <PageContainer className="pb-24">
+        {/* Custom header with greeting */}
+        <motion.div
+          className="flex justify-between items-center mt-2 mb-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div>
+            <h1 className="text-2xl font-bold text-white">
+              {greeting}
+              {user ? `, ${getUserDisplayName().split(" ")[0]}` : ""}
+            </h1>
+            <p className="text-sm text-gray-400">{formattedDate}</p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Notification bell */}
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="h-9 w-9 bg-gray-900/80 rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
+              >
+                <Bell className="h-[18px] w-[18px] text-gray-300" />
+                {unreadNotifications.length > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-neon-green text-xs text-black font-medium rounded-full flex items-center justify-center">
+                    {unreadNotifications.length}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* User profile */}
+            <Link to="/profile">
+              <Avatar className="h-10 w-10 border-2 border-neon-green/30 hover:border-neon-green transition-colors">
+                {getUserPhotoURL() ? (
+                  <AvatarImage
+                    src={getUserPhotoURL()}
+                    alt={getUserDisplayName() || "User"}
+                  />
+                ) : (
+                  <AvatarFallback className="bg-gray-800 text-neon-green">
+                    {getUserDisplayName().charAt(0) || (
+                      <User className="h-5 w-5" />
+                    )}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Wallet balance card */}
+        {user && (
+          <motion.div {...fadeIn}>
+            <Card className="bg-gradient-to-r from-gray-900 to-gray-950 border-gray-800 mb-6 overflow-hidden">
+              <div className="p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center">
+                    <div className="h-10 w-10 rounded-full bg-neon-green/10 flex items-center justify-center mr-3">
+                      <DollarSign className="h-5 w-5 text-neon-green" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400">Available Balance</p>
+                      <p className="text-xl font-bold text-white">₹1,250</p>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="bg-neon-green text-gray-900 hover:bg-neon-green/90"
+                  >
+                    Add Money
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 mt-4 text-center">
+                  <Link to="/wallet">
+                    <div className="p-2 bg-gray-800/40 hover:bg-gray-800/60 rounded-lg transition-colors">
+                      <p className="text-xs text-gray-400">Deposits</p>
+                      <p className="font-medium text-white">₹2,500</p>
+                    </div>
+                  </Link>
+                  <Link to="/wallet">
+                    <div className="p-2 bg-gray-800/40 hover:bg-gray-800/60 rounded-lg transition-colors">
+                      <p className="text-xs text-gray-400">Winnings</p>
+                      <p className="font-medium text-white">₹750</p>
+                    </div>
+                  </Link>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Live matches section (if any) */}
+        {liveMatches.length > 0 && (
+          <motion.div
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 bg-red-500 rounded-full animate-pulse"></div>
+                <h2 className="font-bold text-lg">Live Matches</h2>
+              </div>
+              <Link
+                to="/matches?filter=live"
+                className="text-neon-green text-sm flex items-center"
+              >
+                View All <ChevronRight className="h-4 w-4 ml-1" />
+              </Link>
+            </div>
+
+            <div className="space-y-4">
+              {liveMatches.map((match) => (
+                <MatchCard
+                  key={match.id}
+                  match={match}
+                  showFantasyFeatures={true}
+                  featured={match.fantasy?.isHotMatch}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Mega contest highlight */}
+        <motion.div
+          className="mb-8 relative overflow-hidden"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <div className="absolute -inset-1 bg-gradient-to-r from-neon-green/20 to-purple-500/20 rounded-xl blur-lg animate-pulse"></div>
+          <div className="relative bg-gradient-to-br from-gray-900 to-gray-950 rounded-xl border border-gray-800/40 p-5 overflow-hidden">
+            <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] bg-repeat opacity-10"></div>
+
+            <div className="flex items-center gap-2 mb-1">
+              <Sparkles className="h-4 w-4 text-neon-green" />
+              <h3 className="text-sm font-semibold text-neon-green">
+                MEGA CONTEST
+              </h3>
+            </div>
+
+            <h2 className="text-xl font-bold mb-2">IPL 2025 Championship</h2>
+
+            <div className="flex justify-between items-center mb-5">
+              <div className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-amber-400" />
+                <span className="text-lg font-bold text-white">₹10 Crore</span>
+              </div>
+
+              <Badge className="bg-gray-800 text-gray-300">
+                <Clock className="h-3 w-3 mr-1 text-neon-green" />
+                2d left
+              </Badge>
+            </div>
+
+            <div className="mb-4">
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-400">Registration</span>
+                <span className="text-amber-400">75% Full</span>
+              </div>
+              <Progress value={75} className="h-1.5 bg-gray-800" />
+            </div>
+
+            <div className="flex gap-4">
+              <Button className="flex-1 bg-neon-green hover:bg-neon-green/90 text-gray-900 font-medium">
+                Join Now
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 border-gray-700 hover:bg-gray-800/60"
+              >
+                View Details
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Upcoming matches */}
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.4 }}
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="font-bold text-lg">Upcoming Matches</h2>
+            <Link
+              to="/matches?filter=upcoming"
+              className="text-neon-green text-sm flex items-center"
+            >
+              View All <ChevronRight className="h-4 w-4 ml-1" />
+            </Link>
+          </div>
+
+          <div className="space-y-4">
+            {upcomingMatches.map((match) => (
+              <MatchCard
+                key={match.id}
+                match={match}
+                showFantasyFeatures={true}
+              />
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Quick links section */}
+        <motion.div
+          className="mb-8"
+          variants={staggerItems}
+          initial="initial"
+          animate="animate"
+        >
+          <h2 className="font-bold text-lg mb-4">Quick Actions</h2>
+
+          <div className="grid grid-cols-3 gap-3">
+            <motion.div variants={itemAnimation}>
+              <Link to="/teams/create">
+                <div className="flex flex-col items-center justify-center bg-gray-900/80 hover:bg-gray-900 border border-gray-800/50 rounded-xl p-4 transition-colors">
+                  <div className="h-10 w-10 rounded-full bg-neon-green/10 flex items-center justify-center mb-2">
+                    <Plus className="h-5 w-5 text-neon-green" />
+                  </div>
+                  <span className="text-sm text-center">Create Team</span>
+                </div>
+              </Link>
+            </motion.div>
+
+            <motion.div variants={itemAnimation}>
+              <Link to="/leagues">
+                <div className="flex flex-col items-center justify-center bg-gray-900/80 hover:bg-gray-900 border border-gray-800/50 rounded-xl p-4 transition-colors">
+                  <div className="h-10 w-10 rounded-full bg-amber-400/10 flex items-center justify-center mb-2">
+                    <Trophy className="h-5 w-5 text-amber-400" />
+                  </div>
+                  <span className="text-sm text-center">Leagues</span>
+                </div>
+              </Link>
+            </motion.div>
+
+            <motion.div variants={itemAnimation}>
+              <Link to="/wallet">
+                <div className="flex flex-col items-center justify-center bg-gray-900/80 hover:bg-gray-900 border border-gray-800/50 rounded-xl p-4 transition-colors">
+                  <div className="h-10 w-10 rounded-full bg-purple-500/10 flex items-center justify-center mb-2">
+                    <DollarSign className="h-5 w-5 text-purple-500" />
+                  </div>
+                  <span className="text-sm text-center">Add Money</span>
+                </div>
+              </Link>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Stats cards */}
+        <motion.div
+          className="mb-8"
+          variants={staggerItems}
+          initial="initial"
+          animate="animate"
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="font-bold text-lg">Fantasy Stats</h2>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <motion.div variants={itemAnimation}>
+              <div className="bg-gray-900/80 border border-gray-800/50 rounded-xl p-4">
+                <div className="flex justify-between items-center mb-3">
+                  <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                    <Calendar className="h-4 w-4 text-blue-400" />
+                  </div>
+                  <span className="text-xs text-gray-400">This Season</span>
+                </div>
+                <p className="text-xl font-bold text-white">500+</p>
+                <p className="text-sm text-gray-400">Matches</p>
+              </div>
+            </motion.div>
+
+            <motion.div variants={itemAnimation}>
+              <div className="bg-gray-900/80 border border-gray-800/50 rounded-xl p-4">
+                <div className="flex justify-between items-center mb-3">
+                  <div className="h-8 w-8 rounded-full bg-neon-green/10 flex items-center justify-center">
+                    <User className="h-4 w-4 text-neon-green" />
+                  </div>
+                  <span className="text-xs text-gray-400">Community</span>
+                </div>
+                <p className="text-xl font-bold text-white">15M+</p>
+                <p className="text-sm text-gray-400">Players</p>
+              </div>
+            </motion.div>
+
+            <motion.div variants={itemAnimation}>
+              <div className="bg-gray-900/80 border border-gray-800/50 rounded-xl p-4">
+                <div className="flex justify-between items-center mb-3">
+                  <div className="h-8 w-8 rounded-full bg-amber-400/10 flex items-center justify-center">
+                    <Trophy className="h-4 w-4 text-amber-400" />
+                  </div>
+                  <span className="text-xs text-gray-400">Total Prizes</span>
+                </div>
+                <p className="text-xl font-bold text-white">₹10Cr</p>
+                <p className="text-sm text-gray-400">Prize Pool</p>
+              </div>
+            </motion.div>
+
+            <motion.div variants={itemAnimation}>
+              <div className="bg-gray-900/80 border border-gray-800/50 rounded-xl p-4">
+                <div className="flex justify-between items-center mb-3">
+                  <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
+                    <Award className="h-4 w-4 text-red-400" />
+                  </div>
+                  <span className="text-xs text-gray-400">Today</span>
+                </div>
+                <p className="text-xl font-bold text-white">5000+</p>
+                <p className="text-sm text-gray-400">Winners</p>
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Top performers */}
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.5 }}
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="font-bold text-lg">Top Performers</h2>
+            <Link
+              to="/players"
+              className="text-neon-green text-sm flex items-center"
+            >
+              View All <ChevronRight className="h-4 w-4 ml-1" />
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {topPlayers.map((player, index) => (
+              <Link to={`/players/${player.id}`} key={player.id}>
+                <Card className="bg-gray-900/80 hover:bg-gray-900 border border-gray-800/50 transition-colors">
+                  <div className="p-3 flex items-center">
+                    <div className="flex items-center flex-1 gap-3">
+                      {/* Rank indicator */}
+                      <div className="h-8 w-8 rounded-full bg-gray-800 flex items-center justify-center text-sm font-bold">
+                        #{index + 1}
+                      </div>
+
+                      {/* Player image */}
+                      <div className="h-12 w-12 rounded-full overflow-hidden border border-gray-800">
+                        {player.image ? (
+                          <img
+                            src={player.image}
+                            alt={player.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-gray-800 flex items-center justify-center">
+                            <User className="h-6 w-6 text-gray-600" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Player details */}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold">{player.name}</h3>
+                          <img
+                            src={player.countryFlag}
+                            alt={player.country}
+                            className="h-3 w-5"
+                          />
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-gray-400">
+                          <img
+                            src={player.teamLogo}
+                            alt={player.team}
+                            className="h-3 w-3"
+                          />
+                          <span>{player.position}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Player points */}
+                    <div className="px-3 py-1.5 bg-neon-green/10 rounded-full">
+                      <span className="text-sm font-medium text-neon-green">
+                        {player.points} pts
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Featured league */}
+        <motion.div
+          className="mb-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.6 }}
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="font-bold text-lg">Featured League</h2>
+            <Link
+              to="/leagues"
+              className="text-neon-green text-sm flex items-center"
+            >
+              View All <ChevronRight className="h-4 w-4 ml-1" />
+            </Link>
+          </div>
+
+          <Card className="bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800/50 overflow-hidden">
+            <div className="relative p-5">
+              <div className="absolute top-0 right-0">
+                <div className="bg-neon-green text-black font-bold text-xs py-1 px-6 rounded-bl-lg">
+                  FEATURED
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 mb-4">
+                <div className="h-14 w-14 rounded-full bg-gradient-to-br from-neon-green/20 to-blue-500/20 flex items-center justify-center border border-neon-green/30">
+                  <Trophy className="h-7 w-7 text-neon-green" />
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-bold">IPL Fantasy League</h3>
+                  <p className="text-sm text-gray-400">14,726 participants</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <span className="text-xs text-gray-400">Prize Pool</span>
+                  <p className="text-xl font-bold text-neon-green">
+                    ₹1,000,000
+                  </p>
+                </div>
+
+                <div>
+                  <span className="text-xs text-gray-400">Duration</span>
+                  <p className="text-sm">Apr 5 - May 28, 2025</p>
+                </div>
+              </div>
+
+              <Button className="w-full bg-neon-green hover:bg-neon-green/90 text-gray-900 font-medium">
+                Join League
+              </Button>
+            </div>
+          </Card>
+        </motion.div>
+      </PageContainer>
+      <Navbar />
+    </>
+  );
+};
+
+export default Home;
