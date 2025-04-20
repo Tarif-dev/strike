@@ -1,9 +1,20 @@
-import { Calendar, Trophy, Users, Clock, ArrowRight, Star } from "lucide-react";
+import {
+  Calendar,
+  Trophy,
+  Users,
+  Clock,
+  ArrowRight,
+  Star,
+  Zap,
+  AlertCircle,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 export interface MatchData {
   id: string;
@@ -45,11 +56,15 @@ export interface MatchData {
 interface MatchCardProps {
   match: MatchData;
   showFantasyFeatures?: boolean;
+  className?: string;
+  featured?: boolean;
 }
 
 export default function MatchCard({
   match,
   showFantasyFeatures = false,
+  className,
+  featured = false,
 }: MatchCardProps) {
   if (
     !match ||
@@ -59,10 +74,18 @@ export default function MatchCard({
     !match.tournament
   ) {
     return (
-      <Card className="overflow-hidden transition-all p-4">
-        <div className="text-center py-4">
-          <p className="text-muted-foreground">Match data unavailable</p>
-        </div>
+      <Card
+        className={cn(
+          "overflow-hidden bg-gray-900/80 border-gray-800",
+          className
+        )}
+      >
+        <CardContent className="p-5">
+          <div className="flex items-center justify-center py-8 text-gray-400">
+            <AlertCircle className="w-5 h-5 mr-2 opacity-70" />
+            <p>Match data unavailable</p>
+          </div>
+        </CardContent>
       </Card>
     );
   }
@@ -108,198 +131,288 @@ export default function MatchCard({
     isHotMatch: Math.random() > 0.7,
   };
 
+  // Animation variants for hover effects
+  const cardVariants = {
+    hover: { y: -5, transition: { duration: 0.2 } },
+  };
+
   return (
-    <Card
-      variant="default"
-      className="overflow-hidden transition-all hover-effect"
-    >
-      <div className="bg-card px-4 py-3 flex justify-between items-center border-b border-border/20">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-foreground">
-            {match.tournament.name}
-          </span>
-          {match.fantasy?.isHotMatch && (
-            <Badge
-              variant="outline"
-              className="bg-gold-100/10 text-gold-500 border-gold-500/20"
-            >
-              <Star className="h-3 w-3 mr-1 fill-gold-500" /> Hot
-            </Badge>
-          )}
-        </div>
-        <div>
-          {isLive && (
-            <div className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-crimson-red animate-pulse"></span>
-              <span className="text-xs font-medium text-crimson-red">LIVE</span>
-            </div>
-          )}
-          {isUpcoming && timeDisplay && (
-            <div className="text-xs font-medium bg-muted py-1 px-2.5 rounded-full text-foreground">
-              <Clock className="w-3 h-3 inline mr-1" />
-              {timeDisplay}
-            </div>
-          )}
-        </div>
-      </div>
+    <motion.div whileHover={cardVariants.hover} className={cn(className)}>
+      <Card
+        className={cn(
+          "relative overflow-hidden border transition-colors",
+          featured
+            ? "border-neon-green/40 bg-gradient-to-br from-gray-900 to-gray-950"
+            : "border-gray-800 bg-gray-900/80",
+          "backdrop-blur-md"
+        )}
+      >
+        {/* Live status indicator or hot match indicator */}
+        {(isLive || match.fantasy?.isHotMatch) && (
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-neon-green to-transparent" />
+        )}
 
-      <div className="p-5">
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full overflow-hidden bg-muted/50 flex items-center justify-center">
-              <img
-                src={
-                  match.teams.home.logo ||
-                  `/team-logos/${match.teams.home.code.toLowerCase()}.png`
-                }
-                alt={match.teams.home.name}
-                className="w-10 h-10 object-contain"
-                onError={(e) => {
-                  e.currentTarget.src = "/placeholder.svg";
-                }}
-              />
-            </div>
-            <div>
-              <p className="font-medium text-foreground">
-                {match.teams.home.name}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {match.teams.home.code}
-              </p>
-              {isCompleted && match.scores?.home && (
-                <p className="text-sm text-foreground font-medium mt-1">
-                  {match.scores.home}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="text-center">
-            <span className="text-xs bg-accent/10 text-accent px-3 py-1 rounded-full font-medium">
-              VS
+        {/* Tournament & Status Header */}
+        <div className="flex justify-between items-center px-4 py-3 border-b border-gray-800/50">
+          <div className="flex items-center gap-2">
+            {match.fantasy?.isHotMatch && (
+              <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 px-1.5 py-0.5">
+                <Zap className="h-3 w-3 mr-1 text-amber-400 fill-amber-400/20" />{" "}
+                Hot Match
+              </Badge>
+            )}
+            <span className="text-sm font-medium text-gray-300">
+              {match.tournament.name}
             </span>
           </div>
 
-          <div className="flex items-center gap-3 flex-row-reverse text-right">
-            <div className="h-12 w-12 rounded-full overflow-hidden bg-muted/50 flex items-center justify-center">
-              <img
-                src={
-                  match.teams.away.logo ||
-                  `/team-logos/${match.teams.away.code.toLowerCase()}.png`
-                }
-                alt={match.teams.away.name}
-                className="w-10 h-10 object-contain"
-                onError={(e) => {
-                  e.currentTarget.src = "/placeholder.svg";
-                }}
-              />
-            </div>
-            <div>
-              <p className="font-medium text-foreground">
-                {match.teams.away.name}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {match.teams.away.code}
-              </p>
-              {isCompleted && match.scores?.away && (
-                <p className="text-sm text-foreground font-medium mt-1">
-                  {match.scores.away}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-between items-center text-sm text-muted-foreground mt-3">
-          <div className="flex items-center gap-1">
-            <Calendar className="w-4 h-4" />
-            <span>{formattedDate}</span>
-          </div>
-          <span>{formattedTime}</span>
-          <span className="truncate max-w-[140px]">{match.venue}</span>
-        </div>
-
-        {isCompleted && match.result && (
-          <div className="mt-4 text-center text-sm bg-muted/40 py-2 rounded-md">
-            <span className="text-foreground">{match.result}</span>
-          </div>
-        )}
-
-        {showFantasyFeatures && !isCompleted && (
-          <div className="mt-5 pt-4 border-t border-border/20">
-            <div className="flex justify-between items-center mb-3">
-              <div className="flex items-center gap-1.5">
-                <Trophy className="w-4 h-4 text-accent" />
-                <span className="font-medium text-foreground">
-                  Prize Pool:{" "}
-                  <span className="text-accent">{fantasyData.prizePool}</span>
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Users className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground text-sm">
-                  {fantasyData.teamsCreated.toLocaleString()} teams
-                </span>
-              </div>
-            </div>
-
-            {isUpcoming && (
-              <>
-                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
-                  <span>Contest filling fast</span>
-                  <span>{fantasyData.percentageJoined}% Full</span>
-                </div>
-                <Progress
-                  value={fantasyData.percentageJoined}
-                  className="h-1.5 mb-4 bg-muted/30"
-                />
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {fantasyData.entryFees.map((fee, index) => (
-                    <div
-                      key={index}
-                      className="text-xs bg-muted/50 text-foreground px-2.5 py-1 rounded-full"
-                    >
-                      ₹{fee}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex gap-3">
-                  <Link to={`/matches/${match.id}`} className="flex-1">
-                    <Button variant="outline" className="w-full" size="sm">
-                      {fantasyData.contestCount} Contests
-                    </Button>
-                  </Link>
-                  <Link
-                    to={`/teams/create?match=${match.id}`}
-                    className="flex-1"
-                  >
-                    <Button variant="accent" className="w-full" size="sm">
-                      Create Team <ArrowRight className="ml-1 h-3 w-3" />
-                    </Button>
-                  </Link>
-                </div>
-              </>
-            )}
-
+          {/* Status indicator */}
+          <div>
             {isLive && (
-              <div className="flex gap-3">
-                <Link to={`/matches/${match.id}`} className="flex-1">
-                  <Button variant="outline" className="w-full" size="sm">
-                    My Contests
-                  </Button>
-                </Link>
-                <Link to={`/matches/${match.id}/live`} className="flex-1">
-                  <Button variant="accent" className="w-full" size="sm">
-                    Live Score
-                  </Button>
-                </Link>
+              <Badge className="bg-red-500/20 text-red-400 border-red-500/30 px-2">
+                <span className="mr-1.5 h-2 w-2 rounded-full bg-red-500 inline-block animate-pulse"></span>
+                LIVE
+              </Badge>
+            )}
+            {isUpcoming && timeDisplay && (
+              <Badge className="bg-gray-800 text-gray-300 border-gray-700">
+                <Clock className="w-3 h-3 mr-1.5 text-neon-green" />
+                {timeDisplay}
+              </Badge>
+            )}
+            {isCompleted && (
+              <Badge className="bg-gray-800 text-gray-400 border-gray-700/50">
+                Completed
+              </Badge>
+            )}
+          </div>
+        </div>
+
+        <CardContent className="p-4">
+          <div className="relative">
+            {/* VS indicator in the center */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+              <div className="w-10 h-10 rounded-full bg-gray-800/90 backdrop-blur-sm flex items-center justify-center border border-gray-700/50 shadow-lg">
+                <span className="text-xs font-bold bg-clip-text text-transparent bg-gradient-to-r from-neon-green to-blue-400">
+                  VS
+                </span>
+              </div>
+            </div>
+
+            {/* Teams Container */}
+            <div className="flex items-center justify-between mb-6 relative z-0">
+              {/* Home Team */}
+              <div className="flex-1">
+                <div className="flex flex-col items-center">
+                  <div className="h-16 w-16 rounded-full bg-gray-800/50 backdrop-blur-sm border border-gray-800/80 p-0.5 flex items-center justify-center mb-3 shadow-lg">
+                    <img
+                      src={match.teams.home.logo || `/placeholder.svg`}
+                      alt={match.teams.home.name}
+                      className="w-12 h-12 object-contain rounded-full"
+                      onError={(e) => {
+                        e.currentTarget.src = "/placeholder.svg";
+                      }}
+                    />
+                  </div>
+                  <h3 className="font-semibold text-white mb-1 text-center">
+                    {match.teams.home.code}
+                  </h3>
+                  <p className="text-xs text-gray-400 text-center max-w-[100px] truncate">
+                    {match.teams.home.name}
+                  </p>
+
+                  {/* Score for home team */}
+                  {isLive || isCompleted ? (
+                    <div className="mt-2 text-center">
+                      <span
+                        className={cn(
+                          "text-sm font-medium px-3 py-1 rounded-full",
+                          isLive
+                            ? "bg-neon-green/10 text-neon-green"
+                            : "bg-gray-800 text-white"
+                        )}
+                      >
+                        {match.scores?.home || "Yet to bat"}
+                      </span>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              {/* Away Team */}
+              <div className="flex-1">
+                <div className="flex flex-col items-center">
+                  <div className="h-16 w-16 rounded-full bg-gray-800/50 backdrop-blur-sm border border-gray-800/80 p-0.5 flex items-center justify-center mb-3 shadow-lg">
+                    <img
+                      src={match.teams.away.logo || `/placeholder.svg`}
+                      alt={match.teams.away.name}
+                      className="w-12 h-12 object-contain rounded-full"
+                      onError={(e) => {
+                        e.currentTarget.src = "/placeholder.svg";
+                      }}
+                    />
+                  </div>
+                  <h3 className="font-semibold text-white mb-1 text-center">
+                    {match.teams.away.code}
+                  </h3>
+                  <p className="text-xs text-gray-400 text-center max-w-[100px] truncate">
+                    {match.teams.away.name}
+                  </p>
+
+                  {/* Score for away team */}
+                  {isLive || isCompleted ? (
+                    <div className="mt-2 text-center">
+                      <span
+                        className={cn(
+                          "text-sm font-medium px-3 py-1 rounded-full",
+                          isLive
+                            ? "bg-neon-green/10 text-neon-green"
+                            : "bg-gray-800 text-white"
+                        )}
+                      >
+                        {match.scores?.away || "Yet to bat"}
+                      </span>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
+            {/* Match info and venue */}
+            <div className="flex items-center justify-between bg-gray-800/30 py-2 px-3 rounded-lg text-xs text-gray-400">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="w-3 h-3 text-gray-500" />
+                <span>{formattedDate}</span>
+              </div>
+              <span>•</span>
+              <span>{formattedTime}</span>
+              <span>•</span>
+              <div className="truncate max-w-[120px]">{match.venue}</div>
+            </div>
+
+            {/* Match result for completed matches */}
+            {isCompleted && match.result && (
+              <div className="mt-3 text-center bg-gray-800/50 border border-gray-800/80 py-2 px-3 rounded-lg">
+                <span className="text-sm text-gray-300">{match.result}</span>
+              </div>
+            )}
+
+            {/* Fantasy features */}
+            {showFantasyFeatures && !isCompleted && (
+              <div className="mt-4 pt-4 border-t border-gray-800/50">
+                {/* Prize Pool and Teams */}
+                <div className="flex justify-between mb-3">
+                  <div className="flex items-start gap-2">
+                    <Trophy className="h-5 w-5 text-neon-green mt-0.5" />
+                    <div>
+                      <div className="text-xs text-gray-400 mb-0.5">
+                        Prize Pool
+                      </div>
+                      <div className="text-neon-green font-bold">
+                        {fantasyData.prizePool}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <Users className="h-5 w-5 text-gray-400 mt-0.5" />
+                    <div>
+                      <div className="text-xs text-gray-400 mb-0.5">Teams</div>
+                      <div className="text-white font-medium">
+                        {fantasyData.teamsCreated.toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Entry fees chips */}
+                {isUpcoming && (
+                  <>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {fantasyData.entryFees.map((fee, index) => (
+                        <div
+                          key={index}
+                          className="text-xs bg-gray-800/70 text-white font-medium px-2.5 py-1 rounded-full border border-gray-700/50"
+                        >
+                          ₹{fee}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Contest filling progress */}
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between text-xs mb-1.5">
+                        <span className="text-gray-400">Contest filling</span>
+                        <span
+                          className={cn(
+                            fantasyData.percentageJoined > 80
+                              ? "text-red-400"
+                              : fantasyData.percentageJoined > 50
+                              ? "text-amber-400"
+                              : "text-neon-green"
+                          )}
+                        >
+                          {fantasyData.percentageJoined}% Full
+                        </span>
+                      </div>
+                      <Progress
+                        value={fantasyData.percentageJoined}
+                        className="h-1.5 bg-gray-800/80"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Action buttons */}
+                <div className="grid grid-cols-2 gap-3">
+                  {isUpcoming && (
+                    <>
+                      <Link to={`/matches/${match.id}`}>
+                        <Button
+                          variant="outline"
+                          className="w-full bg-gray-800/50 border-gray-700/50 hover:bg-gray-700/50 text-white"
+                        >
+                          {fantasyData.contestCount} Contests
+                        </Button>
+                      </Link>
+                      <Link to={`/teams/create?match=${match.id}`}>
+                        <Button className="w-full bg-neon-green hover:bg-neon-green/90 text-gray-900 font-semibold">
+                          Create Team <ArrowRight className="ml-1 h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </>
+                  )}
+
+                  {isLive && (
+                    <>
+                      <Link to={`/matches/${match.id}`}>
+                        <Button
+                          variant="outline"
+                          className="w-full bg-gray-800/50 border-gray-700/50 hover:bg-gray-700/50 text-white"
+                        >
+                          My Contests
+                        </Button>
+                      </Link>
+                      <Link to={`/matches/${match.id}/live`}>
+                        <Button className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold">
+                          Live Score <Zap className="ml-1 h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* "Featured" tag for featured matches */}
+            {featured && (
+              <div className="absolute -top-1 -right-12 rotate-45 bg-neon-green px-10 py-1 text-xs font-bold text-black shadow-lg">
+                FEATURED
               </div>
             )}
           </div>
-        )}
-      </div>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
