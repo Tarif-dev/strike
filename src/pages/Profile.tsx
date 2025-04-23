@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate, Link, useNavigate } from "react-router-dom";
 import {
   Settings,
   LogOut,
@@ -140,6 +140,7 @@ const mockFantasyData = {
 
 const Profile = () => {
   const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = React.useState("Dashboard");
   const [fantasyData, setFantasyData] = useState(mockFantasyData);
 
@@ -175,6 +176,11 @@ const Profile = () => {
       </PageContainer>
     );
   }
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/", { replace: true }); // Redirect to landing page after logout
+  };
 
   return (
     <>
@@ -725,7 +731,7 @@ const Profile = () => {
                 <Button
                   variant="outline"
                   className="bg-transparent border-red-500 text-red-500 hover:bg-red-500/10"
-                  onClick={() => signOut()}
+                  onClick={handleSignOut}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
