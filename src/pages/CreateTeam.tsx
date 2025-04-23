@@ -15,6 +15,7 @@ import {
   ChevronUp,
   Plus,
   Minus,
+  Shield,
 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -31,7 +32,12 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 
 // Data
-import { players } from "@/data/mockData";
+import {
+  players,
+  matches,
+  countryFlags,
+  extendedPlayers,
+} from "@/data/mockData";
 
 // Team balance constraints
 const TEAM_CONSTRAINTS = {
@@ -50,7 +56,7 @@ const CreateTeam = () => {
 
   // States
   const [teamName, setTeamName] = useState("My Fantasy XI");
-  const [activeTab, setActiveTab] = useState("All Players");
+  const [activeTab, setActiveTab] = useState("Batsmen");
   const [selectedPlayers, setSelectedPlayers] = useState<PlayerData[]>([]);
   const [captain, setCaptain] = useState<PlayerData | null>(null);
   const [viceCaptain, setViceCaptain] = useState<PlayerData | null>(null);
@@ -61,6 +67,12 @@ const CreateTeam = () => {
   const [teamValidationError, setTeamValidationError] = useState<string | null>(
     null
   );
+
+  // States for dual team display
+  const [selectedMatch, setSelectedMatch] = useState(matches[0]);
+  const [homeTeamPlayers, setHomeTeamPlayers] = useState<PlayerData[]>([]);
+  const [awayTeamPlayers, setAwayTeamPlayers] = useState<PlayerData[]>([]);
+  const [activeTeamTab, setActiveTeamTab] = useState<"home" | "away">("home");
 
   // Derived states
   const currentPlayers = selectedPlayers.length;
@@ -113,6 +125,127 @@ const CreateTeam = () => {
     validateTeam();
   }, [selectedPlayers, captain, viceCaptain]);
 
+  // Initialize team players when match is selected
+  useEffect(() => {
+    // Get team-specific players from the extendedPlayers object
+    const homeTeam = selectedMatch.teams.home.name;
+    const awayTeam = selectedMatch.teams.away.name;
+
+    // Get team code for lookup (lowercased)
+    const homeCode = selectedMatch.teams.home.code.toLowerCase();
+    const awayCode = selectedMatch.teams.away.code.toLowerCase();
+
+    // Get players from extendedPlayers or fallback to generating players
+    const getTeamPlayers = (
+      teamCode: string,
+      teamName: string,
+      teamLogo: string
+    ) => {
+      // Try to get players from our predefined extendedPlayers
+      if (extendedPlayers[teamCode as keyof typeof extendedPlayers]) {
+        return extendedPlayers[teamCode as keyof typeof extendedPlayers];
+      }
+
+      // Fallback: Generate players if team not in extendedPlayers
+      const existingTeamPlayers = players
+        .filter((p) => p.team === teamName || p.team.includes(teamName))
+        .slice(0, 3);
+
+      // Create balanced team with proper distribution of players
+      const positions = ["Batsman", "Bowler", "All-rounder"];
+      const distributionNeeded = [
+        { position: "Batsman", count: 5 },
+        { position: "Bowler", count: 4 },
+        { position: "All-rounder", count: 2 },
+      ];
+
+      // Count existing players by position
+      const existingPositionCounts = {
+        Batsman: existingTeamPlayers.filter((p) => p.position === "Batsman")
+          .length,
+        Bowler: existingTeamPlayers.filter((p) => p.position === "Bowler")
+          .length,
+        "All-rounder": existingTeamPlayers.filter(
+          (p) => p.position === "All-rounder"
+        ).length,
+      };
+
+      // Generate players to fill the team with proper distribution
+      const dummyPlayers: PlayerData[] = [];
+
+      distributionNeeded.forEach(({ position, count }) => {
+        const existing =
+          existingPositionCounts[
+            position as keyof typeof existingPositionCounts
+          ];
+        const needed = count - existing;
+
+        for (let i = 0; i < needed; i++) {
+          const id = `${teamName.toLowerCase()}-${position
+            .toLowerCase()
+            .replace("-", "")}-${i}`;
+
+          dummyPlayers.push({
+            id,
+            name: `${teamName} ${position} ${i + 1}`,
+            team: teamName,
+            teamLogo: teamLogo,
+            position,
+            country: teamName.includes("India") ? "India" : "International",
+            countryFlag: countryFlags.india,
+            stats:
+              position === "Batsman"
+                ? {
+                    matches: Math.floor(Math.random() * 50) + 20,
+                    runs: Math.floor(Math.random() * 2000) + 500,
+                    average: Math.floor(Math.random() * 15) + 30,
+                    strikeRate: Math.floor(Math.random() * 20) + 130,
+                  }
+                : position === "Bowler"
+                ? {
+                    matches: Math.floor(Math.random() * 40) + 15,
+                    wickets: Math.floor(Math.random() * 80) + 20,
+                    economy: Math.random() * 2 + 7,
+                    average: Math.floor(Math.random() * 10) + 20,
+                  }
+                : {
+                    matches: Math.floor(Math.random() * 45) + 25,
+                    runs: Math.floor(Math.random() * 1000) + 300,
+                    wickets: Math.floor(Math.random() * 50) + 15,
+                    average: Math.floor(Math.random() * 10) + 25,
+                    economy: Math.random() * 1.5 + 7.5,
+                    strikeRate: Math.floor(Math.random() * 15) + 120,
+                  },
+            points:
+              Math.floor(Math.random() * 200) +
+              (position === "Batsman"
+                ? 600
+                : position === "Bowler"
+                ? 550
+                : 650),
+          });
+        }
+      });
+
+      return [...existingTeamPlayers, ...dummyPlayers];
+    };
+
+    // Get players for both teams using our helper function
+    const homeTeamFinal = getTeamPlayers(
+      homeCode,
+      homeTeam,
+      selectedMatch.teams.home.logo
+    );
+    const awayTeamFinal = getTeamPlayers(
+      awayCode,
+      awayTeam,
+      selectedMatch.teams.away.logo
+    );
+
+    setHomeTeamPlayers(homeTeamFinal);
+    setAwayTeamPlayers(awayTeamFinal);
+  }, [selectedMatch]);
+
   // Get players based on active tab and search query
   const getFilteredPlayers = () => {
     let filteredPlayers = [...players];
@@ -148,6 +281,56 @@ const CreateTeam = () => {
     return filteredPlayers;
   };
 
+  // Get team filtered players
+  const getTeamFilteredPlayers = () => {
+    // Get appropriate team players
+    let teamPlayers =
+      activeTeamTab === "home" ? [...homeTeamPlayers] : [...awayTeamPlayers];
+
+    // Filter by position tab
+    if (activeTab === "Batsmen") {
+      teamPlayers = teamPlayers.filter((p) => p.position === "Batsman");
+    } else if (activeTab === "Bowlers") {
+      teamPlayers = teamPlayers.filter((p) => p.position === "Bowler");
+    } else if (activeTab === "All-rounders") {
+      teamPlayers = teamPlayers.filter((p) => p.position === "All-rounder");
+    }
+
+    // Filter by search
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      teamPlayers = teamPlayers.filter(
+        (p) =>
+          p.name.toLowerCase().includes(query) ||
+          p.team.toLowerCase().includes(query)
+      );
+    }
+
+    // Sort players
+    if (sortBy === "points") {
+      teamPlayers.sort((a, b) => (b.points || 0) - (a.points || 0));
+    } else if (sortBy === "name") {
+      teamPlayers.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    return teamPlayers;
+  };
+
+  const homeTeamFilteredPlayers = homeTeamPlayers.filter((player) => {
+    if (activeTab === "Batsmen") return player.position === "Batsman";
+    if (activeTab === "Bowlers") return player.position === "Bowler";
+    if (activeTab === "All-rounders") return player.position === "All-rounder";
+    return true;
+  });
+
+  const awayTeamFilteredPlayers = awayTeamPlayers.filter((player) => {
+    if (activeTab === "Batsmen") return player.position === "Batsman";
+    if (activeTab === "Bowlers") return player.position === "Bowler";
+    if (activeTab === "All-rounders") return player.position === "All-rounder";
+    return true;
+  });
+
+  // Old filtered players method (keep for reference/compatibility)
   const filteredPlayers = getFilteredPlayers();
 
   // Check if adding a player would violate team constraints
@@ -391,6 +574,50 @@ const CreateTeam = () => {
         </div>
       </div>
 
+      {/* Match selection - Moved to top */}
+      <div className="mb-6 bg-gray-900/80 backdrop-blur-sm rounded-xl p-4">
+        <h2 className="font-semibold mb-3 text-lg">Match</h2>
+        <div className="flex flex-col md:flex-row items-center justify-between p-4 bg-gray-800/60 rounded-lg">
+          <div className="flex flex-col items-center mb-3 md:mb-0">
+            <img
+              src={selectedMatch.teams.home.logo}
+              alt={selectedMatch.teams.home.name}
+              className="w-16 h-16 mb-2"
+            />
+            <span className="font-medium text-lg">
+              {selectedMatch.teams.home.name}
+            </span>
+            <span className="text-sm text-gray-400">
+              {selectedMatch.teams.home.code}
+            </span>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <div className="text-neon-green font-bold mb-1">VS</div>
+            <div className="text-xs text-gray-400 mb-1">
+              {selectedMatch.venue}
+            </div>
+            <div className="text-xs bg-neon-green/20 text-neon-green px-2 py-1 rounded-full">
+              {selectedMatch.tournament.name}
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center mt-3 md:mt-0">
+            <img
+              src={selectedMatch.teams.away.logo}
+              alt={selectedMatch.teams.away.name}
+              className="w-16 h-16 mb-2"
+            />
+            <span className="font-medium text-lg">
+              {selectedMatch.teams.away.name}
+            </span>
+            <span className="text-sm text-gray-400">
+              {selectedMatch.teams.away.code}
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Team name and progress */}
       <div className="bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 mb-6">
         <div className="flex justify-between items-center mb-2">
@@ -623,7 +850,43 @@ const CreateTeam = () => {
         />
       </div>
 
-      {/* Player selection */}
+      {/* Team tabs for dual selection */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 border-b border-gray-800 pb-1">
+          <Button
+            variant={activeTeamTab === "home" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setActiveTeamTab("home")}
+            className={
+              activeTeamTab === "home" ? "bg-neon-green text-black" : ""
+            }
+          >
+            <img
+              src={selectedMatch.teams.home.logo}
+              alt={selectedMatch.teams.home.name}
+              className="w-5 h-5 mr-1"
+            />
+            {selectedMatch.teams.home.code}
+          </Button>
+          <Button
+            variant={activeTeamTab === "away" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setActiveTeamTab("away")}
+            className={
+              activeTeamTab === "away" ? "bg-neon-green text-black" : ""
+            }
+          >
+            <img
+              src={selectedMatch.teams.away.logo}
+              alt={selectedMatch.teams.away.name}
+              className="w-5 h-5 mr-1"
+            />
+            {selectedMatch.teams.away.code}
+          </Button>
+        </div>
+      </div>
+
+      {/* Player selection section */}
       <div className="mb-4">
         <div className="flex justify-between items-center mb-3">
           <h2 className="font-semibold">Select Players</h2>
@@ -639,107 +902,134 @@ const CreateTeam = () => {
           )}
         </div>
 
-        <div className="space-y-3">
-          {filteredPlayers.length === 0 ? (
-            <div className="bg-gray-900/80 rounded-xl p-6 text-center text-gray-400">
-              <Search className="w-8 h-8 mx-auto mb-2 opacity-70" />
-              <p>No players found</p>
-              <p className="text-sm mt-1">
-                Try a different search term or filter
-              </p>
+        {activeTeamTab === "home" ? (
+          /* Home Team Players */
+          <div className="bg-gray-900/80 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <img
+                src={selectedMatch.teams.home.logo}
+                alt={selectedMatch.teams.home.name}
+                className="w-6 h-6"
+              />
+              <h3 className="font-medium">{selectedMatch.teams.home.name}</h3>
+              <Badge variant="outline" className="ml-auto">
+                11 Players
+              </Badge>
             </div>
-          ) : (
-            filteredPlayers.map((player) => {
-              const isSelected = selectedPlayers.some(
-                (p) => p.id === player.id
-              );
-              const isCaptain = captain?.id === player.id;
-              const isViceCaptain = viceCaptain?.id === player.id;
-              const constraintError = !isSelected
-                ? wouldViolateTeamConstraints(player)
-                : null;
 
-              return (
-                <div
-                  key={player.id}
-                  className={`bg-gray-900/80 rounded-xl p-3 transition-all ${
-                    isSelected
-                      ? "border border-neon-green/50"
-                      : constraintError
-                      ? "opacity-50"
-                      : "border border-transparent hover:border-gray-700"
-                  }`}
-                >
-                  <div className="flex items-center">
-                    {/* Player image and info */}
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="relative">
-                        {player.image ? (
-                          <img
-                            src={player.image}
-                            alt={player.name}
-                            className="w-12 h-12 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center">
-                            <User className="w-6 h-6 text-gray-500" />
+            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+              {homeTeamFilteredPlayers.length === 0 ? (
+                <div className="p-4 text-center text-gray-400">
+                  <p>No players match the filter</p>
+                </div>
+              ) : (
+                homeTeamFilteredPlayers.map((player) => {
+                  const isSelected = selectedPlayers.some(
+                    (p) => p.id === player.id
+                  );
+                  const isCaptain = captain?.id === player.id;
+                  const isViceCaptain = viceCaptain?.id === player.id;
+                  const constraintError = !isSelected
+                    ? wouldViolateTeamConstraints(player)
+                    : null;
+
+                  return (
+                    <div
+                      key={player.id}
+                      className={`bg-gray-800/60 rounded-lg p-2 transition-all ${
+                        isSelected
+                          ? "border border-neon-green/50"
+                          : constraintError
+                          ? "opacity-50"
+                          : "border border-transparent hover:border-gray-700"
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <div className="flex items-center gap-2 flex-1">
+                          <div className="relative">
+                            {player.image ? (
+                              <img
+                                src={player.image}
+                                alt={player.name}
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+                                <User className="w-5 h-5 text-gray-400" />
+                              </div>
+                            )}
+                            {isCaptain && (
+                              <div className="absolute -top-1 -right-1 bg-neon-green text-black rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">
+                                C
+                              </div>
+                            )}
+                            {isViceCaptain && (
+                              <div className="absolute -top-1 -right-1 bg-amber-400 text-black rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">
+                                VC
+                              </div>
+                            )}
                           </div>
-                        )}
-                        {isCaptain && (
-                          <div className="absolute -top-1 -right-1 bg-neon-green text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
-                            C
+
+                          <div className="overflow-hidden">
+                            <div className="font-medium text-sm truncate">
+                              {player.name}
+                            </div>
+                            <div className="text-xs text-gray-400 flex items-center gap-1">
+                              <span className="truncate">
+                                {player.position}
+                              </span>
+                              <span className="text-gray-600">•</span>
+                              <span className="text-xs text-neon-green">
+                                {((player.points || 0) / 100).toFixed(1)} Cr
+                              </span>
+                            </div>
                           </div>
-                        )}
-                        {isViceCaptain && (
-                          <div className="absolute -top-1 -right-1 bg-amber-400 text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
-                            VC
-                          </div>
-                        )}
+                        </div>
+
+                        <div className="flex ml-1">
+                          {isSelected ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 w-7 p-0 rounded-full text-red-400 border-red-400/30 hover:bg-red-500/10"
+                              onClick={() => handlePlayerSelection(player)}
+                            >
+                              <Minus className="w-4 h-4" />
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={`h-7 w-7 p-0 rounded-full ${
+                                constraintError
+                                  ? "text-gray-500 border-gray-700"
+                                  : "text-neon-green border-neon-green/30"
+                              }`}
+                              onClick={() =>
+                                !constraintError &&
+                                handlePlayerSelection(player)
+                              }
+                              disabled={!!constraintError}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
 
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold">{player.name}</h3>
-                          <img
-                            src={player.countryFlag}
-                            alt={player.country}
-                            className="w-4 h-3"
-                          />
-                        </div>
-                        <div className="text-sm text-gray-400 flex items-center gap-2">
-                          <img
-                            src={player.teamLogo}
-                            alt={player.team}
-                            className="w-4 h-4"
-                          />
-                          <span>{player.position}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Credit points */}
-                    <div className="px-3 py-1 rounded-full bg-gray-800/80 mx-2">
-                      <span className="text-sm font-medium text-neon-green">
-                        {((player.points || 0) / 100).toFixed(1)} Cr
-                      </span>
-                    </div>
-
-                    {/* Selection and captain buttons */}
-                    <div className="flex gap-1">
-                      {isSelected ? (
-                        <>
+                      {isSelected && (
+                        <div className="flex gap-1 mt-2 justify-end">
                           <Button
                             variant="ghost"
                             size="sm"
                             className={`rounded-full ${
                               isCaptain
                                 ? "bg-neon-green text-black"
-                                : "bg-gray-800 text-gray-300"
-                            } px-2 min-w-8 h-8`}
+                                : "bg-gray-700 text-gray-300"
+                            } px-2 h-6 text-xs`}
                             onClick={() => handleCaptainSelection(player)}
-                            title="Captain"
                           >
-                            C
+                            Captain
                           </Button>
                           <Button
                             variant="ghost"
@@ -747,79 +1037,184 @@ const CreateTeam = () => {
                             className={`rounded-full ${
                               isViceCaptain
                                 ? "bg-amber-400 text-black"
-                                : "bg-gray-800 text-gray-300"
-                            } px-2 min-w-8 h-8`}
+                                : "bg-gray-700 text-gray-300"
+                            } px-2 h-6 text-xs`}
                             onClick={() => handleViceCaptainSelection(player)}
-                            title="Vice Captain"
                           >
-                            VC
+                            Vice Captain
+                          </Button>
+                        </div>
+                      )}
+
+                      {constraintError && (
+                        <div className="mt-1 text-xs text-amber-400 flex items-center">
+                          <AlertTriangle className="w-3 h-3 mr-1" />
+                          <span className="truncate">{constraintError}</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        ) : (
+          /* Away Team Players */
+          <div className="bg-gray-900/80 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <img
+                src={selectedMatch.teams.away.logo}
+                alt={selectedMatch.teams.away.name}
+                className="w-6 h-6"
+              />
+              <h3 className="font-medium">{selectedMatch.teams.away.name}</h3>
+              <Badge variant="outline" className="ml-auto">
+                11 Players
+              </Badge>
+            </div>
+
+            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+              {awayTeamFilteredPlayers.length === 0 ? (
+                <div className="p-4 text-center text-gray-400">
+                  <p>No players match the filter</p>
+                </div>
+              ) : (
+                awayTeamFilteredPlayers.map((player) => {
+                  const isSelected = selectedPlayers.some(
+                    (p) => p.id === player.id
+                  );
+                  const isCaptain = captain?.id === player.id;
+                  const isViceCaptain = viceCaptain?.id === player.id;
+                  const constraintError = !isSelected
+                    ? wouldViolateTeamConstraints(player)
+                    : null;
+
+                  return (
+                    <div
+                      key={player.id}
+                      className={`bg-gray-800/60 rounded-lg p-2 transition-all ${
+                        isSelected
+                          ? "border border-neon-green/50"
+                          : constraintError
+                          ? "opacity-50"
+                          : "border border-transparent hover:border-gray-700"
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <div className="flex items-center gap-2 flex-1">
+                          <div className="relative">
+                            {player.image ? (
+                              <img
+                                src={player.image}
+                                alt={player.name}
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+                                <User className="w-5 h-5 text-gray-400" />
+                              </div>
+                            )}
+                            {isCaptain && (
+                              <div className="absolute -top-1 -right-1 bg-neon-green text-black rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">
+                                C
+                              </div>
+                            )}
+                            {isViceCaptain && (
+                              <div className="absolute -top-1 -right-1 bg-amber-400 text-black rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">
+                                VC
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="overflow-hidden">
+                            <div className="font-medium text-sm truncate">
+                              {player.name}
+                            </div>
+                            <div className="text-xs text-gray-400 flex items-center gap-1">
+                              <span className="truncate">
+                                {player.position}
+                              </span>
+                              <span className="text-gray-600">•</span>
+                              <span className="text-xs text-neon-green">
+                                {((player.points || 0) / 100).toFixed(1)} Cr
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex ml-1">
+                          {isSelected ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 w-7 p-0 rounded-full text-red-400 border-red-400/30 hover:bg-red-500/10"
+                              onClick={() => handlePlayerSelection(player)}
+                            >
+                              <Minus className="w-4 h-4" />
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={`h-7 w-7 p-0 rounded-full ${
+                                constraintError
+                                  ? "text-gray-500 border-gray-700"
+                                  : "text-neon-green border-neon-green/30"
+                              }`}
+                              onClick={() =>
+                                !constraintError &&
+                                handlePlayerSelection(player)
+                              }
+                              disabled={!!constraintError}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      {isSelected && (
+                        <div className="flex gap-1 mt-2 justify-end">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={`rounded-full ${
+                              isCaptain
+                                ? "bg-neon-green text-black"
+                                : "bg-gray-700 text-gray-300"
+                            } px-2 h-6 text-xs`}
+                            onClick={() => handleCaptainSelection(player)}
+                          >
+                            Captain
                           </Button>
                           <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
-                            className="rounded-full text-red-400 border-red-400/30 hover:bg-red-500/10"
-                            onClick={() => handlePlayerSelection(player)}
-                            title="Remove Player"
+                            className={`rounded-full ${
+                              isViceCaptain
+                                ? "bg-amber-400 text-black"
+                                : "bg-gray-700 text-gray-300"
+                            } px-2 h-6 text-xs`}
+                            onClick={() => handleViceCaptainSelection(player)}
                           >
-                            <Minus className="w-4 h-4" />
+                            Vice Captain
                           </Button>
-                        </>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={`rounded-full ${
-                            constraintError
-                              ? "text-gray-500 border-gray-700"
-                              : "text-neon-green border-neon-green/30 hover:bg-neon-green/10"
-                          }`}
-                          onClick={() =>
-                            !constraintError && handlePlayerSelection(player)
-                          }
-                          disabled={!!constraintError}
-                          title={constraintError || "Add Player"}
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
+                        </div>
                       )}
-                    </div>
-                  </div>
 
-                  {/* Player stats (expandable) */}
-                  <div className="mt-2 pl-15">
-                    <div className="grid grid-cols-3 gap-x-4 gap-y-1 text-xs">
-                      {player.stats.matches !== undefined && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Matches</span>
-                          <span>{player.stats.matches}</span>
-                        </div>
-                      )}
-                      {player.stats.runs !== undefined && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Runs</span>
-                          <span>{player.stats.runs}</span>
-                        </div>
-                      )}
-                      {player.stats.wickets !== undefined && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Wickets</span>
-                          <span>{player.stats.wickets}</span>
+                      {constraintError && (
+                        <div className="mt-1 text-xs text-amber-400 flex items-center">
+                          <AlertTriangle className="w-3 h-3 mr-1" />
+                          <span className="truncate">{constraintError}</span>
                         </div>
                       )}
                     </div>
-                  </div>
-
-                  {constraintError && (
-                    <div className="mt-2 text-xs text-amber-400 flex items-center">
-                      <AlertTriangle className="w-3 h-3 mr-1" />
-                      <span>{constraintError}</span>
-                    </div>
-                  )}
-                </div>
-              );
-            })
-          )}
-        </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Team validation errors */}
