@@ -16,6 +16,7 @@ import {
   Plus,
   Lock,
   Bell,
+  Loader2,
 } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Navbar from "@/components/layout/Navbar";
@@ -33,9 +34,65 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
+
+// Define types for our teams
+type DatabaseTeam = Database["public"]["Tables"]["teams"]["Row"];
+
+// Define interface that works with both database teams and mock fantasy data
+interface TeamWithDetails extends Omit<DatabaseTeam, "id"> {
+  id: string | number;
+  name?: string;
+  points?: number;
+  rank?: number;
+  nextMatch?: string;
+  contestName?: string;
+}
+
+// Define types for mock data
+interface FantasyData {
+  balance: number;
+  totalPoints: number;
+  rank: number;
+  contests: {
+    upcoming: number;
+    live: number;
+    completed: number;
+    totalWinnings: number;
+  };
+  teams: {
+    id: string | number;
+    name: string;
+    points: number;
+    rank: number;
+    nextMatch: string;
+    contestName: string;
+  }[];
+  recentResults: {
+    contestId: number;
+    contestName: string;
+    teamName: string;
+    rank: number;
+    points: number;
+    winnings: number;
+    date: string;
+  }[];
+  achievements: {
+    id: number;
+    name: string;
+    description: string;
+    achieved: boolean;
+    date?: string;
+    progress?: number;
+  }[];
+  favoriteTeams: string[];
+  favoritePlayers: string[];
+}
 
 // Mock data - In a real app, this would come from an API
-const mockFantasyData = {
+const mockFantasyData: FantasyData = {
   balance: 5000,
   totalPoints: 7845,
   rank: 1245,
@@ -143,6 +200,95 @@ const Profile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = React.useState("Dashboard");
   const [fantasyData, setFantasyData] = useState(mockFantasyData);
+
+  // Add state for teams
+  const [teams, setTeams] = useState<TeamWithDetails[]>([]);
+  const [isLoadingTeams, setIsLoadingTeams] = useState(false);
+  const [teamsError, setTeamsError] = useState<string | null>(null);
+
+  // Fetch teams when user loads
+  useEffect(() => {
+    if (user) {
+      fetchUserTeams();
+    }
+  }, [user]);
+
+  // Fetch user's teams from Supabase
+  const fetchUserTeams = async () => {
+    if (!user) return;
+
+    setIsLoadingTeams(true);
+    setTeamsError(null);
+
+    try {
+      const { data, error } = await supabase
+        .from("teams")
+        .select("*")
+        // The RLS policy will ensure only the current user's teams are returned
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching teams:", error);
+        setTeamsError("Failed to load teams. Please try again later.");
+        toast({
+          title: "Error",
+          description: "Failed to load your teams",
+          variant: "destructive",
+        });
+      } else {
+        // Add additional details to each team
+        const teamsWithDetails = data.map((team) => {
+          const matchDetails = team.match_details as any;
+          return {
+            ...team,
+            // Use team_name for display
+            name: team.team_name,
+            // Format match display name from match_details if available
+            nextMatch:
+              matchDetails?.matchName ||
+              (matchDetails?.teams
+                ? `${matchDetails.teams.home?.name || "TBD"} vs ${
+                    matchDetails.teams.away?.name || "TBD"
+                  }`
+                : "Unknown Match"),
+            // Use match tournament name or default to "Fantasy Contest"
+            contestName: matchDetails?.tournament?.name || "Fantasy Contest",
+            // Default rank and points if not available
+            rank: Math.floor(Math.random() * 200) + 1, // Mock rank for now
+            points: team.total_points || 0,
+          };
+        });
+
+        setTeams(teamsWithDetails);
+
+        // Also update the teams in fantasyData for dashboard display
+        // Convert to the format expected by fantasyData
+        const compatibleTeams = teamsWithDetails.map((team) => ({
+          id: team.id,
+          name: team.team_name || team.name || "Unnamed Team",
+          points: team.points || Number(team.total_points) || 0,
+          rank: team.rank || 100,
+          nextMatch: team.nextMatch || "No upcoming match",
+          contestName: team.contestName || "Fantasy Contest",
+        }));
+
+        setFantasyData((prev) => ({
+          ...prev,
+          teams: compatibleTeams,
+        }));
+      }
+    } catch (err) {
+      console.error("Unexpected error fetching teams:", err);
+      setTeamsError("An unexpected error occurred. Please try again later.");
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingTeams(false);
+    }
+  };
 
   // If not authenticated, redirect to the landing page
   if (!loading && !user) {
@@ -387,7 +533,7 @@ const Profile = () => {
                           Points:{" "}
                           <span className="font-bold">{team.points}</span>
                         </p>
-                        <Link to={`/team/${team.id}`}>
+                        <Link to={`/teams/${team.id}`}>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -408,53 +554,102 @@ const Profile = () => {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold">Your Fantasy Teams</h2>
-                <Link to="/create-team">
+                <Link to="/teams/create">
                   <Button className="bg-neon-green text-gray-900 hover:bg-neon-green/90">
                     Create New Team
                   </Button>
                 </Link>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {fantasyData.teams.map((team) => (
-                  <Card
-                    key={team.id}
-                    className="bg-gray-900/60 border-gray-800 hover:border-neon-green/20 transition-all"
+              {isLoadingTeams ? (
+                <div className="flex justify-center items-center py-12">
+                  <div className="flex flex-col items-center">
+                    <Loader2 className="h-10 w-10 text-neon-green animate-spin mb-4" />
+                    <p className="text-gray-400">Loading your teams...</p>
+                  </div>
+                </div>
+              ) : teamsError ? (
+                <div className="bg-gray-900/60 border border-red-800/30 rounded-lg p-6 text-center">
+                  <p className="text-red-400 mb-2">{teamsError}</p>
+                  <Button
+                    variant="outline"
+                    onClick={fetchUserTeams}
+                    className="mt-2"
                   >
-                    <CardHeader className="pb-2 border-b border-gray-800">
-                      <div className="flex justify-between items-center">
-                        <CardTitle>{team.name}</CardTitle>
-                        <Badge className="bg-neon-green/20 text-neon-green border-neon-green/30">
-                          Rank #{team.rank}
-                        </Badge>
-                      </div>
-                      <CardDescription>{team.nextMatch}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-4">
-                      <div className="flex justify-between items-center mb-4">
-                        <p className="text-sm text-gray-400">Contest</p>
-                        <p className="font-medium">{team.contestName}</p>
-                      </div>
-                      <div className="flex justify-between items-center mb-4">
-                        <p className="text-sm text-gray-400">Points</p>
-                        <p className="font-medium">{team.points}</p>
-                      </div>
-                      <div className="flex gap-2 mt-4">
-                        <Link to={`/team/${team.id}`} className="flex-1">
-                          <Button variant="outline" className="w-full">
-                            View Team
-                          </Button>
-                        </Link>
-                        <Link to={`/team/${team.id}/edit`} className="flex-1">
-                          <Button className="w-full bg-neon-green text-gray-900 hover:bg-neon-green/90">
-                            Edit Team
-                          </Button>
-                        </Link>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                    Try Again
+                  </Button>
+                </div>
+              ) : teams.length === 0 ? (
+                <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-10 text-center">
+                  <div className="h-16 w-16 bg-gray-800/80 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-medium mb-2">
+                    No Teams Created Yet
+                  </h3>
+                  <p className="text-gray-400 mb-6 max-w-md mx-auto">
+                    You haven't created any fantasy teams yet. Create a team to
+                    participate in contests and win prizes!
+                  </p>
+                  <Link to="/teams/create">
+                    <Button className="bg-neon-green text-gray-900 hover:bg-neon-green/90">
+                      <Plus className="h-4 w-4 mr-2" /> Create Your First Team
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {teams.map((team) => (
+                    <Card
+                      key={team.id}
+                      className="bg-gray-900/60 border-gray-800 hover:border-neon-green/20 transition-all"
+                    >
+                      <CardHeader className="pb-2 border-b border-gray-800">
+                        <div className="flex justify-between items-center">
+                          <CardTitle>{team.team_name || team.name}</CardTitle>
+                          <Badge className="bg-neon-green/20 text-neon-green border-neon-green/30">
+                            Rank #{team.rank || "—"}
+                          </Badge>
+                        </div>
+                        <CardDescription>{team.nextMatch}</CardDescription>
+                      </CardHeader>
+                      <CardContent className="pt-4">
+                        <div className="flex justify-between items-center mb-4">
+                          <p className="text-sm text-gray-400">Contest</p>
+                          <p className="font-medium">{team.contestName}</p>
+                        </div>
+                        <div className="flex justify-between items-center mb-4">
+                          <p className="text-sm text-gray-400">Points</p>
+                          <p className="font-medium">
+                            {team.points || team.total_points || 0}
+                          </p>
+                        </div>
+                        <div className="flex justify-between items-center mb-4">
+                          <p className="text-sm text-gray-400">Created</p>
+                          <p className="text-sm">
+                            {new Date(team.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex gap-2 mt-4">
+                          <Link to={`/teams/${team.id}`} className="flex-1">
+                            <Button variant="outline" className="w-full">
+                              View Team
+                            </Button>
+                          </Link>
+                          <Link
+                            to={`/teams/${team.id}/edit`}
+                            className="flex-1"
+                          >
+                            <Button className="w-full bg-neon-green text-gray-900 hover:bg-neon-green/90">
+                              Edit Team
+                            </Button>
+                          </Link>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

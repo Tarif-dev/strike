@@ -16,10 +16,13 @@ import {
   Plus,
   Minus,
   Shield,
+  Loader2,
 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 // Components
 import PageContainer from "@/components/layout/PageContainer";
@@ -48,11 +51,40 @@ const TEAM_CONSTRAINTS = {
   MAX_FROM_TEAM: 7,
 };
 
+// Create teams table function
+const createTeamsTable = async () => {
+  try {
+    // Check if table exists using a direct query instead of _database
+    const { data, error } = await supabase.from("teams").select("id").limit(1);
+
+    if (error && error.code === "42P01") {
+      // Table doesn't exist error code
+      console.log("Table doesn't exist, proceeding with creation");
+
+      // Create the teams table via raw SQL query using RPC
+      try {
+        // We'll skip this approach as it requires additional setup
+        console.log(
+          "Teams table needs to be created manually through Supabase dashboard"
+        );
+      } catch (createError) {
+        console.error("Error creating teams table:", createError);
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error with teams table check:", error);
+    return false;
+  }
+};
+
 const CreateTeam = () => {
   // Hooks
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // States
   const [teamName, setTeamName] = useState("My Fantasy XI");
@@ -67,6 +99,7 @@ const CreateTeam = () => {
   const [teamValidationError, setTeamValidationError] = useState<string | null>(
     null
   );
+  const [isSaving, setIsSaving] = useState(false);
 
   // States for dual team display
   const [selectedMatch, setSelectedMatch] = useState(matches[0]);
@@ -486,7 +519,7 @@ const CreateTeam = () => {
   };
 
   // Handle team creation
-  const handleCreateTeam = () => {
+  const handleCreateTeam = async () => {
     // Validate team name
     if (!teamName.trim()) {
       toast({
@@ -507,17 +540,125 @@ const CreateTeam = () => {
       return;
     }
 
-    // In a real app, we would submit this to an API
-    toast({
-      title: "Team Created Successfully!",
-      description: `Your team "${teamName}" is ready`,
-      variant: "default",
-    });
+    // Verify user authentication
+    if (!user || !user.id) {
+      toast({
+        title: "Authentication Error",
+        description: "You must be logged in to create a team",
+        variant: "destructive",
+      });
+      navigate("/auth/login", { state: { from: location.pathname } });
+      return;
+    }
 
-    // Navigate to home or matches page
-    setTimeout(() => {
-      navigate("/matches");
-    }, 1500);
+    try {
+      // Start saving process
+      setIsSaving(true);
+
+      console.log("Creating team with user:", user.id);
+
+      // Create match details object - keep only necessary data
+      const matchDetails = {
+        match_id: selectedMatch.id,
+        tournament: selectedMatch.tournament.name,
+        venue: selectedMatch.venue,
+        date: selectedMatch.startTime,
+        teams: {
+          home: {
+            name: selectedMatch.teams.home.name,
+            code: selectedMatch.teams.home.code,
+            logo: selectedMatch.teams.home.logo,
+          },
+          away: {
+            name: selectedMatch.teams.away.name,
+            code: selectedMatch.teams.away.code,
+            logo: selectedMatch.teams.away.logo,
+          },
+        },
+      };
+
+      // Create sanitized player objects (remove circular references)
+      const sanitizedPlayers = selectedPlayers.map((player) => ({
+        id: player.id,
+        name: player.name,
+        position: player.position,
+        team: player.team,
+        teamLogo: player.teamLogo || null,
+        image: player.image || null,
+        points: player.points || 0,
+        country: player.country || null,
+      }));
+
+      // Create team object to store in database
+      const teamData = {
+        user_id: user.id,
+        team_name: teamName,
+        match_id: selectedMatch.id,
+        players: sanitizedPlayers,
+        captain_id: captain?.id || "",
+        vice_captain_id: viceCaptain?.id || "",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        total_points: 0,
+        match_details: matchDetails,
+      };
+
+      console.log("Saving team data to Supabase");
+
+      // Need to make sure the current user has RLS permissions
+      // First, request the current user's auth status to ensure tokens are fresh
+      const { data: authData } = await supabase.auth.getUser();
+
+      if (!authData?.user) {
+        throw new Error("Authentication required. Please log in again.");
+      }
+
+      // Save team to Supabase
+      const { data, error } = await supabase
+        .from("teams")
+        .insert(teamData)
+        .select();
+
+      console.log("Supabase response:", { data, error });
+
+      // Handle completion
+      setIsSaving(false);
+
+      if (error) {
+        console.error("Supabase error details:", error);
+
+        // Special handling for RLS policy violations
+        if (error.code === "42501" || error.message?.includes("policy")) {
+          throw new Error(
+            `Row-level security policy violation. Make sure you have proper permission to create teams.`
+          );
+        }
+
+        throw new Error(`Database error: ${error.message || error.code}`);
+      }
+
+      // Show success notification
+      toast({
+        title: "Team Created Successfully!",
+        description: `Your team "${teamName}" is ready`,
+        variant: "default",
+      });
+
+      // Navigate to matches page
+      setTimeout(() => {
+        navigate("/matches");
+      }, 1500);
+    } catch (error) {
+      setIsSaving(false);
+      console.error("Error creating team:", error);
+
+      toast({
+        title: "Failed to Create Team",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+    }
   };
 
   // Clear all selections
@@ -1238,9 +1379,16 @@ const CreateTeam = () => {
           <Button
             onClick={handleCreateTeam}
             className="bg-neon-green hover:bg-neon-green/90 text-gray-900 font-semibold px-6"
-            disabled={selectedPlayers.length === 0}
+            disabled={selectedPlayers.length === 0 || isSaving}
           >
-            Create Team
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Create Team"
+            )}
           </Button>
         </div>
       </div>
