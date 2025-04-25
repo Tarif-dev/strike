@@ -1,167 +1,1215 @@
+import { useParams, Link } from "react-router-dom";
+import {
+  ArrowLeft,
+  Trophy,
+  User,
+  Loader2,
+  Calendar,
+  MapPin,
+  Edit,
+  Shield,
+  Star,
+  Share2,
+  BarChart3,
+  Users,
+  Clock,
+} from "lucide-react";
+import PageContainer from "@/components/layout/PageContainer";
+import { useState, useEffect } from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
+import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { players } from "@/data/mockData";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Edit, Trophy } from 'lucide-react';
-import PageContainer from '@/components/layout/PageContainer';
-import PlayerCard from '@/components/cricket/PlayerCard';
-import { teams, players } from '@/data/mockData';
-import { useState } from 'react';
-import { Tabs } from '@/components/ui/tab';
+// Define team type from Supabase
+type DatabaseTeam = Database["public"]["Tables"]["teams"]["Row"];
+
+interface TeamDetail extends DatabaseTeam {
+  playerDetails?: any[]; // Explicitly define playerDetails as an array
+}
+
+// Define player positions for styled display
+const positionColors = {
+  Batsman: {
+    bg: "bg-blue-500/20",
+    text: "text-blue-500",
+    border: "border-blue-500/30",
+  },
+  Bowler: {
+    bg: "bg-purple-500/20",
+    text: "text-purple-500",
+    border: "border-purple-500/30",
+  },
+  "All-rounder": {
+    bg: "bg-amber-500/20",
+    text: "text-amber-500",
+    border: "border-amber-500/30",
+  },
+  "Wicket-keeper": {
+    bg: "bg-green-500/20",
+    text: "text-green-500",
+    border: "border-green-500/30",
+  },
+};
 
 const TeamDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const [activeTab, setActiveTab] = useState("Players");
-  
-  // Find team by ID
-  const team = teams.find(t => t.id === id);
-  
-  // For the demo, we'll just take some random players from our mock data
-  const teamPlayers = players.slice(0, 11);
-  
-  if (!team) {
+  const [activeTab, setActiveTab] = useState("players");
+  const [team, setTeam] = useState<TeamDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+
+  // Fetch team data from Supabase
+  useEffect(() => {
+    if (id) {
+      fetchTeamData();
+    }
+  }, [id]);
+
+  const fetchTeamData = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error } = await supabase
+        .from("teams")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching team:", error);
+        setError("Failed to load team data.");
+        toast({
+          title: "Error",
+          description: "Failed to load team data",
+          variant: "destructive",
+        });
+      } else if (data) {
+        // Process players data
+        const playersList = data.players as any[];
+
+        // Add mock player data to enhance the UI
+        const teamPlayers = playersList.map((playerData) => {
+          // Try to find the player in mock data
+          const mockPlayer = players.find((p) => p.id === playerData.id) || {
+            id: playerData.id,
+            name: playerData.name || "Unknown Player",
+            position: playerData.position || "Unknown",
+            image: playerData.image || undefined,
+            points: playerData.points || 0,
+            team: playerData.team || "Unknown Team",
+            stats: {
+              matches: Math.floor(Math.random() * 50) + 10,
+              runs: Math.floor(Math.random() * 1000) + 100,
+              wickets: Math.floor(Math.random() * 30),
+              average: (Math.random() * 40 + 10).toFixed(2),
+              strikeRate: (Math.random() * 100 + 50).toFixed(2),
+              economy: (Math.random() * 8 + 4).toFixed(2),
+            },
+          };
+
+          return mockPlayer;
+        });
+
+        setTeam({ ...data, playerDetails: teamPlayers });
+      } else {
+        setError("Team not found.");
+      }
+    } catch (err) {
+      console.error("Unexpected error fetching team:", err);
+      setError("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getPlayerPositionStyle = (position: string) => {
+    return (
+      positionColors[position as keyof typeof positionColors] || {
+        bg: "bg-gray-500/20",
+        text: "text-gray-500",
+        border: "border-gray-500/30",
+      }
+    );
+  };
+
+  // Format match date
+  const formatMatchDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    } catch (e) {
+      return "Unknown date";
+    }
+  };
+
+  // Show loading state
+  if (loading) {
     return (
       <PageContainer>
-        <div className="text-center py-10">
-          <h2 className="text-xl font-bold mb-2">Team Not Found</h2>
-          <Link to="/" className="text-cricket-lime">Back to Home</Link>
+        <div className="h-screen flex flex-col items-center justify-center">
+          <div className="w-16 h-16 relative mb-8">
+            <div className="absolute inset-0 rounded-full border-4 border-neon-green/30 animate-ping"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader2 className="w-10 h-10 text-neon-green animate-spin" />
+            </div>
+          </div>
+          <p className="text-xl font-semibold text-white">
+            Loading team details...
+          </p>
+          <p className="text-sm text-gray-400 mt-2">
+            Please wait while we fetch your team information
+          </p>
         </div>
       </PageContainer>
     );
   }
-  
+
+  // Show error state
+  if (error || !team) {
+    return (
+      <PageContainer>
+        <div className="flex justify-between items-center py-4">
+          <Link
+            to="/profile"
+            className="flex items-center gap-1 text-neon-green"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Profile</span>
+          </Link>
+        </div>
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center mb-6">
+            <Shield className="h-10 w-10 text-red-500" />
+          </div>
+          <h2 className="text-2xl font-bold mb-2">Team Not Found</h2>
+          <p className="text-gray-400 mb-8 max-w-md text-center">
+            {error ||
+              "We couldn't find the team you're looking for. It may have been deleted or you might not have permission to view it."}
+          </p>
+          <Link to="/profile">
+            <Button className="bg-neon-green hover:bg-neon-green/90 text-black">
+              Back to Profile
+            </Button>
+          </Link>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  // Parse match details
+  const matchDetails = team.match_details as any;
+  const homeTeam = matchDetails?.teams?.home;
+  const awayTeam = matchDetails?.teams?.away;
+  const matchDate = matchDetails?.date || team.created_at;
+
+  // Find captain and vice-captain
+  const captain = team.playerDetails?.find((p) => p.id === team.captain_id);
+  const viceCaptain = team.playerDetails?.find(
+    (p) => p.id === team.vice_captain_id
+  );
+
+  // Organize players by position
+  const batsmen =
+    team.playerDetails?.filter((p) => p.position === "Batsman") || [];
+  const bowlers =
+    team.playerDetails?.filter((p) => p.position === "Bowler") || [];
+  const allRounders =
+    team.playerDetails?.filter((p) => p.position === "All-rounder") || [];
+  const wicketKeepers =
+    team.playerDetails?.filter((p) => p.position === "Wicket-keeper") || [];
+
   return (
-    <PageContainer className="pb-6">
-      <div className="flex justify-between items-center py-4">
-        <Link to="/" className="flex items-center gap-1 text-cricket-lime">
-          <ArrowLeft className="w-5 h-5" />
-          <span>Back</span>
-        </Link>
-        
-        <Link 
-          to={`/teams/edit/${team.id}`}
-          className="flex items-center gap-1 px-3 py-1.5 bg-cricket-lime text-cricket-dark-green rounded-lg text-sm font-medium"
-        >
-          <Edit className="w-4 h-4" />
-          <span>Edit Team</span>
-        </Link>
-      </div>
-      
-      <div className="lime-card mb-6">
-        <div>
-          <h1 className="font-bold text-2xl">{team.name}</h1>
-          <div className="flex items-center mt-2 justify-between">
-            <div className="flex items-center gap-1">
-              <Trophy className="w-4 h-4" />
-              <span className="text-sm font-medium">Rank #{team.rank}</span>
+    <PageContainer className="pb-24">
+      {/* Header with gradient background */}
+      <div className="relative bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-xl overflow-hidden mb-6">
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10"></div>
+
+        {/* Glowing accent */}
+        <div className="absolute h-px top-0 left-5 right-5 bg-gradient-to-r from-transparent via-neon-green to-transparent"></div>
+
+        <div className="relative p-6">
+          {/* Back button and actions */}
+          <div className="flex justify-between items-center mb-6">
+            <Link
+              to="/profile"
+              className="flex items-center gap-1 text-neon-green hover:text-neon-green/80 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Back</span>
+            </Link>
+
+            <div className="flex items-center gap-2">
+              {team.user_id === user?.id && (
+                <Link to={`/teams/${team.id}/edit`}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-neon-green border-neon-green/30 hover:bg-neon-green/10"
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit Team
+                  </Button>
+                </Link>
+              )}
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-gray-400 hover:text-white"
+              >
+                <Share2 className="h-5 w-5" />
+              </Button>
             </div>
-            <span className="text-sm font-bold">{team.points} points</span>
           </div>
+
+          {/* Team name and match info */}
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-neon-green">
+              {team.team_name}
+            </h1>
+
+            <div className="flex flex-wrap items-center gap-3 mt-2 text-sm">
+              <Badge
+                variant="outline"
+                className="bg-neon-green/10 text-neon-green border-neon-green/30"
+              >
+                {team.total_points || 0} pts
+              </Badge>
+
+              <div className="flex items-center text-gray-400">
+                <Calendar className="h-3.5 w-3.5 mr-1" />
+                <span>{formatMatchDate(team.created_at)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Match details */}
+          {matchDetails && (
+            <div className="mt-6 bg-gray-900/60 backdrop-blur-sm rounded-lg p-4 border border-gray-800">
+              <p className="text-xs text-neon-green mb-2">MATCH DETAILS</p>
+
+              <div className="flex items-center justify-between">
+                <div className="flex-1 text-center">
+                  <div className="h-16 w-16 mx-auto bg-gray-800 rounded-full flex items-center justify-center border border-gray-700">
+                    {homeTeam?.logo ? (
+                      <img
+                        src={homeTeam.logo}
+                        alt={homeTeam.name}
+                        className="h-10 w-10"
+                      />
+                    ) : (
+                      <Shield className="h-8 w-8 text-blue-400" />
+                    )}
+                  </div>
+                  <p className="font-medium mt-2">
+                    {homeTeam?.name || "Home Team"}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {homeTeam?.code || "HOME"}
+                  </p>
+                </div>
+
+                <div className="flex-shrink-0 mx-4">
+                  <div className="text-gray-400 text-sm mb-1 flex items-center justify-center">
+                    <Clock className="h-3 w-3 mr-1" />
+                    <span>{matchDetails?.time || "7:30 PM"}</span>
+                  </div>
+                  <div className="bg-gray-800/80 py-1.5 px-3 rounded-full">
+                    <span className="text-sm font-medium">VS</span>
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1 text-center">
+                    {matchDetails?.tournament?.name || "Tournament"}
+                  </div>
+                </div>
+
+                <div className="flex-1 text-center">
+                  <div className="h-16 w-16 mx-auto bg-gray-800 rounded-full flex items-center justify-center border border-gray-700">
+                    {awayTeam?.logo ? (
+                      <img
+                        src={awayTeam.logo}
+                        alt={awayTeam.name}
+                        className="h-10 w-10"
+                      />
+                    ) : (
+                      <Shield className="h-8 w-8 text-red-400" />
+                    )}
+                  </div>
+                  <p className="font-medium mt-2">
+                    {awayTeam?.name || "Away Team"}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {awayTeam?.code || "AWAY"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center justify-center gap-1 text-sm text-gray-400">
+                <MapPin className="h-3.5 w-3.5" />
+                <span>{matchDetails?.venue || "Stadium"}</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="dark-card">
-          <span className="text-xs text-muted-foreground">Captain</span>
-          <div className="flex items-center mt-1 gap-2">
-            {team.captainImage ? (
-              <img src={team.captainImage} alt={team.captain} className="w-8 h-8 rounded-full" />
-            ) : (
-              <div className="w-8 h-8 bg-cricket-light-green rounded-full" />
-            )}
-            <span className="font-medium">{team.captain}</span>
-          </div>
-        </div>
-        
-        <div className="dark-card">
-          <span className="text-xs text-muted-foreground">Vice Captain</span>
-          <div className="flex items-center mt-1 gap-2">
-            {team.viceCaptainImage ? (
-              <img src={team.viceCaptainImage} alt={team.viceCaptain} className="w-8 h-8 rounded-full" />
-            ) : (
-              <div className="w-8 h-8 bg-cricket-light-green rounded-full" />
-            )}
-            <span className="font-medium">{team.viceCaptain}</span>
-          </div>
-        </div>
+
+      {/* Key Stats Section */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <Card className="bg-gray-900/60 border-gray-800">
+          <CardContent className="p-4 flex flex-col items-center">
+            <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center mb-2">
+              <Users className="h-5 w-5 text-blue-400" />
+            </div>
+            <p className="text-lg font-bold">
+              {team.playerDetails?.length || 0}
+            </p>
+            <p className="text-xs text-gray-400">Players</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gray-900/60 border-gray-800">
+          <CardContent className="p-4 flex flex-col items-center">
+            <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center mb-2">
+              <BarChart3 className="h-5 w-5 text-purple-400" />
+            </div>
+            <p className="text-lg font-bold">{team.total_points || 0}</p>
+            <p className="text-xs text-gray-400">Total Points</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gray-900/60 border-gray-800">
+          <CardContent className="p-4 flex flex-col items-center">
+            <div className="h-10 w-10 rounded-full bg-neon-green/20 flex items-center justify-center mb-2">
+              <Star className="h-5 w-5 text-neon-green" />
+            </div>
+            <p className="text-lg font-bold">
+              {captain?.name?.split(" ")[0] || "None"}
+            </p>
+            <p className="text-xs text-gray-400">Captain</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gray-900/60 border-gray-800">
+          <CardContent className="p-4 flex flex-col items-center">
+            <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center mb-2">
+              <Trophy className="h-5 w-5 text-amber-400" />
+            </div>
+            <p className="text-lg font-bold">
+              {viceCaptain?.name?.split(" ")[0] || "None"}
+            </p>
+            <p className="text-xs text-gray-400">Vice Captain</p>
+          </CardContent>
+        </Card>
       </div>
-      
+
+      {/* Tabs for team content */}
       <Tabs
-        tabs={["Players", "Performance"]}
-        activeTab={activeTab}
-        onChange={setActiveTab}
-      />
-      
-      <div className="mt-4 animate-fade-in">
-        {activeTab === "Players" && (
-          <div className="space-y-4">
-            {teamPlayers.map(player => (
-              <Link key={player.id} to={`/players/${player.id}`}>
-                <PlayerCard player={player} compact={true} />
-              </Link>
-            ))}
-          </div>
-        )}
-        
-        {activeTab === "Performance" && (
-          <div className="space-y-5">
-            <div className="bg-cricket-medium-green rounded-xl p-4">
-              <h3 className="font-semibold mb-3">Recent Performances</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center pb-2 border-b border-border">
-                  <div>
-                    <span className="text-sm font-medium">IPL Match #24</span>
-                    <p className="text-xs text-muted-foreground">vs Chennai Super Kings</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-medium text-cricket-lime">+153 pts</span>
-                    <p className="text-xs text-muted-foreground">Apr 10, 2023</p>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center pb-2 border-b border-border">
-                  <div>
-                    <span className="text-sm font-medium">IPL Match #18</span>
-                    <p className="text-xs text-muted-foreground">vs Royal Challengers</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-medium text-cricket-lime">+205 pts</span>
-                    <p className="text-xs text-muted-foreground">Apr 5, 2023</p>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="text-sm font-medium">IPL Match #12</span>
-                    <p className="text-xs text-muted-foreground">vs Delhi Capitals</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-medium text-cricket-lime">+178 pts</span>
-                    <p className="text-xs text-muted-foreground">Apr 1, 2023</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-cricket-medium-green rounded-xl p-4">
-              <h3 className="font-semibold mb-3">Top Performers</h3>
-              <div className="space-y-3">
-                {teamPlayers.slice(0, 3).map(player => (
-                  <div key={player.id} className="flex justify-between items-center pb-2 border-b border-border">
-                    <div className="flex items-center gap-2">
-                      {player.image ? (
-                        <img src={player.image} alt={player.name} className="w-10 h-10 rounded-full" />
-                      ) : (
-                        <div className="w-10 h-10 bg-cricket-light-green rounded-full" />
-                      )}
-                      <span className="font-medium">{player.name}</span>
+        defaultValue="players"
+        value={activeTab}
+        onValueChange={setActiveTab}
+      >
+        <TabsList className="grid grid-cols-3 mb-6">
+          <TabsTrigger value="players">Players</TabsTrigger>
+          <TabsTrigger value="stats">Stats</TabsTrigger>
+          <TabsTrigger value="performance">Performance</TabsTrigger>
+        </TabsList>
+
+        {/* Players Tab - Display team members */}
+        {activeTab === "players" && (
+          <div className="space-y-6">
+            {/* Captain & Vice-Captain Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {captain && (
+                <Card className="border border-neon-green/20 bg-gradient-to-br from-gray-900 to-gray-950">
+                  <CardHeader className="pb-2">
+                    <Badge className="bg-neon-green/20 text-neon-green w-fit mb-1">
+                      Captain
+                    </Badge>
+                    <div className="flex items-center">
+                      <Avatar className="h-12 w-12 mr-3 ring-2 ring-neon-green">
+                        {captain.image ? (
+                          <AvatarImage src={captain.image} />
+                        ) : (
+                          <AvatarFallback className="bg-neon-green/20 text-neon-green">
+                            {captain.name?.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                      <div>
+                        <CardTitle>{captain.name}</CardTitle>
+                        <CardDescription>{captain.team}</CardDescription>
+                      </div>
                     </div>
-                    <span className="font-medium text-cricket-lime">+{Math.floor(Math.random() * 100) + 50} pts</span>
-                  </div>
-                ))}
-              </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-3 mt-2">
+                      <div>
+                        <p className="text-xs text-gray-400">Points</p>
+                        <p className="font-medium text-neon-green">
+                          {captain.points || 0}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Position</p>
+                        <p className="font-medium">{captain.position}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {viceCaptain && (
+                <Card className="border border-amber-500/20 bg-gradient-to-br from-gray-900 to-gray-950">
+                  <CardHeader className="pb-2">
+                    <Badge className="bg-amber-500/20 text-amber-400 w-fit mb-1">
+                      Vice Captain
+                    </Badge>
+                    <div className="flex items-center">
+                      <Avatar className="h-12 w-12 mr-3 ring-2 ring-amber-400/70">
+                        {viceCaptain.image ? (
+                          <AvatarImage src={viceCaptain.image} />
+                        ) : (
+                          <AvatarFallback className="bg-amber-500/20 text-amber-400">
+                            {viceCaptain.name?.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                      <div>
+                        <CardTitle>{viceCaptain.name}</CardTitle>
+                        <CardDescription>{viceCaptain.team}</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-3 mt-2">
+                      <div>
+                        <p className="text-xs text-gray-400">Points</p>
+                        <p className="font-medium text-amber-400">
+                          {viceCaptain.points || 0}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Position</p>
+                        <p className="font-medium">{viceCaptain.position}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
+
+            {/* Players by Position */}
+            {batsmen.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-3 flex items-center">
+                  <div className="h-2 w-2 bg-blue-500 rounded-full mr-2"></div>
+                  Batsmen ({batsmen.length})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {batsmen.map((player) => {
+                    const style = getPlayerPositionStyle(player.position);
+                    return (
+                      <div
+                        key={player.id}
+                        className="bg-gray-900/60 border border-gray-800 hover:border-blue-500/30 rounded-lg p-3 transition-all"
+                      >
+                        <div className="flex items-center">
+                          <Avatar className="h-10 w-10 mr-3">
+                            {player.image ? (
+                              <AvatarImage src={player.image} />
+                            ) : (
+                              <AvatarFallback
+                                className={`${style.bg} ${style.text}`}
+                              >
+                                {player.name?.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">
+                              {player.name}
+                            </p>
+                            <p className="text-xs text-gray-400 truncate">
+                              {player.team}
+                            </p>
+                          </div>
+                          <Badge
+                            className={`${style.bg} ${style.text} border ${style.border}`}
+                          >
+                            {player.points || 0} pts
+                          </Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {bowlers.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-3 flex items-center">
+                  <div className="h-2 w-2 bg-purple-500 rounded-full mr-2"></div>
+                  Bowlers ({bowlers.length})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {bowlers.map((player) => {
+                    const style = getPlayerPositionStyle(player.position);
+                    return (
+                      <div
+                        key={player.id}
+                        className="bg-gray-900/60 border border-gray-800 hover:border-purple-500/30 rounded-lg p-3 transition-all"
+                      >
+                        <div className="flex items-center">
+                          <Avatar className="h-10 w-10 mr-3">
+                            {player.image ? (
+                              <AvatarImage src={player.image} />
+                            ) : (
+                              <AvatarFallback
+                                className={`${style.bg} ${style.text}`}
+                              >
+                                {player.name?.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">
+                              {player.name}
+                            </p>
+                            <p className="text-xs text-gray-400 truncate">
+                              {player.team}
+                            </p>
+                          </div>
+                          <Badge
+                            className={`${style.bg} ${style.text} border ${style.border}`}
+                          >
+                            {player.points || 0} pts
+                          </Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {allRounders.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-3 flex items-center">
+                  <div className="h-2 w-2 bg-amber-500 rounded-full mr-2"></div>
+                  All-Rounders ({allRounders.length})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {allRounders.map((player) => {
+                    const style = getPlayerPositionStyle(player.position);
+                    return (
+                      <div
+                        key={player.id}
+                        className="bg-gray-900/60 border border-gray-800 hover:border-amber-500/30 rounded-lg p-3 transition-all"
+                      >
+                        <div className="flex items-center">
+                          <Avatar className="h-10 w-10 mr-3">
+                            {player.image ? (
+                              <AvatarImage src={player.image} />
+                            ) : (
+                              <AvatarFallback
+                                className={`${style.bg} ${style.text}`}
+                              >
+                                {player.name?.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">
+                              {player.name}
+                            </p>
+                            <p className="text-xs text-gray-400 truncate">
+                              {player.team}
+                            </p>
+                          </div>
+                          <Badge
+                            className={`${style.bg} ${style.text} border ${style.border}`}
+                          >
+                            {player.points || 0} pts
+                          </Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {wicketKeepers.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-3 flex items-center">
+                  <div className="h-2 w-2 bg-green-500 rounded-full mr-2"></div>
+                  Wicket-Keepers ({wicketKeepers.length})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {wicketKeepers.map((player) => {
+                    const style = getPlayerPositionStyle(player.position);
+                    return (
+                      <div
+                        key={player.id}
+                        className="bg-gray-900/60 border border-gray-800 hover:border-green-500/30 rounded-lg p-3 transition-all"
+                      >
+                        <div className="flex items-center">
+                          <Avatar className="h-10 w-10 mr-3">
+                            {player.image ? (
+                              <AvatarImage src={player.image} />
+                            ) : (
+                              <AvatarFallback
+                                className={`${style.bg} ${style.text}`}
+                              >
+                                {player.name?.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">
+                              {player.name}
+                            </p>
+                            <p className="text-xs text-gray-400 truncate">
+                              {player.team}
+                            </p>
+                          </div>
+                          <Badge
+                            className={`${style.bg} ${style.text} border ${style.border}`}
+                          >
+                            {player.points || 0} pts
+                          </Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {team.playerDetails?.length === 0 && (
+              <div className="py-12 text-center">
+                <div className="h-16 w-16 bg-gray-800/80 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-xl font-medium mb-2">No Players Found</h3>
+                <p className="text-gray-400 max-w-md mx-auto">
+                  This team doesn't have any players yet.
+                </p>
+              </div>
+            )}
           </div>
         )}
-      </div>
+
+        {/* Stats Tab - Show statistics about the team */}
+        {activeTab === "stats" && (
+          <div className="space-y-6">
+            <Card className="bg-gray-900/60 border-gray-800">
+              <CardHeader>
+                <CardTitle>Team Composition</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-400">Batsmen</span>
+                      <span>{batsmen.length} players</span>
+                    </div>
+                    <Progress
+                      value={
+                        (batsmen.length /
+                          (team.playerDetails &&
+                          Array.isArray(team.playerDetails) &&
+                          team.playerDetails.length > 0
+                            ? team.playerDetails.length
+                            : 1)) *
+                        100
+                      }
+                      className="h-2 bg-gray-800"
+                    >
+                      <div className="h-full bg-blue-500 rounded-full" />
+                    </Progress>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-400">Bowlers</span>
+                      <span>{bowlers.length} players</span>
+                    </div>
+                    <Progress
+                      value={
+                        (bowlers.length /
+                          (team.playerDetails &&
+                          Array.isArray(team.playerDetails) &&
+                          team.playerDetails.length > 0
+                            ? team.playerDetails.length
+                            : 1)) *
+                        100
+                      }
+                      className="h-2 bg-gray-800"
+                    >
+                      <div className="h-full bg-purple-500 rounded-full" />
+                    </Progress>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-400">All-Rounders</span>
+                      <span>{allRounders.length} players</span>
+                    </div>
+                    <Progress
+                      value={
+                        (allRounders.length /
+                          (team.playerDetails &&
+                          Array.isArray(team.playerDetails) &&
+                          team.playerDetails.length > 0
+                            ? team.playerDetails.length
+                            : 1)) *
+                        100
+                      }
+                      className="h-2 bg-gray-800"
+                    >
+                      <div className="h-full bg-amber-500 rounded-full" />
+                    </Progress>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-400">Wicket-Keepers</span>
+                      <span>{wicketKeepers.length} players</span>
+                    </div>
+                    <Progress
+                      value={
+                        (wicketKeepers.length /
+                          (team.playerDetails &&
+                          Array.isArray(team.playerDetails) &&
+                          team.playerDetails.length > 0
+                            ? team.playerDetails.length
+                            : 1)) *
+                        100
+                      }
+                      className="h-2 bg-gray-800"
+                    >
+                      <div className="h-full bg-green-500 rounded-full" />
+                    </Progress>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gray-900/60 border-gray-800">
+              <CardHeader>
+                <CardTitle>Team Points Distribution</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-5">
+                  {team.playerDetails && team.playerDetails.length > 0 ? (
+                    team.playerDetails
+                      .sort((a, b) => (b.points || 0) - (a.points || 0))
+                      .slice(0, 5)
+                      .map((player, index) => (
+                        <div key={player.id} className="flex items-center">
+                          <Avatar className="h-8 w-8 mr-3">
+                            {player.image ? (
+                              <AvatarImage src={player.image} />
+                            ) : (
+                              <AvatarFallback className="bg-gray-800">
+                                {player.name?.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">
+                              {player.name}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <span className="font-medium text-neon-green">
+                              {player.points || 0} pts
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                  ) : (
+                    <p className="text-gray-400 text-center py-8">
+                      No statistics available
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gray-900/60 border-gray-800">
+              <CardHeader>
+                <CardTitle>Team Distribution by Cricket Teams</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {team.playerDetails && team.playerDetails.length > 0 ? (
+                  <div className="space-y-4">
+                    {/* Group players by team and show distribution */}
+                    {Object.entries(
+                      team.playerDetails.reduce((acc, player) => {
+                        const team = player.team || "Unknown Team";
+                        if (!acc[team]) acc[team] = [];
+                        acc[team].push(player);
+                        return acc;
+                      }, {} as Record<string, any[]>)
+                    ).map(([teamName, players]) => (
+                      <div key={teamName}>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="truncate">{teamName}</span>
+                          <span>{(players as any[]).length} players</span>
+                        </div>
+                        <Progress
+                          value={
+                            ((players as any[]).length /
+                              (team.playerDetails?.length || 1)) *
+                            100
+                          }
+                          className="h-2 bg-gray-800"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 text-center py-8">
+                    No data available
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Performance Tab */}
+        {activeTab === "performance" && (
+          <div className="space-y-6">
+            <Card className="bg-gradient-to-br from-gray-900 to-gray-950 border-gray-800">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Trophy className="h-5 w-5 mr-2 text-amber-400" />
+                  Overall Performance
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-center py-8">
+                <div className="h-32 w-32 rounded-full bg-gradient-to-br from-neon-green/20 to-blue-500/20 mx-auto flex items-center justify-center border border-neon-green/30">
+                  <div className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neon-green to-blue-500">
+                    {team.total_points || 0}
+                  </div>
+                </div>
+                <p className="mt-4 text-xl font-semibold">Total Points</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Based on player performances in{" "}
+                  {matchDetails?.tournament?.name || "this tournament"}
+                </p>
+
+                <div className="mt-8 max-w-md mx-auto">
+                  <h4 className="text-sm font-medium text-gray-300 mb-3">
+                    Performance by Category
+                  </h4>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-gray-400">Batting</span>
+                        <span>{Math.floor(Math.random() * 50) + 50}%</span>
+                      </div>
+                      <Progress
+                        value={Math.floor(Math.random() * 50) + 50}
+                        className="h-1.5 bg-gray-800"
+                      >
+                        <div className="h-full bg-blue-500 rounded-full" />
+                      </Progress>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-gray-400">Bowling</span>
+                        <span>{Math.floor(Math.random() * 50) + 40}%</span>
+                      </div>
+                      <Progress
+                        value={Math.floor(Math.random() * 50) + 40}
+                        className="h-1.5 bg-gray-800"
+                      >
+                        <div className="h-full bg-purple-500 rounded-full" />
+                      </Progress>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-gray-400">Fielding</span>
+                        <span>{Math.floor(Math.random() * 30) + 60}%</span>
+                      </div>
+                      <Progress
+                        value={Math.floor(Math.random() * 30) + 60}
+                        className="h-1.5 bg-gray-800"
+                      >
+                        <div className="h-full bg-amber-500 rounded-full" />
+                      </Progress>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="bg-gray-900/60 border-gray-800">
+                <CardHeader>
+                  <CardTitle>Captain Performance</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {captain ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center">
+                        <Avatar className="h-12 w-12 mr-3">
+                          {captain.image ? (
+                            <AvatarImage src={captain.image} />
+                          ) : (
+                            <AvatarFallback className="bg-neon-green/20 text-neon-green">
+                              {captain.name?.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{captain.name}</p>
+                          <Badge className="bg-neon-green/20 text-neon-green mt-1">
+                            2x Points: {(captain.points || 0) * 2}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      <div className="grid grid-cols-2 gap-3">
+                        {captain.position === "Batsman" && (
+                          <>
+                            <div>
+                              <p className="text-xs text-gray-400">Runs</p>
+                              <p className="font-medium">
+                                {captain.stats?.runs || "0"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-400">
+                                Strike Rate
+                              </p>
+                              <p className="font-medium">
+                                {captain.stats?.strikeRate || "0"}
+                              </p>
+                            </div>
+                          </>
+                        )}
+
+                        {captain.position === "Bowler" && (
+                          <>
+                            <div>
+                              <p className="text-xs text-gray-400">Wickets</p>
+                              <p className="font-medium">
+                                {captain.stats?.wickets || "0"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-400">Economy</p>
+                              <p className="font-medium">
+                                {captain.stats?.economy || "0"}
+                              </p>
+                            </div>
+                          </>
+                        )}
+
+                        {(captain.position === "All-rounder" ||
+                          captain.position === "Wicket-keeper") && (
+                          <>
+                            <div>
+                              <p className="text-xs text-gray-400">Runs</p>
+                              <p className="font-medium">
+                                {captain.stats?.runs || "0"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-400">Wickets</p>
+                              <p className="font-medium">
+                                {captain.stats?.wickets || "0"}
+                              </p>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 text-center py-8">
+                      No captain selected
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gray-900/60 border-gray-800">
+                <CardHeader>
+                  <CardTitle>Vice-Captain Performance</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {viceCaptain ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center">
+                        <Avatar className="h-12 w-12 mr-3">
+                          {viceCaptain.image ? (
+                            <AvatarImage src={viceCaptain.image} />
+                          ) : (
+                            <AvatarFallback className="bg-amber-500/20 text-amber-400">
+                              {viceCaptain.name?.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{viceCaptain.name}</p>
+                          <Badge className="bg-amber-500/20 text-amber-400 mt-1">
+                            1.5x Points:{" "}
+                            {((viceCaptain.points || 0) * 1.5).toFixed(1)}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      <div className="grid grid-cols-2 gap-3">
+                        {viceCaptain.position === "Batsman" && (
+                          <>
+                            <div>
+                              <p className="text-xs text-gray-400">Runs</p>
+                              <p className="font-medium">
+                                {viceCaptain.stats?.runs || "0"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-400">
+                                Strike Rate
+                              </p>
+                              <p className="font-medium">
+                                {viceCaptain.stats?.strikeRate || "0"}
+                              </p>
+                            </div>
+                          </>
+                        )}
+
+                        {viceCaptain.position === "Bowler" && (
+                          <>
+                            <div>
+                              <p className="text-xs text-gray-400">Wickets</p>
+                              <p className="font-medium">
+                                {viceCaptain.stats?.wickets || "0"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-400">Economy</p>
+                              <p className="font-medium">
+                                {viceCaptain.stats?.economy || "0"}
+                              </p>
+                            </div>
+                          </>
+                        )}
+
+                        {(viceCaptain.position === "All-rounder" ||
+                          viceCaptain.position === "Wicket-keeper") && (
+                          <>
+                            <div>
+                              <p className="text-xs text-gray-400">Runs</p>
+                              <p className="font-medium">
+                                {viceCaptain.stats?.runs || "0"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-400">Wickets</p>
+                              <p className="font-medium">
+                                {viceCaptain.stats?.wickets || "0"}
+                              </p>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 text-center py-8">
+                      No vice-captain selected
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="bg-gray-900/60 border-gray-800">
+              <CardHeader>
+                <CardTitle>Top Performers</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {team.playerDetails && team.playerDetails.length > 0 ? (
+                  <div className="space-y-4">
+                    {team.playerDetails
+                      .sort((a, b) => (b.points || 0) - (a.points || 0))
+                      .slice(0, 3)
+                      .map((player, index) => (
+                        <div
+                          key={player.id}
+                          className="flex items-center justify-between p-3 bg-gray-800/60 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Badge className="bg-gray-700/80 h-6 w-6 flex items-center justify-center rounded-full p-0">
+                              {index + 1}
+                            </Badge>
+                            <Avatar className="h-9 w-9">
+                              {player.image ? (
+                                <AvatarImage src={player.image} />
+                              ) : (
+                                <AvatarFallback>
+                                  {player.name?.substring(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              )}
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{player.name}</p>
+                              <p className="text-xs text-gray-400">
+                                {player.position}
+                              </p>
+                            </div>
+                          </div>
+                          <div>
+                            <Badge className="bg-neon-green text-black">
+                              {player.points || 0} pts
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 text-center py-8">
+                    No performers data available
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </Tabs>
     </PageContainer>
   );
 };
