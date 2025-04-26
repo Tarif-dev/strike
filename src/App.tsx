@@ -12,6 +12,7 @@ import TeamDetail from "@/pages/TeamDetail";
 import Profile from "@/pages/Profile";
 import Wallet from "@/pages/Wallet";
 import Contests from "@/pages/Contests";
+import NFTMarketplace from "@/pages/NFTMarketplace";
 import Login from "@/pages/auth/Login";
 import Signup from "@/pages/auth/Signup";
 import OtpLogin from "@/pages/auth/OtpLogin";
@@ -60,6 +61,7 @@ function App() {
               <Route path="/wallet" element={<Wallet />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/api-settings" element={<ApiSettings />} />
+              <Route path="/nft-marketplace" element={<NFTMarketplace />} />
             </Route>
 
             {/* Fallback for unknown routes */}

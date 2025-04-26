@@ -1,4 +1,12 @@
-import { Home, Calendar, Trophy, User, Wallet, Search } from "lucide-react";
+import {
+  Home,
+  Calendar,
+  Trophy,
+  User,
+  Wallet,
+  Search,
+  Gem,
+} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +17,7 @@ export default function Navbar() {
     { icon: Home, path: "/home", label: "Home" },
     { icon: Calendar, path: "/matches", label: "Matches" },
     { icon: Trophy, path: "/leagues", label: "Leagues" },
+    { icon: Gem, path: "/nft-marketplace", label: "NFTs" },
     { icon: Wallet, path: "/wallet", label: "Wallet" },
     { icon: User, path: "/profile", label: "Profile" },
   ];
