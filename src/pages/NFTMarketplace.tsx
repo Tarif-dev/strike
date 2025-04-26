@@ -13,6 +13,12 @@ import {
   Activity,
   Bookmark,
   Share2,
+  ChevronLeft,
+  Trophy,
+  Users,
+  Shield,
+  HelpCircle,
+  Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +41,8 @@ import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
+import Navbar from "@/components/layout/Navbar";
 
 // Marquee component for trending players
 const TrendingMarquee = () => {
@@ -673,6 +681,20 @@ export default function NFTMarketplace() {
 
   return (
     <div className="min-h-screen bg-midnight-black text-soft-white">
+      {/* Back button navigation */}
+      {/* <div className="fixed top-4 left-4 z-50">
+        <Link to="/home">
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-full border-gunmetal-grey bg-midnight-black text-soft-white hover:bg-gunmetal-grey"
+          >
+            <ChevronLeft size={16} className="mr-1" />
+            Back to Home
+          </Button>
+        </Link>
+      </div> */}
+
       {/* Trending ticker */}
       <TrendingMarquee />
 
@@ -786,7 +808,7 @@ export default function NFTMarketplace() {
                         {/* Bottom content overlay */}
                         <div className="absolute bottom-0 inset-x-0 p-4 flex flex-col gap-1">
                           <h3 className="text-xl font-bold text-soft-white drop-shadow-md">
-                            T20 World Cup 2011 
+                            T20 World Cup 2011
                           </h3>
                           <p className="text-sm text-soft-white/90 drop-shadow-md">
                             World's Most Valuable Cricket NFT
@@ -1007,38 +1029,216 @@ export default function NFTMarketplace() {
         </div>
 
         {/* Footer */}
-        <footer className="mt-10 pt-8 border-t border-gunmetal-grey">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-neon-green rounded-full"></div>
-              <span className="font-bold text-lg text-soft-white">
-                CricketNFT
-              </span>
+        <footer className="mt-10 pt-10 pb-24 border-t border-gunmetal-grey">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              {/* Logo and tag line */}
+              <div className="md:col-span-1">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-10 h-10 bg-neon-green rounded-full flex items-center justify-center">
+                    <Zap className="h-5 w-5 text-midnight-black" />
+                  </div>
+                  <span className="font-bold text-xl text-soft-white">
+                    Strike
+                  </span>
+                </div>
+                <p className="text-sm text-platinum-silver mb-6">
+                  The ultimate fantasy cricket platform with exclusive NFTs and
+                  immersive gameplay
+                </p>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full h-8 w-8 border-gunmetal-grey"
+                  >
+                    <Globe size={16} className="text-soft-white" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full h-8 w-8 border-gunmetal-grey"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      className="text-soft-white"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M22 5.92375C21.2563 6.25 20.4637 6.46625 19.6375 6.57125C20.4875 6.06375 21.1363 5.26625 21.4412 4.305C20.6488 4.7775 19.7738 5.11125 18.8412 5.2975C18.0887 4.49625 17.0162 4 15.8462 4C13.5763 4 11.7487 5.8425 11.7487 8.10125C11.7487 8.42625 11.7762 8.73875 11.8438 9.03625C8.435 8.87 5.41875 7.23625 3.3925 4.7475C3.03875 5.36125 2.83125 6.06375 2.83125 6.82C2.83125 8.23875 3.5625 9.49875 4.6525 10.2275C3.99375 10.2150 3.3475 10.0225 2.8 9.7225C2.8 9.735 2.8 9.75125 2.8 9.7675C2.8 11.76 4.22125 13.415 6.085 13.7962C5.75125 13.8875 5.3875 13.9312 5.01 13.9312C4.7475 13.9312 4.4825 13.9163 4.23375 13.8612C4.765 15.485 6.2725 16.6788 8.065 16.7175C6.67 17.8088 4.89875 18.4662 2.98125 18.4662C2.645 18.4662 2.3225 18.4513 2 18.41C3.81625 19.5813 5.96875 20.25 8.29 20.25C15.835 20.25 19.96 13.9988 19.96 8.5825C19.96 8.40125 19.9538 8.22625 19.945 8.0525C20.7588 7.475 21.4425 6.75375 22 5.92375Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full h-8 w-8 border-gunmetal-grey"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      className="text-soft-white"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M16.5 3C14.76 3 13.09 3.81 12 5.09C10.91 3.81 9.24 3 7.5 3C4.42 3 2 5.42 2 8.5C2 12.28 5.4 15.36 10.55 20.04L12 21.35L13.45 20.03C18.6 15.36 22 12.28 22 8.5C22 8.40125 22 8.22625 22 8.0525C20.7588 7.475 21.4425 6.75375 22 5.92375Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Quick links */}
+              <div className="md:col-span-1">
+                <h4 className="font-bold text-soft-white mb-4">Quick Links</h4>
+                <ul className="space-y-2">
+                  <li>
+                    <Link
+                      to="/home"
+                      className="text-platinum-silver hover:text-neon-green transition-colors text-sm"
+                    >
+                      Home
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/matches"
+                      className="text-platinum-silver hover:text-neon-green transition-colors text-sm"
+                    >
+                      Matches
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/leagues"
+                      className="text-platinum-silver hover:text-neon-green transition-colors text-sm"
+                    >
+                      Leagues
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/players"
+                      className="text-platinum-silver hover:text-neon-green transition-colors text-sm"
+                    >
+                      Players
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Features */}
+              <div className="md:col-span-1">
+                <h4 className="font-bold text-soft-white mb-4">Features</h4>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2">
+                    <Trophy size={14} className="text-neon-green" />
+                    <span className="text-platinum-silver text-sm">
+                      Fantasy Contests
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Users size={14} className="text-neon-green" />
+                    <span className="text-platinum-silver text-sm">
+                      Private Leagues
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Flame size={14} className="text-neon-green" />
+                    <span className="text-platinum-silver text-sm">
+                      Cricket NFTs
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Star size={14} className="text-neon-green" />
+                    <span className="text-platinum-silver text-sm">
+                      Live Scoring
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Help & support */}
+              <div className="md:col-span-1">
+                <h4 className="font-bold text-soft-white mb-4">Support</h4>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2">
+                    <HelpCircle size={14} className="text-neon-green" />
+                    <span className="text-platinum-silver text-sm">
+                      Help Center
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Shield size={14} className="text-neon-green" />
+                    <span className="text-platinum-silver text-sm">
+                      Privacy Policy
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <svg
+                      width="14"
+                      height="14"
+                      className="text-neon-green"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 2L4 5V11.09C4 16.14 7.41 20.85 12 22C16.59 20.85 20 16.14 20 11.09V5L12 2ZM18 11.09C18 15.09 15.45 18.79 12 19.92C8.55 18.79 6 15.1 6 11.09V6.39L12 4.14L18 6.39V11.09Z"
+                        fill="currentColor"
+                      />
+                      <path d="M13 10H11V16H13V10Z" fill="currentColor" />
+                      <path d="M13 7H11V9H13V7Z" fill="currentColor" />
+                    </svg>
+                    <span className="text-platinum-silver text-sm">
+                      Legal Terms
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <svg
+                      width="14"
+                      height="14"
+                      className="text-neon-green"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    <span className="text-platinum-silver text-sm">
+                      Contact Us
+                    </span>
+                  </li>
+                </ul>
+              </div>
             </div>
 
-            <div className="flex gap-6 text-platinum-silver text-sm">
-              <a href="#" className="hover:text-neon-green transition-colors">
-                About
-              </a>
-              <a href="#" className="hover:text-neon-green transition-colors">
-                Collections
-              </a>
-              <a href="#" className="hover:text-neon-green transition-colors">
-                Support
-              </a>
-              <a href="#" className="hover:text-neon-green transition-colors">
-                Terms
-              </a>
-              <a href="#" className="hover:text-neon-green transition-colors">
-                Privacy
-              </a>
-            </div>
-
-            <div className="text-sm text-platinum-silver">
-              © 2025 CricketNFT. All rights reserved.
+            <div className="mt-10 pt-6 border-t border-gunmetal-grey flex flex-col md:flex-row justify-between items-center">
+              <p className="text-xs text-platinum-silver mb-4 md:mb-0">
+                © 2025 Strike Fantasy Sports. All rights reserved.
+              </p>
+              <div className="text-xs text-platinum-silver">
+                <span className="bg-neon-green/20 text-neon-green px-2 py-1 rounded font-medium">
+                  BETA
+                </span>
+                <span className="ml-2">Version 2.5.4</span>
+              </div>
             </div>
           </div>
         </footer>
+
+        {/* Include the Navbar component for consistent navigation */}
+        <Navbar />
       </div>
     </div>
   );
