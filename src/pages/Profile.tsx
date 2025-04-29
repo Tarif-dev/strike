@@ -478,7 +478,7 @@ const Profile = () => {
                       Join Contest
                     </Button>
                   </Link>
-                  <Link to="/create-team">
+                  <Link to="/teams/create">
                     <Button
                       variant="outline"
                       className="w-full border-neon-green/50 text-neon-green hover:bg-neon-green/10"

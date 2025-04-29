@@ -18,7 +18,12 @@ import {
   Shield,
   Loader2,
 } from "lucide-react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
@@ -35,12 +40,9 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 
 // Data
-import {
-  players,
-  matches,
-  countryFlags,
-  extendedPlayers,
-} from "@/data/mockData";
+import { countryFlags } from "@/data/mockData";
+import { players } from "@/data/playersData";
+import { matches } from "@/data/matchesData";
 
 // Team balance constraints
 const TEAM_CONSTRAINTS = {
@@ -85,6 +87,7 @@ const CreateTeam = () => {
   const location = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
 
   // States
   const [teamName, setTeamName] = useState("My Fantasy XI");
@@ -154,130 +157,164 @@ const CreateTeam = () => {
   );
   const remainingCredits = totalCredits - usedCredits;
 
+  // Initialize the selected match based on the URL query parameter
+  useEffect(() => {
+    const matchId = searchParams.get("match");
+    if (matchId) {
+      // Find the match with the given ID
+      const match = matches.find((m) => m.id === matchId);
+      if (match) {
+        setSelectedMatch(match);
+      }
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     validateTeam();
   }, [selectedPlayers, captain, viceCaptain]);
 
   // Initialize team players when match is selected
   useEffect(() => {
-    // Get team-specific players from the extendedPlayers object
-    const homeTeam = selectedMatch.teams.home.name;
-    const awayTeam = selectedMatch.teams.away.name;
+    // Get team names and codes from the selected match
+    const homeTeamName = selectedMatch.teams.home.name;
+    const homeTeamCode = selectedMatch.teams.home.code;
+    const awayTeamName = selectedMatch.teams.away.name;
+    const awayTeamCode = selectedMatch.teams.away.code;
 
-    // Get team code for lookup (lowercased)
-    const homeCode = selectedMatch.teams.home.code.toLowerCase();
-    const awayCode = selectedMatch.teams.away.code.toLowerCase();
+    console.log("Filtering players for teams:", homeTeamName, awayTeamName);
 
-    // Get players from extendedPlayers or fallback to generating players
-    const getTeamPlayers = (
-      teamCode: string,
-      teamName: string,
-      teamLogo: string
-    ) => {
-      // Try to get players from our predefined extendedPlayers
-      if (extendedPlayers[teamCode as keyof typeof extendedPlayers]) {
-        return extendedPlayers[teamCode as keyof typeof extendedPlayers];
-      }
+    // More flexible filtering - check for partial matches in team names
+    const homeTeamFinal = players.filter((player) => {
+      return (
+        player.team === homeTeamName ||
+        player.team.includes(homeTeamName) ||
+        player.team.includes(homeTeamCode) ||
+        (homeTeamCode === "CSK" && player.team.includes("Chennai")) ||
+        (homeTeamCode === "MI" && player.team.includes("Mumbai")) ||
+        (homeTeamCode === "RCB" && player.team.includes("Bengaluru")) ||
+        player.team.includes("Bangalore") ||
+        (homeTeamCode === "KKR" && player.team.includes("Kolkata")) ||
+        (homeTeamCode === "DC" && player.team.includes("Delhi")) ||
+        (homeTeamCode === "PBKS" && player.team.includes("Punjab")) ||
+        (homeTeamCode === "GT" && player.team.includes("Gujarat")) ||
+        (homeTeamCode === "LSG" && player.team.includes("Lucknow")) ||
+        (homeTeamCode === "RR" && player.team.includes("Rajasthan")) ||
+        (homeTeamCode === "SRH" && player.team.includes("Hyderabad"))
+      );
+    });
 
-      // Fallback: Generate players if team not in extendedPlayers
-      const existingTeamPlayers = players
-        .filter((p) => p.team === teamName || p.team.includes(teamName))
-        .slice(0, 3);
+    const awayTeamFinal = players.filter((player) => {
+      return (
+        player.team === awayTeamName ||
+        player.team.includes(awayTeamName) ||
+        player.team.includes(awayTeamCode) ||
+        (awayTeamCode === "CSK" && player.team.includes("Chennai")) ||
+        (awayTeamCode === "MI" && player.team.includes("Mumbai")) ||
+        (awayTeamCode === "RCB" && player.team.includes("Bengaluru")) ||
+        player.team.includes("Bangalore") ||
+        (awayTeamCode === "KKR" && player.team.includes("Kolkata")) ||
+        (awayTeamCode === "DC" && player.team.includes("Delhi")) ||
+        (awayTeamCode === "PBKS" && player.team.includes("Punjab")) ||
+        (awayTeamCode === "GT" && player.team.includes("Gujarat")) ||
+        (awayTeamCode === "LSG" && player.team.includes("Lucknow")) ||
+        (awayTeamCode === "RR" && player.team.includes("Rajasthan")) ||
+        (awayTeamCode === "SRH" && player.team.includes("Hyderabad"))
+      );
+    });
 
-      // Create balanced team with proper distribution of players
-      const positions = ["Batsman", "Bowler", "All-rounder"];
-      const distributionNeeded = [
-        { position: "Batsman", count: 5 },
-        { position: "Bowler", count: 4 },
-        { position: "All-rounder", count: 2 },
-      ];
+    console.log("Found home team players:", homeTeamFinal.length);
+    console.log("Found away team players:", awayTeamFinal.length);
 
-      // Count existing players by position
-      const existingPositionCounts = {
-        Batsman: existingTeamPlayers.filter((p) => p.position === "Batsman")
-          .length,
-        Bowler: existingTeamPlayers.filter((p) => p.position === "Bowler")
-          .length,
-        "All-rounder": existingTeamPlayers.filter(
-          (p) => p.position === "All-rounder"
-        ).length,
-      };
+    // If no players found, try using mock data
+    if (homeTeamFinal.length === 0) {
+      // Create some default players for the home team
+      const defaultHomePlayers = createDefaultPlayers(
+        homeTeamName,
+        homeTeamCode,
+        selectedMatch.teams.home.logo
+      );
+      setHomeTeamPlayers(defaultHomePlayers);
+    } else {
+      setHomeTeamPlayers(homeTeamFinal);
+    }
 
-      // Generate players to fill the team with proper distribution
-      const dummyPlayers: PlayerData[] = [];
+    if (awayTeamFinal.length === 0) {
+      // Create some default players for the away team
+      const defaultAwayPlayers = createDefaultPlayers(
+        awayTeamName,
+        awayTeamCode,
+        selectedMatch.teams.away.logo
+      );
+      setAwayTeamPlayers(defaultAwayPlayers);
+    } else {
+      setAwayTeamPlayers(awayTeamFinal);
+    }
+  }, [selectedMatch]);
 
-      distributionNeeded.forEach(({ position, count }) => {
-        const existing =
-          existingPositionCounts[
-            position as keyof typeof existingPositionCounts
-          ];
-        const needed = count - existing;
+  // Helper function to create default players if none are found
+  const createDefaultPlayers = (
+    teamName: string,
+    teamCode: string,
+    teamLogo: string
+  ): PlayerData[] => {
+    const positions = ["Batsman", "Bowler", "All-rounder"];
+    const defaultPlayers: PlayerData[] = [];
 
-        for (let i = 0; i < needed; i++) {
-          const id = `${teamName.toLowerCase()}-${position
-            .toLowerCase()
-            .replace("-", "")}-${i}`;
-
-          dummyPlayers.push({
-            id,
-            name: `${teamName} ${position} ${i + 1}`,
-            team: teamName,
-            teamLogo: teamLogo,
-            position,
-            country: teamName.includes("India") ? "India" : "International",
-            countryFlag: countryFlags.india,
-            stats:
-              position === "Batsman"
-                ? {
-                    matches: Math.floor(Math.random() * 50) + 20,
-                    runs: Math.floor(Math.random() * 2000) + 500,
-                    average: Math.floor(Math.random() * 15) + 30,
-                    strikeRate: Math.floor(Math.random() * 20) + 130,
-                  }
-                : position === "Bowler"
-                ? {
-                    matches: Math.floor(Math.random() * 40) + 15,
-                    wickets: Math.floor(Math.random() * 80) + 20,
-                    economy: Math.random() * 2 + 7,
-                    average: Math.floor(Math.random() * 10) + 20,
-                  }
-                : {
-                    matches: Math.floor(Math.random() * 45) + 25,
-                    runs: Math.floor(Math.random() * 1000) + 300,
-                    wickets: Math.floor(Math.random() * 50) + 15,
-                    average: Math.floor(Math.random() * 10) + 25,
-                    economy: Math.random() * 1.5 + 7.5,
-                    strikeRate: Math.floor(Math.random() * 15) + 120,
-                  },
-            points:
-              Math.floor(Math.random() * 200) +
-              (position === "Batsman"
-                ? 600
-                : position === "Bowler"
-                ? 550
-                : 650),
-          });
-        }
-      });
-
-      return [...existingTeamPlayers, ...dummyPlayers];
+    // Create 11 players for the team - 5 batsmen, 4 bowlers, 2 all-rounders
+    const playerCounts = {
+      Batsman: 5,
+      Bowler: 4,
+      "All-rounder": 2,
     };
 
-    // Get players for both teams using our helper function
-    const homeTeamFinal = getTeamPlayers(
-      homeCode,
-      homeTeam,
-      selectedMatch.teams.home.logo
-    );
-    const awayTeamFinal = getTeamPlayers(
-      awayCode,
-      awayTeam,
-      selectedMatch.teams.away.logo
-    );
+    // Generate players for each position
+    for (const position of positions) {
+      const count = playerCounts[position as keyof typeof playerCounts];
 
-    setHomeTeamPlayers(homeTeamFinal);
-    setAwayTeamPlayers(awayTeamFinal);
-  }, [selectedMatch]);
+      for (let i = 1; i <= count; i++) {
+        const playerId = `${teamCode.toLowerCase()}-${position.toLowerCase()}-${i}`;
+        const playerName = `${teamCode} ${position} ${i}`;
+
+        defaultPlayers.push({
+          id: playerId,
+          name: playerName,
+          team: teamName,
+          teamLogo: teamLogo,
+          position: position,
+          country: "International",
+          countryFlag: countryFlags.india,
+          stats:
+            position === "Batsman"
+              ? {
+                  matches: Math.floor(Math.random() * 50) + 20,
+                  runs: Math.floor(Math.random() * 2000) + 500,
+                  average: Math.floor(Math.random() * 15) + 30,
+                  strikeRate: Math.floor(Math.random() * 20) + 130,
+                }
+              : position === "Bowler"
+              ? {
+                  matches: Math.floor(Math.random() * 40) + 15,
+                  wickets: Math.floor(Math.random() * 80) + 20,
+                  economy: Math.random() * 2 + 7,
+                  average: Math.floor(Math.random() * 10) + 20,
+                }
+              : {
+                  matches: Math.floor(Math.random() * 45) + 25,
+                  runs: Math.floor(Math.random() * 1000) + 300,
+                  wickets: Math.floor(Math.random() * 50) + 15,
+                  average: Math.floor(Math.random() * 10) + 25,
+                  economy: Math.random() * 1.5 + 7.5,
+                  strikeRate: Math.floor(Math.random() * 15) + 120,
+                },
+          points:
+            Math.floor(Math.random() * 200) +
+            (position === "Batsman" ? 600 : position === "Bowler" ? 550 : 650),
+        });
+      }
+    }
+
+    return defaultPlayers;
+  };
 
   // Get players based on active tab and search query
   const getFilteredPlayers = () => {
