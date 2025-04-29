@@ -99,7 +99,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📞 Contact
 
-Project Link: [https://github.com/yourusername/strike](https://github.com/yourusername/strike)
+Project Link: [https://github.com/Tarif-dev/strike](https://github.com/Tarif-dev/strike)
 
 ---
 
