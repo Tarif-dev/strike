@@ -6,6 +6,7 @@ import PageContainer from "@/components/layout/PageContainer";
 import MatchCard, { MatchData } from "@/components/cricket/MatchCard";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMatches } from "@/hooks/useCricketData";
+import { Link } from "react-router-dom";
 
 const Matches = () => {
   const [activeTab, setActiveTab] = useState("All");
@@ -21,13 +22,16 @@ const Matches = () => {
   }, []);
 
   // Make sure matches is always an array and status is a valid type
-  const safeMatches: MatchData[] = Array.isArray(matches) 
-    ? matches.map(match => ({
+  const safeMatches: MatchData[] = Array.isArray(matches)
+    ? matches.map((match) => ({
         ...match,
-        status: (match.status === "completed" || match.status === "live" || match.status === "upcoming") 
-          ? match.status 
-          : "upcoming" // Default fallback if status is not one of the expected values
-      })) 
+        status:
+          match.status === "completed" ||
+          match.status === "live" ||
+          match.status === "upcoming"
+            ? match.status
+            : "upcoming", // Default fallback if status is not one of the expected values
+      }))
     : [];
 
   // Sort all matches by start time, latest first
@@ -206,8 +210,9 @@ const Matches = () => {
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {upcomingMatches.slice(0, 2).map((match) => (
-                        <button
+                        <Link
                           key={match.id}
+                          to={`/teams/create?match=${match.id}`}
                           className="flex items-center justify-between p-3 bg-gray-800/80 hover:bg-gray-800 rounded-lg transition-colors group"
                         >
                           <div className="flex items-center">
@@ -238,7 +243,7 @@ const Matches = () => {
                           <span className="text-neon-green text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                             Create Team →
                           </span>
-                        </button>
+                        </Link>
                       ))}
                     </div>
                   </div>

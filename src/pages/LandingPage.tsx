@@ -506,7 +506,7 @@ const LandingPage = () => {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center">
                     <div className="h-12 w-12 rounded-full bg-blue-900/30 flex items-center justify-center mr-2 border border-blue-800/50">
-                      <img src="/mi-logo.png" alt="MI" className="h-8 w-8" />
+                      <img src="/team_logos/mi.jpeg" alt="MI" className="h-8 w-8" />
                     </div>
                     <div>
                       <p className="font-medium">Mumbai</p>
@@ -526,7 +526,7 @@ const LandingPage = () => {
                       </p>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-yellow-900/30 flex items-center justify-center ml-2 border border-yellow-800/50">
-                      <img src="/csk-logo.png" alt="CSK" className="h-8 w-8" />
+                      <img src="/team_logos/csk.jpeg" alt="CSK" className="h-8 w-8" />
                     </div>
                   </div>
                 </div>
