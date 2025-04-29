@@ -34,7 +34,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
 // Data
-import { matches, teams, players, notifications } from "@/data/mockData";
+import { teams, players, notifications } from "@/data/mockData";
+import { matches } from "@/data/matchesData";
 
 // Animation variants
 const fadeIn = {
@@ -75,10 +76,19 @@ const Home = () => {
   const formattedDate = today.toLocaleDateString("en-US", dateOptions);
 
   // Filter matches by status
-  const liveMatches = matches.filter((m) => m.status === "live");
+  const liveMatches = matches
+    .filter((m) => m.status === "live")
+    .map((match) => ({
+      ...match,
+      status: match.status as "live" | "upcoming" | "completed",
+    }));
   const upcomingMatches = matches
     .filter((m) => m.status === "upcoming")
-    .slice(0, 3);
+    .slice(0, 3)
+    .map((match) => ({
+      ...match,
+      status: match.status as "live" | "upcoming" | "completed",
+    }));
 
   // Top players
   const topPlayers = players
