@@ -278,6 +278,13 @@ export const players = [
   },
 ];
 
+// Mock extended players
+export const extendedPlayers = []
+
+//Mock match data
+export const matches =[
+]
+
 // Mock leagues data
 export const leagues = [
   {
