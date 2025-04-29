@@ -23,10 +23,17 @@ const Matches = () => {
   // Make sure matches is always an array
   const safeMatches: MatchData[] = Array.isArray(matches) ? matches : [];
 
+  // Sort all matches by start time, latest first
+  const sortedMatches = [...safeMatches].sort((a, b) => {
+    return new Date(b.startTime).getTime() - new Date(a.startTime).getTime();
+  });
+
   // Filter matches by status ensuring the status matches the expected type
-  const liveMatches = safeMatches.filter((m) => m.status === "live");
-  const upcomingMatches = safeMatches.filter((m) => m.status === "upcoming");
-  const completedMatches = safeMatches.filter((m) => m.status === "completed");
+  const liveMatches = sortedMatches.filter((m) => m.status === "live");
+  const upcomingMatches = sortedMatches.filter((m) => m.status === "upcoming");
+  const completedMatches = sortedMatches.filter(
+    (m) => m.status === "completed"
+  );
 
   const getFilteredMatches = () => {
     switch (activeTab) {
@@ -37,7 +44,7 @@ const Matches = () => {
       case "Completed":
         return completedMatches;
       default:
-        return safeMatches;
+        return sortedMatches;
     }
   };
 
