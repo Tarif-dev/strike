@@ -20,8 +20,15 @@ const Matches = () => {
     );
   }, []);
 
-  // Make sure matches is always an array
-  const safeMatches: MatchData[] = Array.isArray(matches) ? matches : [];
+  // Make sure matches is always an array and status is a valid type
+  const safeMatches: MatchData[] = Array.isArray(matches) 
+    ? matches.map(match => ({
+        ...match,
+        status: (match.status === "completed" || match.status === "live" || match.status === "upcoming") 
+          ? match.status 
+          : "upcoming" // Default fallback if status is not one of the expected values
+      })) 
+    : [];
 
   // Sort all matches by start time, latest first
   const sortedMatches = [...safeMatches].sort((a, b) => {
