@@ -1,73 +1,108 @@
-# Welcome to your Lovable project
+# STRIKE - Cricket Fantasy Platform 🏏
 
-## Project info
+<div align="center">
+  <img src="public/players/featured_nft.jpg" alt="Strike Logo" width="400"/>
+  <p><em>Your Ultimate Fantasy Cricket Experience</em></p>
+</div>
 
-**URL**: https://lovable.dev/projects/d60ff093-c0e3-4d6c-adfe-e95315190711
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.io/)
 
-## How can I edit this code?
+## 📱 Overview
 
-There are several ways of editing your application.
+Strike is a next-generation fantasy cricket platform where fans can create teams, join contests, track live matches, and even collect NFTs of their favorite players. With a sleek UI and comprehensive stats, Strike brings cricket fantasy gaming to a whole new level.
 
-**Use Lovable**
+## ✨ Features
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d60ff093-c0e3-4d6c-adfe-e95315190711) and start prompting.
+- **🏆 Fantasy Contests**: Create teams and compete with other fans
+- **🎮 Live Match Tracking**: Follow match progress in real-time
+- **👨‍🦱 Player Profiles**: Detailed stats for all your favorite cricketers
+- **🎖️ NFT Marketplace**: Collect and trade digital player cards
+- **👛 Digital Wallet**: Manage your earnings securely
+- **🔐 User Authentication**: Secure login/signup system
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🖥️ Tech Stack
 
-**Use your preferred IDE**
+- **Frontend**: React 18, TypeScript
+- **Styling**: Tailwind CSS, shadcn/ui components
+- **Build Tool**: Vite
+- **Backend**: Supabase
+- **State Management**: React Context API & React Query
+- **Routing**: React Router
+- **Form Handling**: React Hook Form with Zod validation
+- **Charts**: Recharts
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 Getting Started
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
 
-Follow these steps:
+- Node.js (v16+)
+- npm or Bun
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Installation
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```bash
+# Clone the repository
+git clone <YOUR_REPO_URL>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Navigate to the project directory
+cd strike
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Install dependencies
+npm install
+# or
+bun install
+
+# Start the development server
 npm run dev
+# or
+bun dev
 ```
 
-**Edit a file directly in GitHub**
+The app will be available at [http://localhost:5173](http://localhost:5173)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📂 Project Structure
 
-**Use GitHub Codespaces**
+```
+├── public/               # Static assets
+│   ├── players/          # Player images
+│   └── team_logos/       # Team logos
+├── src/
+│   ├── components/       # UI components
+│   │   ├── cricket/      # Cricket-specific components
+│   │   ├── layout/       # Layout components
+│   │   └── ui/           # shadcn/ui components
+│   ├── contexts/         # React contexts
+│   ├── data/             # Mock data and API responses
+│   ├── hooks/            # Custom React hooks
+│   ├── integrations/     # Third-party integrations
+│   ├── lib/              # Utility functions
+│   ├── pages/            # Page components
+│   └── services/         # API service layers
+└── supabase/             # Supabase configurations
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🤝 Contributing
 
-## What technologies are used for this project?
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-This project is built with:
+## 📄 License
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## How can I deploy this project?
+## 📞 Contact
 
-Simply open [Lovable](https://lovable.dev/projects/d60ff093-c0e3-4d6c-adfe-e95315190711) and click on Share -> Publish.
+Project Link: [https://github.com/yourusername/strike](https://github.com/yourusername/strike)
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+<div align="center">
+  <p>Made with ❤️ by the Strike Team</p>
+</div>
