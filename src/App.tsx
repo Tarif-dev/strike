@@ -3,6 +3,7 @@ import Index from "@/pages/Index";
 import Home from "@/pages/Home";
 import Matches from "@/pages/Matches";
 import MatchDetail from "@/pages/MatchDetail";
+import MatchDetails from "@/pages/MatchDetails";
 import Players from "@/pages/Players";
 import PlayerDetail from "@/pages/PlayerDetail";
 import Leagues from "@/pages/Leagues";
@@ -49,7 +50,7 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/home" element={<Home />} />
               <Route path="/matches" element={<Matches />} />
-              <Route path="/matches/:id" element={<MatchDetail />} />
+              <Route path="/matches/:id" element={<MatchDetails />} />
               <Route path="/matches/:id/contests" element={<Contests />} />
               <Route path="/contests/:matchId" element={<Contests />} />
               <Route path="/players" element={<Players />} />
