@@ -7,8 +7,11 @@ import {
   Star,
   Zap,
   AlertCircle,
+  Info,
+  Plus,
+  LineChart,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -66,6 +69,8 @@ export default function MatchCard({
   className,
   featured = false,
 }: MatchCardProps) {
+  const navigate = useNavigate();
+
   if (
     !match ||
     !match.teams ||
@@ -364,43 +369,76 @@ export default function MatchCard({
                 )}
 
                 {/* Action buttons */}
-                <div className="grid grid-cols-2 gap-3">
-                  {isUpcoming && (
-                    <>
-                      <Link to={`/matches/${match.id}`}>
-                        <Button
-                          variant="outline"
-                          className="w-full bg-gray-800/50 border-gray-700/50 hover:bg-gray-700/50 text-white"
-                        >
-                          {fantasyData.contestCount} Contests
-                        </Button>
-                      </Link>
-                      <Link to={`/teams/create?match=${match.id}`}>
-                        <Button className="w-full bg-neon-green hover:bg-neon-green/90 text-gray-900 font-semibold">
-                          Create Team <ArrowRight className="ml-1 h-4 w-4" />
-                        </Button>
-                      </Link>
-                    </>
-                  )}
+                {isUpcoming && (
+                  <div className="flex gap-2 mt-auto">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => navigate(`/matches/${match.id}`)}
+                    >
+                      <Info className="w-4 h-4 mr-1" />
+                      Match Details
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="flex-1 bg-neon-green text-black hover:bg-neon-green/90"
+                      onClick={() =>
+                        navigate(`/teams/create?match=${match.id}`)
+                      }
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Create Team
+                    </Button>
+                  </div>
+                )}
 
-                  {isLive && (
-                    <>
-                      <Link to={`/matches/${match.id}`}>
-                        <Button
-                          variant="outline"
-                          className="w-full bg-gray-800/50 border-gray-700/50 hover:bg-gray-700/50 text-white"
-                        >
-                          My Contests
-                        </Button>
-                      </Link>
-                      <Link to={`/matches/${match.id}/live`}>
-                        <Button className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold">
-                          Live Score <Zap className="ml-1 h-4 w-4" />
-                        </Button>
-                      </Link>
-                    </>
-                  )}
-                </div>
+                {isLive && (
+                  <div className="flex gap-2 mt-auto">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => navigate(`/matches/${match.id}`)}
+                    >
+                      <Info className="w-4 h-4 mr-1" />
+                      Match Details
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold"
+                      onClick={() => navigate(`/matches/${match.id}/live`)}
+                    >
+                      Live Score <Zap className="ml-1 h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* For completed matches, replace the old button section */}
+            {isCompleted && (
+              <div className="flex gap-2 mt-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => navigate(`/matches/${match.id}`)}
+                >
+                  <Info className="w-4 h-4 mr-1" />
+                  Match Details
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => navigate(`/matches/${match.id}`)}
+                >
+                  <LineChart className="w-4 h-4 mr-1" />
+                  Match Summary
+                </Button>
               </div>
             )}
 

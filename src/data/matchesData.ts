@@ -2415,182 +2415,182 @@ export const matches = [
       isHotMatch: true,
     },
   },
-  {
-    id: "m70",
-    teams: {
-      home: {
-        name: "TBD",
-        code: "TBD",
-        logo: "/team_logos/tbd.jpeg",
-      },
-      away: {
-        name: "TBD",
-        code: "TBD",
-        logo: "/team_logos/tbd.jpeg",
-      },
-    },
-    tournament: {
-      name: "IPL 2025",
-      shortName: "IPL",
-    },
-    venue: "MA Chidambaram Stadium, Chennai",
-    startTime: "Tue May 20 2025 19:30:00 GMT+0530 (India Standard Time)",
-    status: "upcoming",
-    result: null,
-    scores: {
-      home: null,
-      away: null,
-    },
-    fantasy: {
-      contestCount: 50,
-      prizePool: "₹15 Lakh",
-      entryFees: [49, 99, 499, 999],
-      teamsCreated: 45000,
-      percentageJoined: 95,
-      isHotMatch: true,
-    },
-  },
-  {
-    id: "m71",
-    teams: {
-      home: {
-        name: "TBD",
-        code: "TBD",
-        logo: "/team_logos/tbd.jpeg",
-      },
-      away: {
-        name: "TBD",
-        code: "TBD",
-        logo: "/team_logos/tbd.jpeg",
-      },
-    },
-    tournament: {
-      name: "IPL 2025",
-      shortName: "IPL",
-    },
-    venue: "Narendra Modi Stadium, Ahmedabad",
-    startTime: "Wed May 21 2025 19:30:00 GMT+0530 (India Standard Time)",
-    status: "upcoming",
-    result: null,
-    scores: {
-      home: null,
-      away: null,
-    },
-    fantasy: {
-      contestCount: 50,
-      prizePool: "₹15 Lakh",
-      entryFees: [49, 99, 499, 999],
-      teamsCreated: 45000,
-      percentageJoined: 95,
-      isHotMatch: true,
-    },
-  },
-  {
-    id: "m72",
-    teams: {
-      home: {
-        name: "TBD",
-        code: "TBD",
-        logo: "/team_logos/tbd.jpeg",
-      },
-      away: {
-        name: "TBD",
-        code: "TBD",
-        logo: "/team_logos/tbd.jpeg",
-      },
-    },
-    tournament: {
-      name: "IPL 2025",
-      shortName: "IPL",
-    },
-    venue: "Narendra Modi Stadium, Ahmedabad",
-    startTime: "Fri May 23 2025 19:30:00 GMT+0530 (India Standard Time)",
-    status: "upcoming",
-    result: null,
-    scores: {
-      home: null,
-      away: null,
-    },
-    fantasy: {
-      contestCount: 50,
-      prizePool: "₹15 Lakh",
-      entryFees: [49, 99, 499, 999],
-      teamsCreated: 45000,
-      percentageJoined: 95,
-      isHotMatch: true,
-    },
-  },
-  {
-    id: "m73",
-    teams: {
-      home: {
-        name: "TBD",
-        code: "TBD",
-        logo: "/team_logos/tbd.jpeg",
-      },
-      away: {
-        name: "TBD",
-        code: "TBD",
-        logo: "/team_logos/tbd.jpeg",
-      },
-    },
-    tournament: {
-      name: "IPL 2025",
-      shortName: "IPL",
-    },
-    venue: "MA Chidambaram Stadium, Chennai",
-    startTime: "Sat May 24 2025 19:30:00 GMT+0530 (India Standard Time)",
-    status: "upcoming",
-    result: null,
-    scores: {
-      home: null,
-      away: null,
-    },
-    fantasy: {
-      contestCount: 50,
-      prizePool: "₹15 Lakh",
-      entryFees: [49, 99, 499, 999],
-      teamsCreated: 45000,
-      percentageJoined: 95,
-      isHotMatch: true,
-    },
-  },
-  {
-    id: "m74",
-    teams: {
-      home: {
-        name: "TBD",
-        code: "TBD",
-        logo: "/team_logos/tbd.jpeg",
-      },
-      away: {
-        name: "TBD",
-        code: "TBD",
-        logo: "/team_logos/tbd.jpeg",
-      },
-    },
-    tournament: {
-      name: "IPL 2025",
-      shortName: "IPL",
-    },
-    venue: "Narendra Modi Stadium, Ahmedabad",
-    startTime: "Sun May 25 2025 19:30:00 GMT+0530 (India Standard Time)",
-    status: "upcoming",
-    result: null,
-    scores: {
-      home: null,
-      away: null,
-    },
-    fantasy: {
-      contestCount: 60,
-      prizePool: "₹20 Lakh",
-      // " Hawkins": true,
-      entryFees: [49, 99, 499, 999, 1999],
-      teamsCreated: 50000,
-      percentageJoined: 98,
-      isHotMatch: true,
-    },
-  },
+  // {
+  //   id: "m70",
+  //   teams: {
+  //     home: {
+  //       name: "TBD",
+  //       code: "TBD",
+  //       logo: "/team_logos/tbd.jpeg",
+  //     },
+  //     away: {
+  //       name: "TBD",
+  //       code: "TBD",
+  //       logo: "/team_logos/tbd.jpeg",
+  //     },
+  //   },
+  //   tournament: {
+  //     name: "IPL 2025",
+  //     shortName: "IPL",
+  //   },
+  //   venue: "MA Chidambaram Stadium, Chennai",
+  //   startTime: "Tue May 20 2025 19:30:00 GMT+0530 (India Standard Time)",
+  //   status: "upcoming",
+  //   result: null,
+  //   scores: {
+  //     home: null,
+  //     away: null,
+  //   },
+  //   fantasy: {
+  //     contestCount: 50,
+  //     prizePool: "₹15 Lakh",
+  //     entryFees: [49, 99, 499, 999],
+  //     teamsCreated: 45000,
+  //     percentageJoined: 95,
+  //     isHotMatch: true,
+  //   },
+  // },
+  // {
+  //   id: "m71",
+  //   teams: {
+  //     home: {
+  //       name: "TBD",
+  //       code: "TBD",
+  //       logo: "/team_logos/tbd.jpeg",
+  //     },
+  //     away: {
+  //       name: "TBD",
+  //       code: "TBD",
+  //       logo: "/team_logos/tbd.jpeg",
+  //     },
+  //   },
+  //   tournament: {
+  //     name: "IPL 2025",
+  //     shortName: "IPL",
+  //   },
+  //   venue: "Narendra Modi Stadium, Ahmedabad",
+  //   startTime: "Wed May 21 2025 19:30:00 GMT+0530 (India Standard Time)",
+  //   status: "upcoming",
+  //   result: null,
+  //   scores: {
+  //     home: null,
+  //     away: null,
+  //   },
+  //   fantasy: {
+  //     contestCount: 50,
+  //     prizePool: "₹15 Lakh",
+  //     entryFees: [49, 99, 499, 999],
+  //     teamsCreated: 45000,
+  //     percentageJoined: 95,
+  //     isHotMatch: true,
+  //   },
+  // },
+  // {
+  //   id: "m72",
+  //   teams: {
+  //     home: {
+  //       name: "TBD",
+  //       code: "TBD",
+  //       logo: "/team_logos/tbd.jpeg",
+  //     },
+  //     away: {
+  //       name: "TBD",
+  //       code: "TBD",
+  //       logo: "/team_logos/tbd.jpeg",
+  //     },
+  //   },
+  //   tournament: {
+  //     name: "IPL 2025",
+  //     shortName: "IPL",
+  //   },
+  //   venue: "Narendra Modi Stadium, Ahmedabad",
+  //   startTime: "Fri May 23 2025 19:30:00 GMT+0530 (India Standard Time)",
+  //   status: "upcoming",
+  //   result: null,
+  //   scores: {
+  //     home: null,
+  //     away: null,
+  //   },
+  //   fantasy: {
+  //     contestCount: 50,
+  //     prizePool: "₹15 Lakh",
+  //     entryFees: [49, 99, 499, 999],
+  //     teamsCreated: 45000,
+  //     percentageJoined: 95,
+  //     isHotMatch: true,
+  //   },
+  // },
+  // {
+  //   id: "m73",
+  //   teams: {
+  //     home: {
+  //       name: "TBD",
+  //       code: "TBD",
+  //       logo: "/team_logos/tbd.jpeg",
+  //     },
+  //     away: {
+  //       name: "TBD",
+  //       code: "TBD",
+  //       logo: "/team_logos/tbd.jpeg",
+  //     },
+  //   },
+  //   tournament: {
+  //     name: "IPL 2025",
+  //     shortName: "IPL",
+  //   },
+  //   venue: "MA Chidambaram Stadium, Chennai",
+  //   startTime: "Sat May 24 2025 19:30:00 GMT+0530 (India Standard Time)",
+  //   status: "upcoming",
+  //   result: null,
+  //   scores: {
+  //     home: null,
+  //     away: null,
+  //   },
+  //   fantasy: {
+  //     contestCount: 50,
+  //     prizePool: "₹15 Lakh",
+  //     entryFees: [49, 99, 499, 999],
+  //     teamsCreated: 45000,
+  //     percentageJoined: 95,
+  //     isHotMatch: true,
+  //   },
+  // },
+  // {
+  //   id: "m74",
+  //   teams: {
+  //     home: {
+  //       name: "TBD",
+  //       code: "TBD",
+  //       logo: "/team_logos/tbd.jpeg",
+  //     },
+  //     away: {
+  //       name: "TBD",
+  //       code: "TBD",
+  //       logo: "/team_logos/tbd.jpeg",
+  //     },
+  //   },
+  //   tournament: {
+  //     name: "IPL 2025",
+  //     shortName: "IPL",
+  //   },
+  //   venue: "Narendra Modi Stadium, Ahmedabad",
+  //   startTime: "Sun May 25 2025 19:30:00 GMT+0530 (India Standard Time)",
+  //   status: "upcoming",
+  //   result: null,
+  //   scores: {
+  //     home: null,
+  //     away: null,
+  //   },
+  //   fantasy: {
+  //     contestCount: 60,
+  //     prizePool: "₹20 Lakh",
+  //     // " Hawkins": true,
+  //     entryFees: [49, 99, 499, 999, 1999],
+  //     teamsCreated: 50000,
+  //     percentageJoined: 98,
+  //     isHotMatch: true,
+  //   },
+  // },
 ];
 
 // Mock leagues data
