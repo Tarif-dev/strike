@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Trophy,
@@ -15,6 +15,7 @@ import {
   DollarSign,
   Bell,
   Sparkles,
+  RefreshCw,
 } from "lucide-react";
 
 // Components
@@ -28,14 +29,21 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Tabs } from "@/components/ui/tabs";
-
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useConnection } from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+// import { useState, useEffect } from 'react';
+import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 // Hooks and contexts
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
+
 // Data
 import { teams, players, notifications } from "@/data/mockData";
 import { matches } from "@/data/matchesData";
+
 
 // Animation variants
 const fadeIn = {
@@ -56,6 +64,66 @@ const Home = () => {
   // States
   const [showNotifications, setShowNotifications] = useState(false);
   const { user } = useAuth();
+  // Add these inside your Home component, with your other state variables
+const { publicKey, connected } = useWallet();
+const { connection } = useConnection();
+const [usdcBalance, setUsdcBalance] = useState(null);
+const [tokenLoading, setTokenLoading] = useState(false);
+const navigate = useNavigate(); // add this import if not already present
+
+// USDC token mint address (as specified)
+const USDC_MINT = new PublicKey('Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr');
+
+// Format public key for display
+const formatPublicKey = (key) => {
+  if (!key) return "";
+  const keyStr = key.toString();
+  return `${keyStr.substring(0, 4)}...${keyStr.substring(keyStr.length - 4)}`;
+};
+
+// Add this function to fetch USDC balance
+const fetchUSDCBalance = async () => {
+  if (!publicKey || !connection) return;
+  
+  try {
+    setTokenLoading(true);
+    
+    // Find token accounts owned by the user
+    const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
+      publicKey, 
+      { mint: USDC_MINT }
+    );
+    
+    // Look for USDC token account
+    let userUsdcBalance = 0;
+    
+    for (const account of tokenAccounts.value) {
+      const parsedInfo = account.account.data.parsed.info;
+      const tokenBalance = parsedInfo.tokenAmount.uiAmount;
+      userUsdcBalance += tokenBalance;
+    }
+    
+    setUsdcBalance(userUsdcBalance);
+  } catch (error) {
+    console.error("Error fetching USDC balance:", error);
+    toast({
+      title: "Error Fetching Balance",
+      description: "Could not load your USDC balance.",
+      variant: "destructive",
+    });
+  } finally {
+    setTokenLoading(false);
+  }
+};
+
+// Add this effect to fetch balance when wallet is connected
+useEffect(() => {
+  if (connected && publicKey) {
+    fetchUSDCBalance();
+  } else {
+    setUsdcBalance(null);
+  }
+}, [connected, publicKey]);
 
   // Get current date for greeting
   const currentHour = new Date().getHours();
@@ -187,46 +255,64 @@ const Home = () => {
         </motion.div>
 
         {/* Wallet balance card */}
-        {user && (
-          <motion.div {...fadeIn}>
-            <Card className="bg-gradient-to-r from-gray-900 to-gray-950 border-gray-800 mb-6 overflow-hidden">
-              <div className="p-4">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center">
-                    <div className="h-10 w-10 rounded-full bg-neon-green/10 flex items-center justify-center mr-3">
-                      <DollarSign className="h-5 w-5 text-neon-green" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-400">Available Balance</p>
-                      <p className="text-xl font-bold text-white">₹1,250</p>
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    className="bg-neon-green text-gray-900 hover:bg-neon-green/90"
-                  >
-                    Add Money
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 mt-4 text-center">
-                  <Link to="/wallet">
-                    <div className="p-2 bg-gray-800/40 hover:bg-gray-800/60 rounded-lg transition-colors">
-                      <p className="text-xs text-gray-400">Deposits</p>
-                      <p className="font-medium text-white">₹2,500</p>
-                    </div>
-                  </Link>
-                  <Link to="/wallet">
-                    <div className="p-2 bg-gray-800/40 hover:bg-gray-800/60 rounded-lg transition-colors">
-                      <p className="text-xs text-gray-400">Winnings</p>
-                      <p className="font-medium text-white">₹750</p>
-                    </div>
-                  </Link>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
+        <motion.div {...fadeIn}>
+  <Card className="bg-gradient-to-r from-gray-900 to-gray-950 border-gray-800 mb-6 overflow-hidden">
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-2">
+        <div className="flex items-center">
+          <div className="h-10 w-10 rounded-full bg-neon-green/10 flex items-center justify-center mr-3">
+            <DollarSign className="h-5 w-5 text-neon-green" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-400">Available Balance</p>
+            {!connected ? (
+              <p className="text-md text-gray-400">Wallet not connected</p>
+            ) : (
+              <p className="text-xl font-bold text-white">
+                {tokenLoading ? (
+                  <span className="flex items-center">
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Loading...
+                  </span>
+                ) : (
+                  `${usdcBalance !== null ? usdcBalance.toFixed(2) : '0.00'} USDC`
+                )}
+              </p>
+            )}
+          </div>
+        </div>
+        {!connected ? (
+          <WalletMultiButton className="text-sm px-4 py-2 h-9 bg-neon-green text-gray-900 hover:bg-neon-green/90 rounded-md" />
+        ) : (
+          <Button
+            size="sm"
+            className="bg-neon-green text-gray-900 hover:bg-neon-green/90"
+            onClick={() => navigate('/wallet')}
+          >
+            Manage
+          </Button>
         )}
+      </div>
+
+      {connected && (
+        <div className="grid grid-cols-2 gap-2 mt-4 text-center">
+          <Link to="/wallet">
+            <div className="p-2 bg-gray-800/40 hover:bg-gray-800/60 rounded-lg transition-colors">
+              <p className="text-xs text-gray-400">Wallet</p>
+              <p className="font-medium text-white">{formatPublicKey(publicKey)}</p>
+            </div>
+          </Link>
+          <Link to="/wallet">
+            <div className="p-2 bg-gray-800/40 hover:bg-gray-800/60 rounded-lg transition-colors">
+              <p className="text-xs text-gray-400">Network</p>
+              <p className="font-medium text-white">Solana Devnet</p>
+            </div>
+          </Link>
+        </div>
+      )}
+    </div>
+  </Card>
+</motion.div>
 
         {/* Live matches section (if any) */}
         {liveMatches.length > 0 && (
