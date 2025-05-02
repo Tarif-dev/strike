@@ -24,7 +24,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+
+    /* Fix for web type definitions */
+    "types": ["node"]
   },
   "include": ["src"]
 }
