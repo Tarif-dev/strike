@@ -6,8 +6,6 @@ import MatchDetail from "@/pages/MatchDetail";
 import MatchDetails from "@/pages/MatchDetails";
 import Players from "@/pages/Players";
 import PlayerDetail from "@/pages/PlayerDetail";
-import Leagues from "@/pages/Leagues";
-import LeagueDetail from "@/pages/LeagueDetail";
 import CreateTeam from "@/pages/CreateTeam";
 import TeamDetail from "@/pages/TeamDetail";
 import Profile from "@/pages/Profile";
@@ -16,6 +14,7 @@ import Contests from "@/pages/Contests";
 import NFTMarketplace from "@/pages/NFTMarketplace";
 import Login from "@/pages/auth/Login";
 import Signup from "@/pages/auth/Signup";
+import AdminSignup from "@/pages/auth/AdminSignup";
 import OtpLogin from "@/pages/auth/OtpLogin";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
@@ -23,27 +22,33 @@ import AuthCallback from "@/pages/auth/AuthCallback";
 import NotFound from "@/pages/NotFound";
 import ApiSettings from "@/pages/ApiSettings";
 import LandingPage from "@/pages/LandingPage";
+import AdminDashboard from "@/pages/admin/Dashboard";
+import CreateMatch from "@/pages/admin/CreateMatch";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
-import React, { FC, useMemo } from 'react';
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
-import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import { 
+import AdminRoute from "@/components/layout/AdminRoute";
+import React, { FC, useMemo } from "react";
+import {
+  ConnectionProvider,
+  WalletProvider,
+} from "@solana/wallet-adapter-react";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import {
   UnsafeBurnerWalletAdapter,
   PhantomWalletAdapter,
   SolflareWalletAdapter,
   TorusWalletAdapter,
   LedgerWalletAdapter,
-} from '@solana/wallet-adapter-wallets';
+} from "@solana/wallet-adapter-wallets";
 import {
-    WalletModalProvider,
-    WalletDisconnectButton,
-    WalletMultiButton
-} from '@solana/wallet-adapter-react-ui';
-import { clusterApiUrl } from '@solana/web3.js';
-import '@solana/wallet-adapter-react-ui/styles.css';
+  WalletModalProvider,
+  WalletDisconnectButton,
+  WalletMultiButton,
+} from "@solana/wallet-adapter-react-ui";
+import { clusterApiUrl } from "@solana/web3.js";
+import "@solana/wallet-adapter-react-ui/styles.css";
 // require('@solana/wallet-adapter-react-ui/styles.css');
 
 // Create a client
@@ -75,43 +80,68 @@ function App() {
       <ConnectionProvider endpoint={endpoint}>
         <WalletProvider wallets={wallets} autoConnect>
           <WalletModalProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/auth/login" element={<Login />} />
-            <Route path="/auth/signup" element={<Signup />} />
-            <Route path="/auth/otp-login" element={<OtpLogin />} />
-            <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-            <Route path="/auth/reset-password" element={<ResetPassword />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
+            <BrowserRouter>
+              <AuthProvider>
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/auth/login" element={<Login />} />
+                  <Route path="/auth/signup" element={<Signup />} />
+                  <Route path="/auth/admin-signup" element={<AdminSignup />} />
+                  <Route path="/auth/otp-login" element={<OtpLogin />} />
+                  <Route
+                    path="/auth/forgot-password"
+                    element={<ForgotPassword />}
+                  />
+                  <Route
+                    path="/auth/reset-password"
+                    element={<ResetPassword />}
+                  />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
 
-            {/* Protected routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/home" element={<Home />} />
-              <Route path="/matches" element={<Matches />} />
-              <Route path="/matches/:id" element={<MatchDetails />} />
-              <Route path="/matches/:id/contests" element={<Contests />} />
-              <Route path="/contests/:matchId" element={<Contests />} />
-              <Route path="/players" element={<Players />} />
-              <Route path="/players/:id" element={<PlayerDetail />} />
-              <Route path="/leagues" element={<Leagues />} />
-              <Route path="/leagues/:id" element={<LeagueDetail />} />
-              <Route path="/teams/create" element={<CreateTeam />} />
-              <Route path="/teams/:id" element={<TeamDetail />} />
-              <Route path="/wallet" element={<Wallet />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/api-settings" element={<ApiSettings />} />
-              <Route path="/nft-marketplace" element={<NFTMarketplace />} />
-            </Route>
+                  {/* Protected routes */}
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/home" element={<Home />} />
+                    <Route path="/matches" element={<Matches />} />
+                    <Route path="/matches/:id" element={<MatchDetails />} />
+                    <Route
+                      path="/matches/:id/contests"
+                      element={<Contests />}
+                    />
+                    <Route path="/contests/:matchId" element={<Contests />} />
+                    <Route path="/players" element={<Players />} />
+                    <Route path="/players/:id" element={<PlayerDetail />} />
+                    {/* Redirect all leagues routes to matches */}
+                    <Route
+                      path="/leagues/*"
+                      element={<Navigate to="/matches" replace />}
+                    />
+                    <Route path="/teams/create" element={<CreateTeam />} />
+                    <Route path="/teams/:id" element={<TeamDetail />} />
+                    <Route path="/wallet" element={<Wallet />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/api-settings" element={<ApiSettings />} />
+                    <Route
+                      path="/nft-marketplace"
+                      element={<NFTMarketplace />}
+                    />
+                  </Route>
 
-            {/* Fallback for unknown routes */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
-        </AuthProvider>
-      </BrowserRouter>
+                  {/* Admin routes */}
+                  <Route element={<AdminRoute />}>
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route
+                      path="/admin/create-match"
+                      element={<CreateMatch />}
+                    />
+                  </Route>
+
+                  {/* Fallback for unknown routes */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <Toaster />
+              </AuthProvider>
+            </BrowserRouter>
           </WalletModalProvider>
         </WalletProvider>
       </ConnectionProvider>

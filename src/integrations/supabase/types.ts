@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      matches: {
+        Row: {
+          admin: string;
+          match_id: string;
+          registration_end_time: string;
+          total_deposited: number;
+          is_active: boolean;
+          is_finalized: boolean;
+          bump: number;
+          token_bump: number;
+          match_details?: Json;
+        };
+        Insert: {
+          admin: string;
+          match_id: string;
+          registration_end_time: string;
+          total_deposited?: number;
+          is_active?: boolean;
+          is_finalized?: boolean;
+          bump: number;
+          token_bump: number;
+          match_details?: Json;
+        };
+        Update: {
+          admin?: string;
+          match_id?: string;
+          registration_end_time?: string;
+          total_deposited?: number;
+          is_active?: boolean;
+          is_finalized?: boolean;
+          bump?: number;
+          token_bump?: number;
+          match_details?: Json;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -17,6 +53,7 @@ export type Database = {
           id: string;
           updated_at: string;
           username: string | null;
+          is_admin: boolean | null;
         };
         Insert: {
           avatar_url?: string | null;
@@ -25,6 +62,7 @@ export type Database = {
           id: string;
           updated_at?: string;
           username?: string | null;
+          is_admin?: boolean | null;
         };
         Update: {
           avatar_url?: string | null;
@@ -33,6 +71,7 @@ export type Database = {
           id?: string;
           updated_at?: string;
           username?: string | null;
+          is_admin?: boolean | null;
         };
         Relationships: [];
       };

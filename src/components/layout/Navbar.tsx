@@ -16,7 +16,6 @@ export default function Navbar() {
   const navItems = [
     { icon: Home, path: "/home", label: "Home" },
     { icon: Calendar, path: "/matches", label: "Matches" },
-    { icon: Trophy, path: "/leagues", label: "Leagues" },
     { icon: Gem, path: "/nft-marketplace", label: "NFTs" },
     { icon: Wallet, path: "/wallet", label: "Wallet" },
     { icon: User, path: "/profile", label: "Profile" },

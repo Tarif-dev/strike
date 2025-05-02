@@ -5,12 +5,12 @@ import Navbar from "@/components/layout/Navbar";
 import PageContainer from "@/components/layout/PageContainer";
 import MatchCard, { MatchData } from "@/components/cricket/MatchCard";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useMatches } from "@/hooks/useCricketData";
 import { Link } from "react-router-dom";
+import { useSupabaseMatches } from "@/hooks/useSupabaseMatches";
 
 const Matches = () => {
   const [activeTab, setActiveTab] = useState("All");
-  const { matches, loading, error } = useMatches();
+  const { matches, loading, error } = useSupabaseMatches(); // Using our new Supabase hook
   const [currentMonth, setCurrentMonth] = useState("");
 
   useEffect(() => {
@@ -145,9 +145,9 @@ const Matches = () => {
             </div>
           ) : error ? (
             <div className="text-center py-8">
-              <p className="text-red-400">Error loading matches</p>
+              <p className="text-red-400">Error loading matches: {error}</p>
               <p className="text-muted-foreground text-sm mt-2">
-                Check your API settings
+                Check your connection or database settings
               </p>
             </div>
           ) : (
@@ -193,7 +193,7 @@ const Matches = () => {
                     {activeTab === "Live"
                       ? "There are no live matches at the moment. Check back later or explore upcoming matches."
                       : activeTab === "Upcoming"
-                      ? "There are no upcoming matches scheduled. Check back later."
+                      ? "There are no upcoming matches scheduled. Check back later or create one from the admin panel."
                       : activeTab === "Completed"
                       ? "No completed matches found. Match history will appear here."
                       : "No matches available. Check back later for updates."}
