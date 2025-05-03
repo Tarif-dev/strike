@@ -28,6 +28,8 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import InitialsAvatar from "@/components/common/InitialsAvatar";
+import { useSupabaseMatch } from "@/hooks/useSupabaseMatch";
 
 // Components
 import PageContainer from "@/components/layout/PageContainer";
@@ -42,7 +44,6 @@ import { Separator } from "@/components/ui/separator";
 // Data
 import { countryFlags } from "@/data/mockData";
 import { players } from "@/data/playersData";
-import { matches } from "@/data/matchesData";
 
 // Team balance constraints
 const TEAM_CONSTRAINTS = {
@@ -53,34 +54,6 @@ const TEAM_CONSTRAINTS = {
   MAX_FROM_TEAM: 7,
 };
 
-// Create teams table function
-const createTeamsTable = async () => {
-  try {
-    // Check if table exists using a direct query instead of _database
-    const { data, error } = await supabase.from("teams").select("id").limit(1);
-
-    if (error && error.code === "42P01") {
-      // Table doesn't exist error code
-      console.log("Table doesn't exist, proceeding with creation");
-
-      // Create the teams table via raw SQL query using RPC
-      try {
-        // We'll skip this approach as it requires additional setup
-        console.log(
-          "Teams table needs to be created manually through Supabase dashboard"
-        );
-      } catch (createError) {
-        console.error("Error creating teams table:", createError);
-      }
-    }
-
-    return true;
-  } catch (error) {
-    console.error("Error with teams table check:", error);
-    return false;
-  }
-};
-
 const CreateTeam = () => {
   // Hooks
   const navigate = useNavigate();
@@ -88,6 +61,12 @@ const CreateTeam = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
+  const matchId = searchParams.get("match");
+  const {
+    match,
+    loading: matchLoading,
+    error: matchError,
+  } = useSupabaseMatch(matchId);
 
   // States
   const [teamName, setTeamName] = useState("My Fantasy XI");
@@ -105,7 +84,6 @@ const CreateTeam = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   // States for dual team display
-  const [selectedMatch, setSelectedMatch] = useState(matches[0]);
   const [homeTeamPlayers, setHomeTeamPlayers] = useState<PlayerData[]>([]);
   const [awayTeamPlayers, setAwayTeamPlayers] = useState<PlayerData[]>([]);
   const [activeTeamTab, setActiveTeamTab] = useState<"home" | "away">("home");
@@ -157,29 +135,19 @@ const CreateTeam = () => {
   );
   const remainingCredits = totalCredits - usedCredits;
 
-  // Initialize the selected match based on the URL query parameter
-  useEffect(() => {
-    const matchId = searchParams.get("match");
-    if (matchId) {
-      // Find the match with the given ID
-      const match = matches.find((m) => m.id === matchId);
-      if (match) {
-        setSelectedMatch(match);
-      }
-    }
-  }, [searchParams]);
-
   useEffect(() => {
     validateTeam();
   }, [selectedPlayers, captain, viceCaptain]);
 
   // Initialize team players when match is selected
   useEffect(() => {
+    if (!match) return;
+
     // Get team names and codes from the selected match
-    const homeTeamName = selectedMatch.teams.home.name;
-    const homeTeamCode = selectedMatch.teams.home.code;
-    const awayTeamName = selectedMatch.teams.away.name;
-    const awayTeamCode = selectedMatch.teams.away.code;
+    const homeTeamName = match.teams.home.name;
+    const homeTeamCode = match.teams.home.code;
+    const awayTeamName = match.teams.away.name;
+    const awayTeamCode = match.teams.away.code;
 
     console.log("Filtering players for teams:", homeTeamName, awayTeamName);
 
@@ -231,7 +199,7 @@ const CreateTeam = () => {
       const defaultHomePlayers = createDefaultPlayers(
         homeTeamName,
         homeTeamCode,
-        selectedMatch.teams.home.logo
+        match.teams.home.logo
       );
       setHomeTeamPlayers(defaultHomePlayers);
     } else {
@@ -243,13 +211,13 @@ const CreateTeam = () => {
       const defaultAwayPlayers = createDefaultPlayers(
         awayTeamName,
         awayTeamCode,
-        selectedMatch.teams.away.logo
+        match.teams.away.logo
       );
       setAwayTeamPlayers(defaultAwayPlayers);
     } else {
       setAwayTeamPlayers(awayTeamFinal);
     }
-  }, [selectedMatch]);
+  }, [match]);
 
   // Helper function to create default players if none are found
   const createDefaultPlayers = (
@@ -596,20 +564,20 @@ const CreateTeam = () => {
 
       // Create match details object - keep only necessary data
       const matchDetails = {
-        match_id: selectedMatch.id,
-        tournament: selectedMatch.tournament.name,
-        venue: selectedMatch.venue,
-        date: selectedMatch.startTime,
+        match_id: match.id,
+        tournament: match.tournament.name,
+        venue: match.venue,
+        date: match.startTime,
         teams: {
           home: {
-            name: selectedMatch.teams.home.name,
-            code: selectedMatch.teams.home.code,
-            logo: selectedMatch.teams.home.logo,
+            name: match.teams.home.name,
+            code: match.teams.home.code,
+            logo: match.teams.home.logo,
           },
           away: {
-            name: selectedMatch.teams.away.name,
-            code: selectedMatch.teams.away.code,
-            logo: selectedMatch.teams.away.logo,
+            name: match.teams.away.name,
+            code: match.teams.away.code,
+            logo: match.teams.away.logo,
           },
         },
       };
@@ -630,7 +598,7 @@ const CreateTeam = () => {
       const teamData = {
         user_id: user.id,
         team_name: teamName,
-        match_id: selectedMatch.id,
+        match_id: match.id,
         players: sanitizedPlayers,
         captain_id: captain?.id || "",
         vice_captain_id: viceCaptain?.id || "",
@@ -755,45 +723,58 @@ const CreateTeam = () => {
       {/* Match selection - Moved to top */}
       <div className="mb-6 bg-gray-900/80 backdrop-blur-sm rounded-xl p-4">
         <h2 className="font-semibold mb-3 text-lg">Match</h2>
-        <div className="flex flex-col md:flex-row items-center justify-between p-4 bg-gray-800/60 rounded-lg">
-          <div className="flex flex-col items-center mb-3 md:mb-0">
-            <img
-              src={selectedMatch.teams.home.logo}
-              alt={selectedMatch.teams.home.name}
-              className="w-16 h-16 mb-2"
-            />
-            <span className="font-medium text-lg">
-              {selectedMatch.teams.home.name}
-            </span>
-            <span className="text-sm text-gray-400">
-              {selectedMatch.teams.home.code}
-            </span>
+        {matchLoading ? (
+          <div className="text-center py-6 text-gray-400">
+            <Loader2 className="w-6 h-6 mx-auto animate-spin" />
+            <p>Loading match details...</p>
           </div>
+        ) : matchError ? (
+          <div className="text-center py-6 text-red-400">
+            <AlertTriangle className="w-6 h-6 mx-auto mb-2" />
+            <p>Failed to load match details</p>
+            <p className="text-sm">{matchError}</p>
+          </div>
+        ) : (
+          match && (
+            <div className="flex flex-col md:flex-row items-center justify-between p-4 bg-gray-800/60 rounded-lg">
+              <div className="flex flex-col items-center mb-3 md:mb-0">
+                <img
+                  src={match.teams.home.logo}
+                  alt={match.teams.home.name}
+                  className="w-16 h-16 mb-2"
+                />
+                <span className="font-medium text-lg">
+                  {match.teams.home.name}
+                </span>
+                <span className="text-sm text-gray-400">
+                  {match.teams.home.code}
+                </span>
+              </div>
 
-          <div className="flex flex-col items-center">
-            <div className="text-neon-green font-bold mb-1">VS</div>
-            <div className="text-xs text-gray-400 mb-1">
-              {selectedMatch.venue}
-            </div>
-            <div className="text-xs bg-neon-green/20 text-neon-green px-2 py-1 rounded-full">
-              {selectedMatch.tournament.name}
-            </div>
-          </div>
+              <div className="flex flex-col items-center">
+                <div className="text-neon-green font-bold mb-1">VS</div>
+                <div className="text-xs text-gray-400 mb-1">{match.venue}</div>
+                <div className="text-xs bg-neon-green/20 text-neon-green px-2 py-1 rounded-full">
+                  {match.tournament.name}
+                </div>
+              </div>
 
-          <div className="flex flex-col items-center mt-3 md:mt-0">
-            <img
-              src={selectedMatch.teams.away.logo}
-              alt={selectedMatch.teams.away.name}
-              className="w-16 h-16 mb-2"
-            />
-            <span className="font-medium text-lg">
-              {selectedMatch.teams.away.name}
-            </span>
-            <span className="text-sm text-gray-400">
-              {selectedMatch.teams.away.code}
-            </span>
-          </div>
-        </div>
+              <div className="flex flex-col items-center mt-3 md:mt-0">
+                <img
+                  src={match.teams.away.logo}
+                  alt={match.teams.away.name}
+                  className="w-16 h-16 mb-2"
+                />
+                <span className="font-medium text-lg">
+                  {match.teams.away.name}
+                </span>
+                <span className="text-sm text-gray-400">
+                  {match.teams.away.code}
+                </span>
+              </div>
+            </div>
+          )
+        )}
       </div>
 
       {/* Team name and progress */}
@@ -907,9 +888,7 @@ const CreateTeam = () => {
                                   className="w-10 h-10 rounded-full object-cover"
                                 />
                               ) : (
-                                <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
-                                  <User className="w-6 h-6 text-gray-400" />
-                                </div>
+                                <InitialsAvatar name={player.name} size="md" />
                               )}
                               <div className="overflow-hidden">
                                 <div className="font-medium truncate">
@@ -1040,11 +1019,11 @@ const CreateTeam = () => {
             }
           >
             <img
-              src={selectedMatch.teams.home.logo}
-              alt={selectedMatch.teams.home.name}
+              src={match?.teams.home.logo}
+              alt={match?.teams.home.name}
               className="w-5 h-5 mr-1"
             />
-            {selectedMatch.teams.home.code}
+            {match?.teams.home.code}
           </Button>
           <Button
             variant={activeTeamTab === "away" ? "default" : "ghost"}
@@ -1055,11 +1034,11 @@ const CreateTeam = () => {
             }
           >
             <img
-              src={selectedMatch.teams.away.logo}
-              alt={selectedMatch.teams.away.name}
+              src={match?.teams.away.logo}
+              alt={match?.teams.away.name}
               className="w-5 h-5 mr-1"
             />
-            {selectedMatch.teams.away.code}
+            {match?.teams.away.code}
           </Button>
         </div>
       </div>
@@ -1085,11 +1064,11 @@ const CreateTeam = () => {
           <div className="bg-gray-900/80 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
               <img
-                src={selectedMatch.teams.home.logo}
-                alt={selectedMatch.teams.home.name}
+                src={match?.teams.home.logo}
+                alt={match?.teams.home.name}
                 className="w-6 h-6"
               />
-              <h3 className="font-medium">{selectedMatch.teams.home.name}</h3>
+              <h3 className="font-medium">{match?.teams.home.name}</h3>
               <Badge variant="outline" className="ml-auto">
                 11 Players
               </Badge>
@@ -1132,9 +1111,7 @@ const CreateTeam = () => {
                                 className="w-10 h-10 rounded-full object-cover"
                               />
                             ) : (
-                              <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
-                                <User className="w-5 h-5 text-gray-400" />
-                              </div>
+                              <InitialsAvatar name={player.name} size="md" />
                             )}
                             {isCaptain && (
                               <div className="absolute -top-1 -right-1 bg-neon-green text-black rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">
@@ -1241,11 +1218,11 @@ const CreateTeam = () => {
           <div className="bg-gray-900/80 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
               <img
-                src={selectedMatch.teams.away.logo}
-                alt={selectedMatch.teams.away.name}
+                src={match?.teams.away.logo}
+                alt={match?.teams.away.name}
                 className="w-6 h-6"
               />
-              <h3 className="font-medium">{selectedMatch.teams.away.name}</h3>
+              <h3 className="font-medium">{match?.teams.away.name}</h3>
               <Badge variant="outline" className="ml-auto">
                 11 Players
               </Badge>
@@ -1288,9 +1265,7 @@ const CreateTeam = () => {
                                 className="w-10 h-10 rounded-full object-cover"
                               />
                             ) : (
-                              <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
-                                <User className="w-5 h-5 text-gray-400" />
-                              </div>
+                              <InitialsAvatar name={player.name} size="md" />
                             )}
                             {isCaptain && (
                               <div className="absolute -top-1 -right-1 bg-neon-green text-black rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">
