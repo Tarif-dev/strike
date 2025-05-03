@@ -6,6 +6,7 @@ import { Tabs } from "@/components/ui/tab";
 import PlayerCard from "@/components/cricket/PlayerCard";
 import { useMatch } from "@/hooks/useCricketData";
 import { players } from "@/data/mockData";
+import InitialsAvatar from "@/components/common/InitialsAvatar";
 
 const MatchDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -369,11 +370,18 @@ const MatchDetail = () => {
                       </span>
                       <div className="flex justify-between pb-2 border-b border-border">
                         <div className="flex items-center gap-2">
-                          <img
-                            src={players[0].image}
-                            alt={players[0].name}
-                            className="w-8 h-8 rounded-full"
-                          />
+                          {players[0].image ? (
+                            <img
+                              src={players[0].image}
+                              alt={players[0].name}
+                              className="w-8 h-8 rounded-full"
+                            />
+                          ) : (
+                            <InitialsAvatar
+                              name={players[0].name}
+                              className="w-8 h-8 rounded-full"
+                            />
+                          )}
                           <span className="font-medium">{players[0].name}</span>
                         </div>
                         <span className="font-medium">63 (42)</span>
@@ -386,11 +394,18 @@ const MatchDetail = () => {
                       </span>
                       <div className="flex justify-between pb-2 border-b border-border">
                         <div className="flex items-center gap-2">
-                          <img
-                            src={players[2].image}
-                            alt={players[2].name}
-                            className="w-8 h-8 rounded-full"
-                          />
+                          {players[2].image ? (
+                            <img
+                              src={players[2].image}
+                              alt={players[2].name}
+                              className="w-8 h-8 rounded-full"
+                            />
+                          ) : (
+                            <InitialsAvatar
+                              name={players[2].name}
+                              className="w-8 h-8 rounded-full"
+                            />
+                          )}
                           <span className="font-medium">{players[2].name}</span>
                         </div>
                         <span className="font-medium">3/24</span>
@@ -403,11 +418,18 @@ const MatchDetail = () => {
                       </span>
                       <div className="flex justify-between pb-2 border-b border-border">
                         <div className="flex items-center gap-2">
-                          <img
-                            src={players[1].image}
-                            alt={players[1].name}
-                            className="w-8 h-8 rounded-full"
-                          />
+                          {players[1].image ? (
+                            <img
+                              src={players[1].image}
+                              alt={players[1].name}
+                              className="w-8 h-8 rounded-full"
+                            />
+                          ) : (
+                            <InitialsAvatar
+                              name={players[1].name}
+                              className="w-8 h-8 rounded-full"
+                            />
+                          )}
                           <span className="font-medium">{players[1].name}</span>
                         </div>
                         <span className="font-medium">175.0</span>
@@ -420,11 +442,18 @@ const MatchDetail = () => {
                       </span>
                       <div className="flex justify-between pb-2 border-border">
                         <div className="flex items-center gap-2">
-                          <img
-                            src={players[8].image}
-                            alt={players[8].name}
-                            className="w-8 h-8 rounded-full"
-                          />
+                          {players[8].image ? (
+                            <img
+                              src={players[8].image}
+                              alt={players[8].name}
+                              className="w-8 h-8 rounded-full"
+                            />
+                          ) : (
+                            <InitialsAvatar
+                              name={players[8].name}
+                              className="w-8 h-8 rounded-full"
+                            />
+                          )}
                           <span className="font-medium">{players[8].name}</span>
                         </div>
                         <span className="font-medium">5.75</span>

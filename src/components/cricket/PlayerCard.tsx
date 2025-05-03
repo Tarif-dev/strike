@@ -1,5 +1,5 @@
-
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
+import InitialsAvatar from "@/components/common/InitialsAvatar";
 
 export interface PlayerData {
   id: string;
@@ -30,15 +30,15 @@ interface PlayerCardProps {
   selected?: boolean;
 }
 
-export default function PlayerCard({ 
-  player, 
+export default function PlayerCard({
+  player,
   compact = false,
   onClick,
-  selected = false
+  selected = false,
 }: PlayerCardProps) {
   if (compact) {
     return (
-      <div 
+      <div
         className={cn(
           "bg-cricket-medium-green rounded-xl p-3 flex items-center gap-3 transition-all",
           onClick && "cursor-pointer hover:bg-secondary",
@@ -48,32 +48,26 @@ export default function PlayerCard({
       >
         <div className="w-12 h-12 rounded-full overflow-hidden bg-accent/20">
           {player.image ? (
-            <img 
-              src={player.image} 
-              alt={player.name} 
-              className="w-full h-full object-cover" 
+            <img
+              src={player.image}
+              alt={player.name}
+              className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-lg">
-              {player.name.charAt(0)}
-            </div>
+            <InitialsAvatar name={player.name} size="sm" />
           )}
         </div>
         <div>
           <div className="flex items-center gap-2">
             <h3 className="font-semibold">{player.name}</h3>
-            <img 
-              src={player.countryFlag} 
-              alt={player.country} 
+            <img
+              src={player.countryFlag}
+              alt={player.country}
               className="country-flag"
             />
           </div>
           <div className="text-sm text-muted-foreground flex items-center gap-2">
-            <img 
-              src={player.teamLogo} 
-              alt={player.team} 
-              className="w-4 h-4" 
-            />
+            <img src={player.teamLogo} alt={player.team} className="w-4 h-4" />
             <span>{player.position}</span>
           </div>
         </div>
@@ -83,9 +77,9 @@ export default function PlayerCard({
       </div>
     );
   }
-  
+
   return (
-    <div 
+    <div
       className={cn(
         "bg-cricket-medium-green rounded-xl overflow-hidden",
         onClick && "cursor-pointer hover:bg-secondary transition-colors",
@@ -97,18 +91,14 @@ export default function PlayerCard({
         <div>
           <div className="flex items-center gap-2">
             <h3 className="font-bold text-lg">{player.name}</h3>
-            <img 
-              src={player.countryFlag} 
-              alt={player.country} 
-              className="country-flag" 
+            <img
+              src={player.countryFlag}
+              alt={player.country}
+              className="country-flag"
             />
           </div>
           <div className="flex items-center gap-2 mt-1">
-            <img 
-              src={player.teamLogo} 
-              alt={player.team} 
-              className="w-5 h-5" 
-            />
+            <img src={player.teamLogo} alt={player.team} className="w-5 h-5" />
             <span className="text-sm">{player.team}</span>
           </div>
         </div>
@@ -119,7 +109,7 @@ export default function PlayerCard({
           </div>
         )}
       </div>
-      
+
       <div className="p-4">
         <div className="flex justify-between mb-3">
           <div>
@@ -131,7 +121,7 @@ export default function PlayerCard({
             <p className="font-medium">{player.stats.matches}</p>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-3 gap-4">
           {player.stats.runs !== undefined && (
             <div>
