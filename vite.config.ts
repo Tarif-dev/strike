@@ -12,6 +12,21 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Add Node.js polyfills for browser environment
+      crypto: "crypto-browserify",
+    },
+  },
+  // Define global variables for Node.js modules
+  define: {
+    global: {},
+    'process.env': {}
+  },
+  // Configure optimizeDeps to include crypto-browserify
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        global: 'globalThis'
+      },
     },
   },
 }));
