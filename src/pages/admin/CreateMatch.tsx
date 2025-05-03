@@ -138,8 +138,6 @@ const CreateMatch = () => {
   const USDC_MINT = new PublicKey("Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr");
 
 
-  // ... [existing imports remain unchanged]
-
 const onSubmit = async (values: CreateMatchFormValues) => {
   if (!user) {
     toast({
