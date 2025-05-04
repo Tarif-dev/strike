@@ -224,7 +224,7 @@ const Profile = () => {
       const { data, error } = await supabase
         .from("teams")
         .select("*")
-        // The RLS policy will ensure only the current user's teams are returned
+        .eq("user_id", user.id) // Explicitly filter teams by the current user's ID
         .order("created_at", { ascending: false });
 
       if (error) {
