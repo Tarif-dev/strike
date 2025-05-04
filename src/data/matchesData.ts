@@ -28,7 +28,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 40,
-      prizePool: "₹7 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 35000,
       percentageJoined: 90,
@@ -63,7 +63,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 35,
-      prizePool: "₹5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 30000,
       percentageJoined: 85,
@@ -98,7 +98,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 45,
-      prizePool: "₹10 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 40000,
       percentageJoined: 95,
@@ -133,7 +133,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 30,
-      prizePool: "₹4 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 25000,
       percentageJoined: 80,
@@ -168,7 +168,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 28,
-      prizePool: "₹3.5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 22000,
       percentageJoined: 75,
@@ -203,7 +203,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 32,
-      prizePool: "₹5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 28000,
       percentageJoined: 85,
@@ -238,7 +238,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 30,
-      prizePool: "₹4 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 26000,
       percentageJoined: 80,
@@ -273,7 +273,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 42,
-      prizePool: "₹8 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 38000,
       percentageJoined: 92,
@@ -308,7 +308,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 34,
-      prizePool: "₹5.5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 29000,
       percentageJoined: 85,
@@ -343,7 +343,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 30,
-      prizePool: "₹4 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 25000,
       percentageJoined: 80,
@@ -378,7 +378,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 36,
-      prizePool: "₹6 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 31000,
       percentageJoined: 88,
@@ -413,7 +413,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 38,
-      prizePool: "₹7 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 34000,
       percentageJoined: 90,
@@ -448,7 +448,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 30,
-      prizePool: "₹4 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 26000,
       percentageJoined: 80,
@@ -483,7 +483,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 34,
-      prizePool: "₹5.5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 29000,
       percentageJoined: 85,
@@ -518,7 +518,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 36,
-      prizePool: "₹6 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 31000,
       percentageJoined: 88,
@@ -553,7 +553,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 32,
-      prizePool: "₹5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 28000,
       percentageJoined: 85,
@@ -588,7 +588,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 34,
-      prizePool: "₹5.5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 29000,
       percentageJoined: 85,
@@ -623,7 +623,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 30,
-      prizePool: "₹4 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 26000,
       percentageJoined: 80,
@@ -658,7 +658,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 32,
-      prizePool: "₹5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 28000,
       percentageJoined: 85,
@@ -693,7 +693,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 40,
-      prizePool: "₹8 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 35000,
       percentageJoined: 90,
@@ -728,7 +728,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 34,
-      prizePool: "₹5.5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 29000,
       percentageJoined: 85,
@@ -763,7 +763,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 32,
-      prizePool: "₹5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 28000,
       percentageJoined: 85,
@@ -798,7 +798,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 30,
-      prizePool: "₹4 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 26000,
       percentageJoined: 80,
@@ -833,7 +833,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 36,
-      prizePool: "₹6 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 31000,
       percentageJoined: 88,
@@ -868,7 +868,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 40,
-      prizePool: "₹8 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 35000,
       percentageJoined: 90,
@@ -903,7 +903,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 30,
-      prizePool: "₹4 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 26000,
       percentageJoined: 80,
@@ -938,7 +938,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 32,
-      prizePool: "₹5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 28000,
       percentageJoined: 85,
@@ -973,7 +973,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 38,
-      prizePool: "₹7 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 34000,
       percentageJoined: 90,
@@ -1008,7 +1008,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 36,
-      prizePool: "₹6 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 31000,
       percentageJoined: 88,
@@ -1043,7 +1043,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 34,
-      prizePool: "₹5.5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 29000,
       percentageJoined: 85,
@@ -1078,7 +1078,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 32,
-      prizePool: "₹5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 28000,
       percentageJoined: 85,
@@ -1113,7 +1113,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 30,
-      prizePool: "₹4 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 26000,
       percentageJoined: 80,
@@ -1148,7 +1148,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 36,
-      prizePool: "₹6 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 31000,
       percentageJoined: 88,
@@ -1183,7 +1183,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 34,
-      prizePool: "₹5.5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 29000,
       percentageJoined: 85,
@@ -1218,7 +1218,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 30,
-      prizePool: "₹4 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 26000,
       percentageJoined: 80,
@@ -1253,7 +1253,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 32,
-      prizePool: "₹5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 28000,
       percentageJoined: 85,
@@ -1288,7 +1288,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 34,
-      prizePool: "₹5.5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 29000,
       percentageJoined: 85,
@@ -1323,7 +1323,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 45,
-      prizePool: "₹10 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 40000,
       percentageJoined: 95,
@@ -1358,7 +1358,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 34,
-      prizePool: "₹5.5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 29000,
       percentageJoined: 85,
@@ -1393,7 +1393,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 30,
-      prizePool: "₹4 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 26000,
       percentageJoined: 80,
@@ -1428,7 +1428,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 36,
-      prizePool: "₹6 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 31000,
       percentageJoined: 88,
@@ -1463,7 +1463,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 38,
-      prizePool: "₹7 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 34000,
       percentageJoined: 90,
@@ -1498,7 +1498,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 40,
-      prizePool: "₹8 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 35000,
       percentageJoined: 90,
@@ -1533,7 +1533,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 38,
-      prizePool: "₹7 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 34000,
       percentageJoined: 90,
@@ -1568,7 +1568,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 36,
-      prizePool: "₹6 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 31000,
       percentageJoined: 88,
@@ -1603,7 +1603,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 38,
-      prizePool: "₹7 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 34000,
       percentageJoined: 90,
@@ -1638,7 +1638,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 34,
-      prizePool: "₹5.5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 29000,
       percentageJoined: 85,
@@ -1673,7 +1673,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 36,
-      prizePool: "₹6 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 31000,
       percentageJoined: 88,
@@ -1708,7 +1708,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 40,
-      prizePool: "₹8 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 35000,
       percentageJoined: 90,
@@ -1743,7 +1743,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 38,
-      prizePool: "₹7 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 34000,
       percentageJoined: 90,
@@ -1778,7 +1778,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 32,
-      prizePool: "₹5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 28000,
       percentageJoined: 85,
@@ -1813,7 +1813,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 42,
-      prizePool: "₹8 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 38000,
       percentageJoined: 92,
@@ -1848,7 +1848,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 38,
-      prizePool: "₹7 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 34000,
       percentageJoined: 90,
@@ -1883,7 +1883,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 32,
-      prizePool: "₹5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 28000,
       percentageJoined: 85,
@@ -1918,7 +1918,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 30,
-      prizePool: "₹4 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 26000,
       percentageJoined: 80,
@@ -1953,7 +1953,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 36,
-      prizePool: "₹6 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 31000,
       percentageJoined: 88,
@@ -1988,7 +1988,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 40,
-      prizePool: "₹8 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 35000,
       percentageJoined: 90,
@@ -2023,7 +2023,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 30,
-      prizePool: "₹4 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 26000,
       percentageJoined: 80,
@@ -2058,7 +2058,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 34,
-      prizePool: "₹5.5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 29000,
       percentageJoined: 85,
@@ -2093,7 +2093,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 40,
-      prizePool: "₹8 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 35000,
       percentageJoined: 90,
@@ -2128,7 +2128,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 36,
-      prizePool: "₹6 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 31000,
       percentageJoined: 88,
@@ -2163,7 +2163,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 34,
-      prizePool: "₹5.5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 29000,
       percentageJoined: 85,
@@ -2198,7 +2198,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 38,
-      prizePool: "₹7 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 34000,
       percentageJoined: 90,
@@ -2233,7 +2233,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 40,
-      prizePool: "₹8 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 35000,
       percentageJoined: 90,
@@ -2268,7 +2268,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 32,
-      prizePool: "₹5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 28000,
       percentageJoined: 85,
@@ -2303,7 +2303,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 30,
-      prizePool: "₹4 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 26000,
       percentageJoined: 80,
@@ -2338,7 +2338,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 34,
-      prizePool: "₹5.5 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 29000,
       percentageJoined: 85,
@@ -2373,7 +2373,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 45,
-      prizePool: "₹10 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 40000,
       percentageJoined: 95,
@@ -2408,7 +2408,7 @@ export const matches = [
     },
     fantasy: {
       contestCount: 36,
-      prizePool: "₹6 Lakh",
+      prizePool: "700 USDC",
       entryFees: [49, 99, 499, 999],
       teamsCreated: 31000,
       percentageJoined: 88,
@@ -2599,7 +2599,7 @@ export const leagues = [
     id: "l1",
     name: "IPL Fantasy League",
     participants: 14726,
-    prize: "₹1,000,000",
+    prize: "1,000,000 USDC",
     startDate: "Apr 5, 2023",
     endDate: "May 28, 2023",
     joined: true,
@@ -2610,7 +2610,7 @@ export const leagues = [
     id: "l2",
     name: "World Cup Challenge",
     participants: 32190,
-    prize: "₹2,500,000",
+    prize: "2,500,000 USDC",
     startDate: "June 10, 2023",
     endDate: "July 15, 2023",
   },

@@ -127,9 +127,9 @@ export default function MatchCard({
 
   const fantasyData = match.fantasy || {
     contestCount: Math.floor(Math.random() * 50) + 10,
-    prizePool: `₹${Math.floor(Math.random() * 10) + 1}${
-      Math.random() > 0.5 ? " Lakh" : " Crore"
-    }`,
+    prizePool: `${Math.floor(Math.random() * 10) + 1}${
+      Math.random() > 0.5 ? "00" : "000"
+    } USDC`,
     entryFees: [49, 99, 499, 999],
     teamsCreated: Math.floor(Math.random() * 100000) + 5000,
     percentageJoined: Math.floor(Math.random() * 70) + 20,
@@ -339,7 +339,7 @@ export default function MatchCard({
                           key={index}
                           className="text-xs bg-gray-800/70 text-white font-medium px-2.5 py-1 rounded-full border border-gray-700/50"
                         >
-                          ₹{fee}
+                          {fee} USDC
                         </div>
                       ))}
                     </div>

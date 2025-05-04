@@ -30,10 +30,19 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Define team type from Supabase
 type DatabaseTeam = Database["public"]["Tables"]["teams"]["Row"];
@@ -73,6 +82,9 @@ const TeamDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+
+  // Add state for Play button and dialog
+  const [showPlayDialog, setShowPlayDialog] = useState(false);
 
   // Fetch team data from Supabase
   useEffect(() => {
@@ -284,25 +296,36 @@ const TeamDetail = () => {
             </div>
           </div>
 
-          {/* Team name and match info */}
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-neon-green">
-              {team.team_name}
-            </h1>
+          {/* Team name and match info with Play Contest Button aligned to the right */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-neon-green">
+                {team.team_name}
+              </h1>
 
-            <div className="flex flex-wrap items-center gap-3 mt-2 text-sm">
-              <Badge
-                variant="outline"
-                className="bg-neon-green/10 text-neon-green border-neon-green/30"
-              >
-                {team.total_points || 0} pts
-              </Badge>
+              <div className="flex flex-wrap items-center gap-3 mt-2 text-sm">
+                <Badge
+                  variant="outline"
+                  className="bg-neon-green/10 text-neon-green border-neon-green/30"
+                >
+                  {team.total_points || 0} pts
+                </Badge>
 
-              <div className="flex items-center text-gray-400">
-                <Calendar className="h-3.5 w-3.5 mr-1" />
-                <span>{formatMatchDate(team.created_at)}</span>
+                <div className="flex items-center text-gray-400">
+                  <Calendar className="h-3.5 w-3.5 mr-1" />
+                  <span>{formatMatchDate(team.created_at)}</span>
+                </div>
               </div>
             </div>
+
+            {/* Play Contest Button moved to the right */}
+            <Button
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-700/30"
+              onClick={() => setShowPlayDialog(true)}
+            >
+              <Trophy className="h-4 w-4 mr-2" />
+              Play Contest
+            </Button>
           </div>
 
           {/* Match details */}
@@ -1210,6 +1233,64 @@ const TeamDetail = () => {
           </div>
         )}
       </Tabs>
+
+      {/* Play Contest Dialog */}
+      <Dialog open={showPlayDialog} onOpenChange={setShowPlayDialog}>
+        <DialogContent className="bg-gray-900 border-gray-800">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Play Contest</DialogTitle>
+            <DialogDescription>
+              Pool 10.00 USDC to participate in this contest and win rewards.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="my-4 p-4 rounded-lg bg-gray-800/50 border border-gray-700">
+            <div className="flex justify-between mb-3">
+              <span className="text-gray-400">Entry Fee:</span>
+              <span className="font-bold flex items-center">
+                <img src="/solana.png" alt="USDC" className="w-4 h-4 mr-1" />
+                10.00 USDC
+              </span>
+            </div>
+            <div className="flex justify-between mb-3">
+              <span className="text-gray-400">Pool Size:</span>
+              <span>1,000+ participants</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Prize Pool:</span>
+              <span className="text-neon-green font-bold">5,000 USDC</span>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPlayDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={() => {
+                // Here would be wallet integration code
+                toast({
+                  title: "Transaction Initiated",
+                  description: "Please confirm the transaction in your wallet",
+                });
+
+                // Mock successful transaction after 2 seconds
+                setTimeout(() => {
+                  setShowPlayDialog(false);
+                  toast({
+                    title: "Successfully Joined!",
+                    description: "You're now participating in the contest",
+                    variant: "default",
+                  });
+                }, 2000);
+              }}
+            >
+              Confirm & Pay
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 };

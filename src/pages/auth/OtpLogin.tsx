@@ -1,18 +1,28 @@
-
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+import { Mail, Smartphone, ArrowRight, Loader2 } from "lucide-react";
 import { z } from "zod";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Mail } from "lucide-react";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import PageContainer from "@/components/layout/PageContainer";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import PageContainer from "@/components/layout/PageContainer";
-import Header from "@/components/layout/Header";
-import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from "@/components/ui/input-otp";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+  InputOTPSeparator,
+} from "@/components/ui/input-otp";
 
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -32,7 +42,7 @@ export default function OtpLogin() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const [otpSent, setOtpSent] = useState(false);
-  
+
   // Redirect if already logged in
   if (user) {
     navigate("/");
@@ -92,13 +102,13 @@ export default function OtpLogin() {
       title: "Logged in successfully",
       description: "Welcome back!",
     });
-    
+
     navigate("/");
   };
 
   const handleResendOtp = async () => {
     if (!email) return;
-    
+
     setIsSubmitting(true);
     const { error } = await signInWithOtp(email);
     setIsSubmitting(false);
@@ -120,8 +130,6 @@ export default function OtpLogin() {
 
   return (
     <PageContainer>
-      <Header title="OTP Login" />
-      
       <div className="flex flex-col items-center justify-center mt-8 px-4">
         <div className="w-full max-w-md space-y-6 bg-cricket-medium-green p-6 rounded-xl">
           <div className="text-center">
@@ -132,10 +140,13 @@ export default function OtpLogin() {
                 : "Enter your email to receive a verification code"}
             </p>
           </div>
-          
+
           {!otpSent ? (
             <Form {...emailForm}>
-              <form onSubmit={emailForm.handleSubmit(onSendOtp)} className="space-y-4">
+              <form
+                onSubmit={emailForm.handleSubmit(onSendOtp)}
+                className="space-y-4"
+              >
                 <FormField
                   control={emailForm.control}
                   name="email"
@@ -158,9 +169,9 @@ export default function OtpLogin() {
                     </FormItem>
                   )}
                 />
-                
-                <Button 
-                  type="submit" 
+
+                <Button
+                  type="submit"
                   className="w-full bg-cricket-lime text-cricket-dark-green hover:bg-cricket-lime/90"
                   disabled={isSubmitting}
                 >
@@ -177,13 +188,18 @@ export default function OtpLogin() {
             </Form>
           ) : (
             <Form {...otpForm}>
-              <form onSubmit={otpForm.handleSubmit(onVerifyOtp)} className="space-y-6">
+              <form
+                onSubmit={otpForm.handleSubmit(onVerifyOtp)}
+                className="space-y-6"
+              >
                 <FormField
                   control={otpForm.control}
                   name="otp"
                   render={({ field }) => (
                     <FormItem className="flex flex-col items-center">
-                      <FormLabel className="text-center">Verification Code</FormLabel>
+                      <FormLabel className="text-center">
+                        Verification Code
+                      </FormLabel>
                       <FormControl>
                         <InputOTP maxLength={6} {...field}>
                           <InputOTPGroup>
@@ -201,10 +217,10 @@ export default function OtpLogin() {
                     </FormItem>
                   )}
                 />
-                
+
                 <div className="space-y-4">
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full bg-cricket-lime text-cricket-dark-green hover:bg-cricket-lime/90"
                     disabled={isSubmitting}
                   >
@@ -217,7 +233,7 @@ export default function OtpLogin() {
                       "Verify OTP"
                     )}
                   </Button>
-                  
+
                   <div className="flex justify-between">
                     <Button
                       type="button"
@@ -228,7 +244,7 @@ export default function OtpLogin() {
                     >
                       Change email
                     </Button>
-                    
+
                     <Button
                       type="button"
                       variant="link"
@@ -243,9 +259,12 @@ export default function OtpLogin() {
               </form>
             </Form>
           )}
-          
+
           <div className="mt-4 text-center text-sm">
-            <Link to="/auth/login" className="text-cricket-lime hover:underline">
+            <Link
+              to="/auth/login"
+              className="text-cricket-lime hover:underline"
+            >
               Back to login
             </Link>
           </div>

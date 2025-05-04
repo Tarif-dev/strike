@@ -1,21 +1,23 @@
-import React, { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
+  ChevronRight,
+  Loader2,
   Trophy,
   Users,
-  Wallet,
   ArrowRight,
-  Filter,
+  CalendarDays,
+  Clock,
+  Sparkles,
+  ArrowUp,
+  Zap,
+  BarChart3,
+  Shield,
+  Wallet,
   Search,
   ChevronDown,
-  Clock,
   Info,
-  Zap,
-  Shield,
-  DollarSign,
-  BarChart3,
 } from "lucide-react";
-import Header from "@/components/layout/Header";
 import Navbar from "@/components/layout/Navbar";
 import PageContainer from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
@@ -77,71 +79,70 @@ const mockContests = [
     id: "contest1",
     type: "mega",
     name: "IPL Championship League",
-    totalPrize: "₹10 Crore",
+    totalPrize: "10,000 USDC",
     entryFee: 49,
     totalSpots: 2500000,
     filledSpots: 1248692,
-    firstPrize: "₹1 Crore",
+    firstPrize: "1,000 USDC",
     winnerPercentage: 45,
     guaranteedPrize: true,
     multipleEntries: true,
     isPopular: true,
     prizeBreakdown: [
-      { position: "1st", prize: "₹1 Crore" },
-      { position: "2nd", prize: "₹50 Lakh" },
-      { position: "3rd", prize: "₹25 Lakh" },
-      { position: "4th-10th", prize: "₹10 Lakh" },
-      { position: "11th-100th", prize: "₹1 Lakh" },
-      { position: "101st-1000th", prize: "₹10,000" },
-      { position: "1001st-10000th", prize: "₹1,000" },
-      { position: "10001st-100000th", prize: "₹500" },
-      { position: "100001st-500000th", prize: "₹100" },
+      { position: "1st", prize: "1,000 USDC" },
+      { position: "2nd", prize: "500 USDC" },
+      { position: "3rd", prize: "250 USDC" },
+      { position: "4th-10th", prize: "100 USDC" },
+      { position: "11th-100th", prize: "10 USDC" },
+      { position: "101st-1000th", prize: "1 USDC" },
+      { position: "1001st-10000th", prize: "0.1 USDC" },
+      { position: "10001st-100000th", prize: "0.05 USDC" },
+      { position: "100001st-500000th", prize: "0.01 USDC" },
     ],
   },
   {
     id: "contest2",
     type: "mega",
     name: "Big Cash League",
-    totalPrize: "₹5 Crore",
+    totalPrize: "5,000 USDC",
     entryFee: 999,
     totalSpots: 500000,
     filledSpots: 352487,
-    firstPrize: "₹50 Lakh",
+    firstPrize: "500 USDC",
     winnerPercentage: 30,
     guaranteedPrize: true,
     multipleEntries: true,
     isPopular: true,
     prizeBreakdown: [
-      { position: "1st", prize: "₹50 Lakh" },
-      { position: "2nd", prize: "₹25 Lakh" },
-      { position: "3rd", prize: "₹15 Lakh" },
-      { position: "4th-10th", prize: "₹5 Lakh" },
-      { position: "11th-100th", prize: "₹50,000" },
-      { position: "101st-1000th", prize: "₹5,000" },
-      { position: "1001st-10000th", prize: "₹500" },
+      { position: "1st", prize: "500 USDC" },
+      { position: "2nd", prize: "250 USDC" },
+      { position: "3rd", prize: "150 USDC" },
+      { position: "4th-10th", prize: "50 USDC" },
+      { position: "11th-100th", prize: "5 USDC" },
+      { position: "101st-1000th", prize: "0.5 USDC" },
     ],
   },
   {
     id: "contest3",
     type: "mega",
     name: "Cricket Mania",
-    totalPrize: "₹2 Crore",
+    totalPrize: "2,000 USDC",
     entryFee: 199,
     totalSpots: 1000000,
     filledSpots: 398547,
-    firstPrize: "₹25 Lakh",
+    firstPrize: "250 USDC",
     winnerPercentage: 35,
     guaranteedPrize: true,
     multipleEntries: false,
     isPopular: false,
     prizeBreakdown: [
-      { position: "1st", prize: "₹25 Lakh" },
-      { position: "2nd", prize: "₹15 Lakh" },
-      { position: "3rd", prize: "₹10 Lakh" },
-      { position: "4th-10th", prize: "₹2 Lakh" },
-      { position: "11th-100th", prize: "₹20,000" },
-      { position: "101st-1000th", prize: "₹2,000" },
-      { position: "1001st-10000th", prize: "₹200" },
+      { position: "1st", prize: "250 USDC" },
+      { position: "2nd", prize: "150 USDC" },
+      { position: "3rd", prize: "100 USDC" },
+      { position: "4th-10th", prize: "20 USDC" },
+      { position: "11th-100th", prize: "2 USDC" },
+      { position: "101st-1000th", prize: "0.2 USDC" },
+      { position: "1001st-10000th", prize: "0.02 USDC" },
     ],
   },
   {
@@ -298,11 +299,6 @@ const Contests = () => {
   return (
     <>
       <PageContainer>
-        <Header
-          title={`Contests: ${matchData.teams.home.code} vs ${matchData.teams.away.code}`}
-          showBackButton
-        />
-
         <div className="mt-4 space-y-6">
           {/* Match info card */}
           <Card className="bg-gray-900/60 border-gray-800">
@@ -627,11 +623,11 @@ const Contests = () => {
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-gray-400">Amount to pay</span>
                   <span className="font-medium">
-                    ₹
                     {(showJoinContest &&
                       mockContests.find((c) => c.id === showJoinContest)
                         ?.entryFee) ||
-                      0}
+                      0}{" "}
+                    USDC
                   </span>
                 </div>
 
@@ -639,7 +635,7 @@ const Contests = () => {
                   <span className="text-sm text-gray-400">
                     Usable cash bonus
                   </span>
-                  <span className="text-neon-green">₹0</span>
+                  <span className="text-neon-green">0 USDC</span>
                 </div>
               </div>
             </div>
@@ -781,7 +777,9 @@ const ContestCard: React.FC<ContestCardProps> = ({
             className="w-full bg-neon-green text-gray-900 hover:bg-neon-green/90 font-medium"
             onClick={onJoinContest}
           >
-            {contest.entryFee > 0 ? `Join ₹${contest.entryFee}` : "Join Free"}
+            {contest.entryFee > 0
+              ? `Join ${contest.entryFee} USDC`
+              : "Join Free"}
           </Button>
         </div>
 

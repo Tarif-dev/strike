@@ -1,12 +1,4 @@
-import {
-  Home,
-  Calendar,
-  Trophy,
-  User,
-  Wallet,
-  Search,
-  Gem,
-} from "lucide-react";
+import { Home, Calendar, Trophy, User, Wallet, Gem } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
