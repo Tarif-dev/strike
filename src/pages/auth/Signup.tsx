@@ -1,28 +1,35 @@
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, Mail, User } from "lucide-react";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import PageContainer from "@/components/layout/PageContainer";
-import Header from "@/components/layout/Header";
 
-const signupSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  fullName: z.string().min(2, "Full name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string(),
-}).refine(data => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const signupSchema = z
+  .object({
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    fullName: z.string().min(2, "Full name must be at least 2 characters"),
+    email: z.string().email("Please enter a valid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
@@ -31,9 +38,10 @@ export default function Signup() {
   const { signUp, isLoading: authLoading, user } = useAuth();
   const { toast } = useToast();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Redirect if already logged in
   if (user) {
     navigate("/");
@@ -71,7 +79,7 @@ export default function Signup() {
       title: "Account created successfully",
       description: "Please check your email to confirm your account",
     });
-    
+
     navigate("/auth/login");
   };
 
@@ -85,15 +93,15 @@ export default function Signup() {
 
   return (
     <PageContainer>
-      <Header title="Sign Up" />
-      
       <div className="flex flex-col items-center justify-center mt-8 px-4">
         <div className="w-full max-w-md space-y-6 bg-cricket-medium-green p-6 rounded-xl">
           <div className="text-center">
             <h1 className="text-2xl font-bold">Create an Account</h1>
-            <p className="text-muted-foreground mt-2">Join our cricket fantasy league</p>
+            <p className="text-muted-foreground mt-2">
+              Join our cricket fantasy league
+            </p>
           </div>
-          
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -117,7 +125,7 @@ export default function Signup() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="fullName"
@@ -139,7 +147,7 @@ export default function Signup() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="email"
@@ -162,7 +170,7 @@ export default function Signup() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="password"
@@ -196,7 +204,7 @@ export default function Signup() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="confirmPassword"
@@ -230,9 +238,9 @@ export default function Signup() {
                   </FormItem>
                 )}
               />
-              
-              <Button 
-                type="submit" 
+
+              <Button
+                type="submit"
                 className="w-full bg-cricket-lime text-cricket-dark-green hover:bg-cricket-lime/90"
                 disabled={isSubmitting}
               >
@@ -247,10 +255,13 @@ export default function Signup() {
               </Button>
             </form>
           </Form>
-          
+
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
-            <Link to="/auth/login" className="text-cricket-lime hover:underline">
+            <Link
+              to="/auth/login"
+              className="text-cricket-lime hover:underline"
+            >
               Login
             </Link>
           </div>

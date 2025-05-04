@@ -1,7 +1,24 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Navigate, Link } from "react-router-dom";
+import {
+  Users,
+  CalendarDays,
+  BarChart3,
+  Settings,
+  Plus,
+  Trophy,
+  DollarSign,
+  Trash2,
+  Edit,
+  MoreHorizontal,
+  Search,
+  ChevronDown,
+  AlertTriangle,
+  Loader,
+} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import PageContainer from "@/components/layout/PageContainer";
-import Header from "@/components/layout/Header";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -10,15 +27,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Users, Layers, BarChart3, Calendar } from "lucide-react";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
 
   return (
     <PageContainer>
-      <Header title="Admin Dashboard" />
-
       <div className="mt-8 space-y-6 px-4">
         {/* Quick action buttons */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -37,7 +51,7 @@ const AdminDashboard = () => {
             onClick={() => navigate("/matches")}
           >
             <div className="flex flex-col items-center">
-              <Calendar className="h-8 w-8 mb-2" />
+              <CalendarDays className="h-8 w-8 mb-2" />
               <span className="text-lg font-medium">View Matches</span>
             </div>
           </Button>
@@ -91,7 +105,7 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <Button className="w-full" variant="outline">
-                <Layers className="mr-2 h-4 w-4" />
+                <Settings className="mr-2 h-4 w-4" />
                 Match Management
               </Button>
               <Button className="w-full" variant="outline">

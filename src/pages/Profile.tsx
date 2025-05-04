@@ -18,7 +18,6 @@ import {
   Bell,
   Loader2,
 } from "lucide-react";
-import Header from "@/components/layout/Header";
 import Navbar from "@/components/layout/Navbar";
 import PageContainer from "@/components/layout/PageContainer";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,11 +31,20 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Define types for our teams
 type DatabaseTeam = Database["public"]["Tables"]["teams"]["Row"];
@@ -206,6 +214,12 @@ const Profile = () => {
   const [isLoadingTeams, setIsLoadingTeams] = useState(false);
   const [teamsError, setTeamsError] = useState<string | null>(null);
 
+  // Add state for Play button
+  const [activePlayTeamId, setActivePlayTeamId] = useState<
+    string | number | null
+  >(null);
+  const [showPlayDialog, setShowPlayDialog] = useState(false);
+
   // Fetch teams when user loads
   useEffect(() => {
     if (user) {
@@ -331,8 +345,6 @@ const Profile = () => {
   return (
     <>
       <PageContainer>
-        <Header title="Profile" />
-
         <div className="relative bg-gradient-to-b from-gray-900 to-gray-950 rounded-xl p-6 mt-2 mb-6">
           {/* Glow effect */}
           <div className="absolute -inset-0.5 bg-gradient-to-r from-neon-green/30 to-blue-600/30 rounded-xl blur-sm opacity-75"></div>
@@ -367,30 +379,6 @@ const Profile = () => {
                   </Badge>
                 )}
               </div>
-            </div>
-
-            <div className="mt-4 md:mt-0 md:ml-auto flex flex-col md:flex-row items-center gap-3">
-              <Card className="bg-gray-900/60 border-gray-800">
-                <CardContent className="p-3 flex items-center">
-                  <Wallet className="h-5 w-5 mr-2 text-neon-green" />
-                  <div>
-                    <p className="text-sm text-gray-400">Balance</p>
-                    <p className="font-bold text-neon-green">
-                      ₹{fantasyData.balance}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Link to="/wallet">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-neon-green/50 text-neon-green hover:bg-neon-green/10"
-                >
-                  Add Money
-                </Button>
-              </Link>
             </div>
           </div>
         </div>
@@ -457,7 +445,12 @@ const Profile = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold text-white">
-                      ₹{fantasyData.contests.totalWinnings}
+                      <img
+                        src="/solana.png"
+                        alt="USDC"
+                        className="w-4 h-4 mr-1 inline-block"
+                      />
+                      {fantasyData.contests.totalWinnings} USDC
                     </div>
                     <p className="text-sm text-gray-400">
                       {fantasyData.contests.completed} contests played
@@ -645,6 +638,15 @@ const Profile = () => {
                             </Button>
                           </Link>
                         </div>
+                        <Button
+                          className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold"
+                          onClick={() => {
+                            setActivePlayTeamId(team.id);
+                            setShowPlayDialog(true);
+                          }}
+                        >
+                          Play Contest
+                        </Button>
                       </CardContent>
                     </Card>
                   ))}
@@ -714,7 +716,7 @@ const Profile = () => {
                               }`}
                             >
                               {result.winnings > 0
-                                ? `₹${result.winnings}`
+                                ? `${result.winnings} USDC`
                                 : "—"}
                             </span>
                           </div>
@@ -937,6 +939,64 @@ const Profile = () => {
         </div>
       </PageContainer>
       <Navbar />
+
+      {/* Play Contest Dialog */}
+      <Dialog open={showPlayDialog} onOpenChange={setShowPlayDialog}>
+        <DialogContent className="bg-gray-900 border-gray-800">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Play Contest</DialogTitle>
+            <DialogDescription>
+              Pool 10.00 USDC to participate in this contest and win rewards.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="my-4 p-4 rounded-lg bg-gray-800/50 border border-gray-700">
+            <div className="flex justify-between mb-3">
+              <span className="text-gray-400">Entry Fee:</span>
+              <span className="font-bold flex items-center">
+                <img src="/solana.png" alt="USDC" className="w-4 h-4 mr-1" />
+                10.00 USDC
+              </span>
+            </div>
+            <div className="flex justify-between mb-3">
+              <span className="text-gray-400">Pool Size:</span>
+              <span>1,000+ participants</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Prize Pool:</span>
+              <span className="text-neon-green font-bold">10,000 USDC</span>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPlayDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={() => {
+                // Here would be wallet integration code
+                toast({
+                  title: "Transaction Initiated",
+                  description: "Please confirm the transaction in your wallet",
+                });
+
+                // Mock successful transaction after 2 seconds
+                setTimeout(() => {
+                  setShowPlayDialog(false);
+                  toast({
+                    title: "Successfully Joined!",
+                    description: "You're now participating in the contest",
+                    variant: "default",
+                  });
+                }, 2000);
+              }}
+            >
+              Confirm & Pay
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

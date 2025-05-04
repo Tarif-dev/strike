@@ -8,7 +8,6 @@ import {
   Crown,
   User,
   Filter,
-  Search,
   X,
   CheckCircle,
   ChevronDown,
@@ -926,9 +925,8 @@ const CreateTeam = () => {
       <div className="mb-4 relative">
         <div className="flex gap-2">
           <div className="relative flex-grow">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              className="pl-9 bg-gray-900/70"
+              className="bg-gray-900/70"
               placeholder="Search players..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

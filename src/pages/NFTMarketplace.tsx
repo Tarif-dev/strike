@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Search,
   Filter,
   ArrowUpDown,
   Zap,
@@ -867,10 +866,9 @@ export default function NFTMarketplace() {
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
             <div className="flex-1 w-full lg:max-w-md">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-platinum-silver h-4 w-4" />
                 <Input
                   placeholder="Search players, teams or collections..."
-                  className="pl-10 rounded-full border-gunmetal-grey focus:ring-2 focus:ring-neon-green/30 bg-gunmetal-grey text-soft-white placeholder:text-grey-600"
+                  className="px-4 rounded-full border-gunmetal-grey focus:ring-2 focus:ring-neon-green/30 bg-gunmetal-grey text-soft-white placeholder:text-grey-600"
                 />
               </div>
             </div>

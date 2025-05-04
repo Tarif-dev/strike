@@ -1,11 +1,20 @@
 import { useState, useEffect } from "react";
-import { Calendar, Filter, Loader2 } from "lucide-react";
-import Header from "@/components/layout/Header";
+import { Link } from "react-router-dom";
+import {
+  Filter,
+  ChevronDown,
+  Search,
+  Trophy,
+  X,
+  Clock,
+  CalendarDays,
+  LogIn,
+  ArrowRight,
+} from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import PageContainer from "@/components/layout/PageContainer";
 import MatchCard, { MatchData } from "@/components/cricket/MatchCard";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "react-router-dom";
 import { useSupabaseMatches } from "@/hooks/useSupabaseMatches";
 
 const Matches = () => {
@@ -81,8 +90,6 @@ const Matches = () => {
   return (
     <>
       <PageContainer>
-        <Header title="Matches" />
-
         <div className="mt-4 space-y-6">
           {/* Featured contest banner - only show for upcoming matches */}
           {activeTab === "Upcoming" && upcomingMatches.length > 0 && (
@@ -117,7 +124,7 @@ const Matches = () => {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Calendar className="text-neon-green" />
+              <CalendarDays className="text-neon-green" />
               <span>{currentMonth}</span>
             </div>
             <button className="flex items-center gap-1 text-sm bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-lg transition-colors">
@@ -141,7 +148,7 @@ const Matches = () => {
 
           {loading ? (
             <div className="flex justify-center items-center py-12">
-              <Loader2 className="h-8 w-8 text-neon-green animate-spin" />
+              <Clock className="h-8 w-8 text-neon-green animate-spin" />
             </div>
           ) : error ? (
             <div className="text-center py-8">
@@ -158,7 +165,7 @@ const Matches = () => {
                   ([date, matches]) => (
                     <div key={date} className="space-y-4">
                       <h3 className="font-medium text-gray-300 flex items-center gap-2 sticky top-0 bg-gray-950/80 backdrop-blur-sm py-2 z-10">
-                        <Calendar className="h-4 w-4 text-neon-green" />
+                        <CalendarDays className="h-4 w-4 text-neon-green" />
                         {date}
                       </h3>
                       <div className="space-y-4">
@@ -186,7 +193,7 @@ const Matches = () => {
               ) : (
                 <div className="text-center py-12 bg-gray-900/50 rounded-xl border border-gray-800 backdrop-blur-sm">
                   <div className="w-16 h-16 mx-auto rounded-full bg-gray-800/80 flex items-center justify-center mb-4">
-                    <Calendar className="h-8 w-8 text-gray-400" />
+                    <CalendarDays className="h-8 w-8 text-gray-400" />
                   </div>
                   <p className="text-xl font-medium mb-2">No matches found</p>
                   <p className="text-gray-400 max-w-md mx-auto">

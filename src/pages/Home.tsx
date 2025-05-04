@@ -1,27 +1,26 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Trophy,
-  Calendar,
+  Users,
   Zap,
-  TrendingUp,
-  User,
+  Calendar,
+  BarChart3,
   Clock,
-  Award,
   ChevronRight,
-  Star,
-  Plus,
-  DollarSign,
   Bell,
+  Wallet,
+  ArrowRight,
+  ArrowUpRight,
+  Star,
+  MoreHorizontal,
+  CalendarDays,
   Sparkles,
-  RefreshCw,
+  Loader2,
 } from "lucide-react";
-
-// Components
-import PageContainer from "@/components/layout/PageContainer";
-import Header from "@/components/layout/Header";
 import Navbar from "@/components/layout/Navbar";
+import PageContainer from "@/components/layout/PageContainer";
 import MatchCard from "@/components/cricket/MatchCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,21 +28,18 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Tabs } from "@/components/ui/tabs";
-import { useWallet } from '@solana/wallet-adapter-react';
-import { useConnection } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-// import { useState, useEffect } from 'react';
-import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 // Hooks and contexts
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
-
 // Data
 import { teams, players, notifications } from "@/data/mockData";
 import { matches } from "@/data/matchesData";
-
 
 // Animation variants
 const fadeIn = {
@@ -64,66 +60,67 @@ const Home = () => {
   // States
   const [showNotifications, setShowNotifications] = useState(false);
   const { user } = useAuth();
-  // Add these inside your Home component, with your other state variables
-const { publicKey, connected } = useWallet();
-const { connection } = useConnection();
-const [usdcBalance, setUsdcBalance] = useState(null);
-const [tokenLoading, setTokenLoading] = useState(false);
-const navigate = useNavigate(); // add this import if not already present
+  const { publicKey, connected } = useWallet();
+  const { connection } = useConnection();
+  const [usdcBalance, setUsdcBalance] = useState(null);
+  const [tokenLoading, setTokenLoading] = useState(false);
+  const navigate = useNavigate(); // add this import if not already present
 
-// USDC token mint address (as specified)
-const USDC_MINT = new PublicKey('Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr');
+  // USDC token mint address (as specified)
+  const USDC_MINT = new PublicKey(
+    "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
+  );
 
-// Format public key for display
-const formatPublicKey = (key) => {
-  if (!key) return "";
-  const keyStr = key.toString();
-  return `${keyStr.substring(0, 4)}...${keyStr.substring(keyStr.length - 4)}`;
-};
+  // Format public key for display
+  const formatPublicKey = (key) => {
+    if (!key) return "";
+    const keyStr = key.toString();
+    return `${keyStr.substring(0, 4)}...${keyStr.substring(keyStr.length - 4)}`;
+  };
 
-// Add this function to fetch USDC balance
-const fetchUSDCBalance = async () => {
-  if (!publicKey || !connection) return;
-  
-  try {
-    setTokenLoading(true);
-    
-    // Find token accounts owned by the user
-    const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
-      publicKey, 
-      { mint: USDC_MINT }
-    );
-    
-    // Look for USDC token account
-    let userUsdcBalance = 0;
-    
-    for (const account of tokenAccounts.value) {
-      const parsedInfo = account.account.data.parsed.info;
-      const tokenBalance = parsedInfo.tokenAmount.uiAmount;
-      userUsdcBalance += tokenBalance;
+  // Add this function to fetch USDC balance
+  const fetchUSDCBalance = async () => {
+    if (!publicKey || !connection) return;
+
+    try {
+      setTokenLoading(true);
+
+      // Find token accounts owned by the user
+      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
+        publicKey,
+        { mint: USDC_MINT }
+      );
+
+      // Look for USDC token account
+      let userUsdcBalance = 0;
+
+      for (const account of tokenAccounts.value) {
+        const parsedInfo = account.account.data.parsed.info;
+        const tokenBalance = parsedInfo.tokenAmount.uiAmount;
+        userUsdcBalance += tokenBalance;
+      }
+
+      setUsdcBalance(userUsdcBalance);
+    } catch (error) {
+      console.error("Error fetching USDC balance:", error);
+      toast({
+        title: "Error Fetching Balance",
+        description: "Could not load your USDC balance.",
+        variant: "destructive",
+      });
+    } finally {
+      setTokenLoading(false);
     }
-    
-    setUsdcBalance(userUsdcBalance);
-  } catch (error) {
-    console.error("Error fetching USDC balance:", error);
-    toast({
-      title: "Error Fetching Balance",
-      description: "Could not load your USDC balance.",
-      variant: "destructive",
-    });
-  } finally {
-    setTokenLoading(false);
-  }
-};
+  };
 
-// Add this effect to fetch balance when wallet is connected
-useEffect(() => {
-  if (connected && publicKey) {
-    fetchUSDCBalance();
-  } else {
-    setUsdcBalance(null);
-  }
-}, [connected, publicKey]);
+  // Add this effect to fetch balance when wallet is connected
+  useEffect(() => {
+    if (connected && publicKey) {
+      fetchUSDCBalance();
+    } else {
+      setUsdcBalance(null);
+    }
+  }, [connected, publicKey]);
 
   // Get current date for greeting
   const currentHour = new Date().getHours();
@@ -203,116 +200,73 @@ useEffect(() => {
   return (
     <>
       <PageContainer className="pb-24">
-        {/* Custom header with greeting */}
-        <motion.div
-          className="flex justify-between items-center mt-2 mb-6"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div>
-            <h1 className="text-2xl font-bold text-white">
-              {greeting}
-              {user ? `, ${getUserDisplayName().split(" ")[0]}` : ""}
-            </h1>
-            <p className="text-sm text-gray-400">{formattedDate}</p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Notification bell */}
-            <div className="relative">
-              <button
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="h-9 w-9 bg-gray-900/80 rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
-              >
-                <Bell className="h-[18px] w-[18px] text-gray-300" />
-                {unreadNotifications.length > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-neon-green text-xs text-black font-medium rounded-full flex items-center justify-center">
-                    {unreadNotifications.length}
-                  </span>
-                )}
-              </button>
-            </div>
-
-            {/* User profile */}
-            <Link to="/profile">
-              <Avatar className="h-10 w-10 border-2 border-neon-green/30 hover:border-neon-green transition-colors">
-                {getUserPhotoURL() ? (
-                  <AvatarImage
-                    src={getUserPhotoURL()}
-                    alt={getUserDisplayName() || "User"}
-                  />
-                ) : (
-                  <AvatarFallback className="bg-gray-800 text-neon-green">
-                    {getUserDisplayName().charAt(0) || (
-                      <User className="h-5 w-5" />
-                    )}
-                  </AvatarFallback>
-                )}
-              </Avatar>
-            </Link>
-          </div>
-        </motion.div>
-
         {/* Wallet balance card */}
         <motion.div {...fadeIn}>
-  <Card className="bg-gradient-to-r from-gray-900 to-gray-950 border-gray-800 mb-6 overflow-hidden">
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-2">
-        <div className="flex items-center">
-          <div className="h-10 w-10 rounded-full bg-neon-green/10 flex items-center justify-center mr-3">
-            <DollarSign className="h-5 w-5 text-neon-green" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-400">Available Balance</p>
-            {!connected ? (
-              <p className="text-md text-gray-400">Wallet not connected</p>
-            ) : (
-              <p className="text-xl font-bold text-white">
-                {tokenLoading ? (
-                  <span className="flex items-center">
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Loading...
-                  </span>
+          <Card className="bg-gradient-to-r from-gray-900 to-gray-950 border-gray-800 mb-6 overflow-hidden">
+            <div className="p-4">
+              <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center">
+                  <div className="h-10 w-10 rounded-full bg-neon-green/10 flex items-center justify-center mr-3">
+                    <Wallet className="h-5 w-5 text-neon-green" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">Available Balance</p>
+                    {!connected ? (
+                      <p className="text-md text-gray-400">
+                        Wallet not connected
+                      </p>
+                    ) : (
+                      <p className="text-xl font-bold text-white">
+                        {tokenLoading ? (
+                          <span className="flex items-center">
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Loading...
+                          </span>
+                        ) : (
+                          `${
+                            usdcBalance !== null
+                              ? usdcBalance.toFixed(2)
+                              : "0.00"
+                          } USDC`
+                        )}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                {!connected ? (
+                  <WalletMultiButton className="text-sm px-4 py-2 h-9 bg-neon-green text-gray-900 hover:bg-neon-green/90 rounded-md" />
                 ) : (
-                  `${usdcBalance !== null ? usdcBalance.toFixed(2) : '0.00'} USDC`
+                  <Button
+                    size="sm"
+                    className="bg-neon-green text-gray-900 hover:bg-neon-green/90"
+                    onClick={() => navigate("/wallet")}
+                  >
+                    Manage
+                  </Button>
                 )}
-              </p>
-            )}
-          </div>
-        </div>
-        {!connected ? (
-          <WalletMultiButton className="text-sm px-4 py-2 h-9 bg-neon-green text-gray-900 hover:bg-neon-green/90 rounded-md" />
-        ) : (
-          <Button
-            size="sm"
-            className="bg-neon-green text-gray-900 hover:bg-neon-green/90"
-            onClick={() => navigate('/wallet')}
-          >
-            Manage
-          </Button>
-        )}
-      </div>
+              </div>
 
-      {connected && (
-        <div className="grid grid-cols-2 gap-2 mt-4 text-center">
-          <Link to="/wallet">
-            <div className="p-2 bg-gray-800/40 hover:bg-gray-800/60 rounded-lg transition-colors">
-              <p className="text-xs text-gray-400">Wallet</p>
-              <p className="font-medium text-white">{formatPublicKey(publicKey)}</p>
+              {connected && (
+                <div className="grid grid-cols-2 gap-2 mt-4 text-center">
+                  <Link to="/wallet">
+                    <div className="p-2 bg-gray-800/40 hover:bg-gray-800/60 rounded-lg transition-colors">
+                      <p className="text-xs text-gray-400">Wallet</p>
+                      <p className="font-medium text-white">
+                        {formatPublicKey(publicKey)}
+                      </p>
+                    </div>
+                  </Link>
+                  <Link to="/wallet">
+                    <div className="p-2 bg-gray-800/40 hover:bg-gray-800/60 rounded-lg transition-colors">
+                      <p className="text-xs text-gray-400">Network</p>
+                      <p className="font-medium text-white">Solana Devnet</p>
+                    </div>
+                  </Link>
+                </div>
+              )}
             </div>
-          </Link>
-          <Link to="/wallet">
-            <div className="p-2 bg-gray-800/40 hover:bg-gray-800/60 rounded-lg transition-colors">
-              <p className="text-xs text-gray-400">Network</p>
-              <p className="font-medium text-white">Solana Devnet</p>
-            </div>
-          </Link>
-        </div>
-      )}
-    </div>
-  </Card>
-</motion.div>
+          </Card>
+        </motion.div>
 
         {/* Live matches section (if any) */}
         {liveMatches.length > 0 && (
@@ -444,7 +398,7 @@ useEffect(() => {
               <Link to="/teams/create">
                 <div className="flex flex-col items-center justify-center bg-gray-900/80 hover:bg-gray-900 border border-gray-800/50 rounded-xl p-4 transition-colors">
                   <div className="h-10 w-10 rounded-full bg-neon-green/10 flex items-center justify-center mb-2">
-                    <Plus className="h-5 w-5 text-neon-green" />
+                    <ArrowRight className="h-5 w-5 text-neon-green" />
                   </div>
                   <span className="text-sm text-center">Create Team</span>
                 </div>
@@ -466,7 +420,7 @@ useEffect(() => {
               <Link to="/wallet">
                 <div className="flex flex-col items-center justify-center bg-gray-900/80 hover:bg-gray-900 border border-gray-800/50 rounded-xl p-4 transition-colors">
                   <div className="h-10 w-10 rounded-full bg-purple-500/10 flex items-center justify-center mb-2">
-                    <DollarSign className="h-5 w-5 text-purple-500" />
+                    <ArrowUpRight className="h-5 w-5 text-purple-500" />
                   </div>
                   <span className="text-sm text-center">Add Money</span>
                 </div>
@@ -491,7 +445,7 @@ useEffect(() => {
               <div className="bg-gray-900/80 border border-gray-800/50 rounded-xl p-4">
                 <div className="flex justify-between items-center mb-3">
                   <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
-                    <Calendar className="h-4 w-4 text-blue-400" />
+                    <CalendarDays className="h-4 w-4 text-blue-400" />
                   </div>
                   <span className="text-xs text-gray-400">This Season</span>
                 </div>
@@ -504,7 +458,7 @@ useEffect(() => {
               <div className="bg-gray-900/80 border border-gray-800/50 rounded-xl p-4">
                 <div className="flex justify-between items-center mb-3">
                   <div className="h-8 w-8 rounded-full bg-neon-green/10 flex items-center justify-center">
-                    <User className="h-4 w-4 text-neon-green" />
+                    <Users className="h-4 w-4 text-neon-green" />
                   </div>
                   <span className="text-xs text-gray-400">Community</span>
                 </div>
@@ -517,7 +471,7 @@ useEffect(() => {
               <div className="bg-gray-900/80 border border-gray-800/50 rounded-xl p-4">
                 <div className="flex justify-between items-center mb-3">
                   <div className="h-8 w-8 rounded-full bg-amber-400/10 flex items-center justify-center">
-                    <Trophy className="h-4 w-4 text-amber-400" />
+                    <BarChart3 className="h-4 w-4 text-amber-400" />
                   </div>
                   <span className="text-xs text-gray-400">Total Prizes</span>
                 </div>
@@ -530,7 +484,7 @@ useEffect(() => {
               <div className="bg-gray-900/80 border border-gray-800/50 rounded-xl p-4">
                 <div className="flex justify-between items-center mb-3">
                   <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
-                    <Award className="h-4 w-4 text-red-400" />
+                    <Zap className="h-4 w-4 text-red-400" />
                   </div>
                   <span className="text-xs text-gray-400">Today</span>
                 </div>
@@ -579,7 +533,7 @@ useEffect(() => {
                           />
                         ) : (
                           <div className="h-full w-full bg-gray-800 flex items-center justify-center">
-                            <User className="h-6 w-6 text-gray-600" />
+                            <Users className="h-6 w-6 text-gray-600" />
                           </div>
                         )}
                       </div>

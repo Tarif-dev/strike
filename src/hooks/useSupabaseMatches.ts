@@ -62,7 +62,7 @@ export const useSupabaseMatches = () => {
             scores: matchDetails.scores || { home: null, away: null },
             fantasy: matchDetails.fantasy || {
               contestCount: 30,
-              prizePool: "₹5 Lakh",
+              prizePool: "5,000 USDC",
               entryFees: [49, 99, 499, 999],
               teamsCreated: 0,
               percentageJoined: 0,

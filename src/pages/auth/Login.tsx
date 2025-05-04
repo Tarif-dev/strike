@@ -1,18 +1,23 @@
-
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Mail, Lock, LogIn, Loader2, EyeOff, Eye, Apple } from "lucide-react";
 import { z } from "zod";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Apple, Eye, EyeOff, Loader2, Mail } from "lucide-react";
+import PageContainer from "@/components/layout/PageContainer";
 import { GoogleLogo } from "@/components/icons/GoogleLogo";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import PageContainer from "@/components/layout/PageContainer";
-import Header from "@/components/layout/Header";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -23,7 +28,13 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const navigate = useNavigate();
-  const { signInWithEmail, signInWithGoogle, signInWithApple, isLoading: authLoading, user } = useAuth();
+  const {
+    signInWithEmail,
+    signInWithGoogle,
+    signInWithApple,
+    isLoading: authLoading,
+    user,
+  } = useAuth();
   const { toast } = useToast();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -88,18 +99,18 @@ export default function Login() {
 
   return (
     <PageContainer>
-      <Header title="Login" />
-      
       <div className="flex flex-col items-center justify-center mt-8 px-4">
         <div className="w-full max-w-md space-y-6 bg-cricket-medium-green p-6 rounded-xl">
           <div className="text-center">
             <h1 className="text-2xl font-bold">Welcome Back</h1>
-            <p className="text-muted-foreground mt-2">Login to continue where you left off</p>
+            <p className="text-muted-foreground mt-2">
+              Login to continue where you left off
+            </p>
           </div>
-          
+
           <div className="space-y-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full flex gap-2 items-center justify-center bg-white"
               onClick={handleGoogleSignIn}
               disabled={authLoading}
@@ -107,9 +118,9 @@ export default function Login() {
               <GoogleLogo className="h-4 w-4" />
               <span>Continue with Google</span>
             </Button>
-            
-            <Button 
-              variant="outline" 
+
+            <Button
+              variant="outline"
               className="w-full flex gap-2 items-center justify-center bg-black text-white hover:bg-gray-800"
               onClick={handleAppleSignIn}
               disabled={authLoading}
@@ -118,7 +129,7 @@ export default function Login() {
               <span>Continue with Apple</span>
             </Button>
           </div>
-          
+
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t"></span>
@@ -129,7 +140,7 @@ export default function Login() {
               </span>
             </div>
           </div>
-          
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -153,7 +164,7 @@ export default function Login() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="password"
@@ -187,7 +198,7 @@ export default function Login() {
                   </FormItem>
                 )}
               />
-              
+
               <div className="flex items-center justify-between">
                 <Link
                   to="/auth/forgot-password"
@@ -202,9 +213,9 @@ export default function Login() {
                   Login with OTP
                 </Link>
               </div>
-              
-              <Button 
-                type="submit" 
+
+              <Button
+                type="submit"
                 className="w-full bg-cricket-lime text-cricket-dark-green hover:bg-cricket-lime/90"
                 disabled={isSubmitting}
               >
@@ -219,10 +230,13 @@ export default function Login() {
               </Button>
             </form>
           </Form>
-          
+
           <div className="mt-4 text-center text-sm">
             Don't have an account?{" "}
-            <Link to="/auth/signup" className="text-cricket-lime hover:underline">
+            <Link
+              to="/auth/signup"
+              className="text-cricket-lime hover:underline"
+            >
               Sign up
             </Link>
           </div>

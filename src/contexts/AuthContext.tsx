@@ -12,6 +12,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isLoading: boolean; // Added to match what components expect
   signIn: (
     email: string,
     password: string
@@ -19,19 +20,35 @@ interface AuthContextType {
     error: Error | null;
     data: any | null;
   }>;
-  signUp: (
+  signInWithEmail: (
     email: string,
     password: string
+  ) => Promise<{
+    error: Error | null;
+    data: any | null;
+  }>; // Alias for signIn to match component usage
+  signUp: (
+    email: string,
+    password: string,
+    metadata?: { [key: string]: any }
   ) => Promise<{
     error: Error | null;
     data: any | null;
   }>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithApple: () => Promise<void>; // Added for Apple login
   signInWithOtp: (email: string) => Promise<{
     error: Error | null;
     data: any | null;
   }>;
+  verifyOtp: (
+    email: string,
+    token: string
+  ) => Promise<{
+    error: Error | null;
+    data: any | null;
+  }>; // Added for OTP verification
   resetPassword: (email: string) => Promise<{
     error: Error | null;
     data: any | null;
@@ -82,10 +99,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { data, error };
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signInWithEmail = signIn; // Alias for signIn
+
+  const signUp = async (
+    email: string,
+    password: string,
+    metadata?: { [key: string]: any }
+  ) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: metadata,
+      },
     });
     return { data, error };
   };
@@ -103,12 +129,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const signInWithApple = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "apple",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+  };
+
   const signInWithOtp = async (email: string) => {
     const { data, error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
+    });
+    return { data, error };
+  };
+
+  const verifyOtp = async (email: string, token: string) => {
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: "email", // This was missing - need to specify the type of OTP verification
     });
     return { data, error };
   };
@@ -131,11 +175,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     user,
     session,
     loading,
+    isLoading: loading, // Added to match what components expect
     signIn,
+    signInWithEmail,
     signUp,
     signOut,
     signInWithGoogle,
+    signInWithApple,
     signInWithOtp,
+    verifyOtp,
     resetPassword,
     updatePassword,
   };

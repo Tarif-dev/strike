@@ -18,7 +18,6 @@ import { motion } from "framer-motion";
 import { matches } from "../data/matchesData";
 import { matchDetails } from "../data/matchDetails";
 import PageContainer from "../components/layout/PageContainer";
-import Header from "../components/layout/Header";
 import Navbar from "../components/layout/Navbar";
 import { Card } from "../components/ui/card";
 import { Progress } from "../components/ui/progress";
@@ -111,8 +110,6 @@ const MatchDetails = () => {
     return (
       <>
         <PageContainer className="py-8">
-          <Header title="Match Details" />
-
           <div className="mb-6 mt-4">
             <Link
               to="/matches"
@@ -461,8 +458,6 @@ const MatchDetails = () => {
   return (
     <>
       <PageContainer className="py-8">
-        <Header title="Match Details" />
-
         <div className="mb-6 mt-4">
           <Link
             to="/matches"
