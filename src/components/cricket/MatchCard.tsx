@@ -61,6 +61,7 @@ interface MatchCardProps {
   showFantasyFeatures?: boolean;
   className?: string;
   featured?: boolean;
+  prizePool?: string;
 }
 
 export default function MatchCard({
@@ -68,6 +69,7 @@ export default function MatchCard({
   showFantasyFeatures = false,
   className,
   featured = false,
+  prizePool
 }: MatchCardProps) {
   const navigate = useNavigate();
 
@@ -314,7 +316,7 @@ export default function MatchCard({
                         Prize Pool
                       </div>
                       <div className="text-neon-green font-bold">
-                        {fantasyData.prizePool}
+                        {prizePool||"0"} USDC
                       </div>
                     </div>
                   </div>

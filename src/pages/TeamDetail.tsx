@@ -43,6 +43,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection } from "@solana/wallet-adapter-react";
+import { PublicKey, Transaction } from "@solana/web3.js";
+import {
+  WalletNotConnectedError,
+  WalletSendTransactionError,
+} from "@solana/wallet-adapter-base";
+import { Program, BN } from "@coral-xyz/anchor";
+import * as anchor from "@coral-xyz/anchor";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { IDL } from "@/idl/strike_contracts_new";
+import { fetchPrizePool, usePrizePool } from "@/utils/prize-pool";
+import PrizePoolDisplay from "@/components/cricket/PrizePoolDisplay";
+import PrizeDistributionDisplay from "@/components/cricket/PrizeDistributionDisplay";
+import { calculatePrizeDistribution, calculateTeamPrize } from "@/utils/prize-distribution";
+// import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 
 // Define team type from Supabase
 type DatabaseTeam = Database["public"]["Tables"]["teams"]["Row"];
@@ -82,16 +100,281 @@ const TeamDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isBlockchainProcessing, setIsBlockchainProcessing] = useState(false);
+  const [txStatus, setTxStatus] = useState("");
+  const [txSignature, setTxSignature] = useState("");
+  const [txComplete, setTxComplete] = useState(false);
+  const [walletError, setWalletError] = useState("");
+  const [matchId, setmatchId] = useState('');
+  const { connection } = useConnection();
+   const wallet = useWallet();
+  const {
+    publicKey,
+    connected,
+    connecting,
+    disconnect,
+    select,
+    sendTransaction,
+  } = wallet;
+  
+  // State for prize distribution
+  const [prizeDistribution, setPrizeDistribution] = useState<PrizeDistributionResult | null>(null);
+  
+  // Use our custom hook for prize pool
+  const { 
+    prizePool, 
+    loading: prizePoolLoading,
+    error: prizePoolError,
+    refetch: refetchPrizePool
+  } = usePrizePool(matchId, connection, wallet);
+
+  // Calculate prize distribution based on team rankings when prize pool data changes
+
+
+  // Calculate prize distribution based on team rankings when prize pool data changes
+  useEffect(() => {
+    if (team && prizePool && Number(prizePool) > 0) {
+      // In a real application, this would be fetched from the backend
+      // For demonstration, we'll create mock data with the current team at the top
+      const mockRankedTeams = [
+        { 
+          id: team.id, 
+          team_name: team.team_name, 
+          total_points: team.total_points || 0
+        },
+        // Add mock competitors to demonstrate distribution UI
+        { 
+          id: 'competitor-1', 
+          team_name: 'Competitor Team 1', 
+          total_points: Math.max(0, (team.total_points || 0) - 20) 
+        },
+        { 
+          id: 'competitor-2', 
+          team_name: 'Competitor Team 2', 
+          total_points: Math.max(0, (team.total_points || 0) - 40)
+        }
+      ];
+      
+      // Calculate distribution using our utility function
+      const distribution = calculatePrizeDistribution(mockRankedTeams, prizePool);
+      setPrizeDistribution(distribution);
+    }
+  }, [team, prizePool]);
+  
+
+  
+  const { setVisible } = useWalletModal();
+  useEffect(() => {
+      if (connected) {
+        console.log("connection", connection);
+        setWalletError("");
+      }
+    }, [connected]);
+
+    const ensureWalletConnection = async () => {
+      if (!connected && !connecting) {
+        setWalletError("Wallet connection lost. Attempting to reconnect...");
+  
+        // If wallet was previously selected, try to reconnect
+        if (wallet.wallet) {
+          try {
+            // Attempt to disconnect and reconnect
+            await disconnect();
+            setTimeout(() => {
+              select(wallet.wallet.adapter.name);
+            }, 500);
+            return false;
+          } catch (error) {
+            console.error("Error reconnecting wallet:", error);
+            setWalletError(
+              "Failed to reconnect wallet. Please connect manually."
+            );
+            return false;
+          }
+        } else {
+          setWalletError("Wallet not connected. Please connect your wallet.");
+          return false;
+        }
+      }
+      return true;
+    };
+    const PROGRAM_ID = new PublicKey(
+        "2Bnp9uikuv1EuAfHbcXizF8FcqNDKQg7hfuKbLC9y6hT"
+      );
+      const USDC_MINT = new PublicKey(
+        "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
+      );
+      const TOKEN_PROGRAM=new PublicKey(
+        "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+      )
+      const ASSOCIATED_TOKEN_PROGRAM=new PublicKey(
+        "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+      )
+      const onSubmit = async (values) => {
+          if (!user) {
+            toast({
+              variant: "destructive",
+              title: "Authentication required",
+              description: "You must be logged in to create matches",
+            });
+            return;
+          }
+      
+          // Check wallet connection status and attempt reconnection if needed
+          if (!(await ensureWalletConnection())) {
+            toast({
+              variant: "destructive",
+              title: "Wallet connection issue",
+              description:
+                walletError || "Please connect your Solana wallet to create a match",
+            });
+            return;
+          }
+          if (!connected || !publicKey) {
+            toast({
+              variant: "destructive",
+              title: "Wallet not connected",
+              description: "Please connect your Solana wallet to create a match",
+            });
+            return;
+          }
+          setIsSubmitting(true);
+    setIsBlockchainProcessing(false);
+    setWalletError(""); 
+     const provider = new anchor.AnchorProvider(connection, wallet, {
+            commitment: "confirmed",
+          });
+          const program = new Program(IDL, provider);
+          const shortMatchId = matchId
+
+          console.log("short match id", shortMatchId);
+          const matchIdBuffer = Buffer.from(shortMatchId);
+        setTxStatus("Deriving program address...")
+        const [matchPoolPDA, matchBump] = await PublicKey.findProgramAddress(
+          [Buffer.from("match_pool"), matchIdBuffer],
+          PROGRAM_ID
+        );
+         const [poolTokenPDA, tokenBump] = await PublicKey.findProgramAddress(
+                [Buffer.from("pool_token"), matchIdBuffer],
+                PROGRAM_ID
+              );
+              setTxStatus("Building transaction...");
+              const userTokenAccount =  PublicKey.findProgramAddressSync([
+                wallet.publicKey.toBuffer(),
+                TOKEN_PROGRAM.toBuffer(),
+                USDC_MINT.toBuffer()
+              ],
+              ASSOCIATED_TOKEN_PROGRAM
+               )[0];
+               console.log("userTokenAccount",userTokenAccount.toString());
+               const amountLamports = new BN(parseFloat("10") * 1_000_000);
+              const tx = await program.methods
+        .deposit(amountLamports)
+        .accounts({
+          matchPool: matchPoolPDA,
+          poolTokenAccount: poolTokenPDA,
+          userTokenAccount: userTokenAccount,
+          user: publicKey,
+          tokenProgram: TOKEN_PROGRAM,
+          systemProgram: anchor.web3.SystemProgram.programId,
+        })
+        .transaction();
+        const transaction = new Transaction();
+        transaction.add(tx);
+        const { blockhash } = await connection.getLatestBlockhash("confirmed");
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = publicKey;
+        // Add right before sendTransaction
+        try {
+          console.log("Simulating transaction before sending...");
+          const { value: simulationResult } =
+            await connection.simulateTransaction(transaction);
+
+          console.log("Simulation result:", simulationResult);
+
+          if (simulationResult.err) {
+            console.error("Simulation error:", simulationResult.err);
+            // Parse and display a more user-friendly error
+            if (simulationResult.logs) {
+              console.error("Simulation logs:", simulationResult.logs);
+              const programErrorLog = simulationResult.logs
+                .filter(
+                  (log) =>
+                    log.includes("Program log:") ||
+                    log.includes("Program failed")
+                )
+                .join("\n");
+
+              if (programErrorLog) {
+                throw new Error(`Program simulation error: ${programErrorLog}`);
+              }
+            }
+            throw new Error(
+              `Simulation failed: ${JSON.stringify(simulationResult.err)}`
+            );
+          } else {
+            console.log("Simulation successful. Proceeding with transaction.");
+          }
+        } catch (simError) {
+          console.error("Error during simulation:", simError);
+          throw new Error(`Transaction simulation failed: ${simError.message}`);
+        }
+
+      
+      // Send the transaction
+      const signature = await sendTransaction(transaction, connection);
+      await connection.confirmTransaction(signature, "confirmed");
+      
+      toast({
+        title: "Deposit successful",
+        description: `You have successfully deposited ${10} USDC`,
+      });
+      
+}
 
   // Add state for Play button and dialog
   const [showPlayDialog, setShowPlayDialog] = useState(false);
-
+  const [totalPoolDeposits, setTotalPoolDeposits] = useState<string>("0");
+  const [loadingPoolData, setLoadingPoolData] = useState(false);
+ 
   // Fetch team data from Supabase
   useEffect(() => {
     if (id) {
       fetchTeamData();
     }
   }, [id]);
+  useEffect(() => {
+    console.log("waiting")
+    if (matchId && connected) {
+      fetchTotalPoolDeposits();
+    }
+  }, [matchId, connected]);
+  
+  const fetchTotalPoolDeposits = async () => {
+    if (!matchId || !connection) {
+      console.log("Match ID or connection not available");
+      return;
+    }
+    
+    try {
+      setLoadingPoolData(true);
+      
+      // Use the utility function to fetch the prize pool
+      const poolAmount = await fetchPrizePool(matchId, connection, wallet);
+      setTotalPoolDeposits(poolAmount);
+      
+    } catch (error) {
+      console.error("Error fetching pool deposits:", error);
+      toast({
+        title: "Error fetching pool data",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPoolData(false);
+    }
+  };
 
   const fetchTeamData = async () => {
     setLoading(true);
@@ -115,6 +398,7 @@ const TeamDetail = () => {
       } else if (data) {
         // Process players data
         const playersList = data.players as any[];
+        setmatchId(data.match_id)
 
         // Add mock player data to enhance the UI
         const teamPlayers = playersList.map((playerData) => {
@@ -174,6 +458,36 @@ const TeamDetail = () => {
       return "Unknown date";
     }
   };
+  const payAmount=async()=>{
+     onSubmit(10);
+  }
+  
+  // Use the PrizePoolDisplay component to show prize pool information
+  const renderPoolInfo = () => {
+    if (!matchId) return null;
+    
+    // Return the reusable PrizePoolDisplay component
+    return (
+      <PrizePoolDisplay matchId={matchId} />
+    );
+  };
+  
+  // Render the prize distribution section
+  const renderPrizeDistribution = () => {
+    if (!prizeDistribution || !team) return null;
+    
+    return (
+      <div className="mt-4">
+        <PrizeDistributionDisplay 
+          distributions={prizeDistribution.distributions}
+          percentages={prizeDistribution.percentages}
+          amounts={prizeDistribution.amounts}
+          teamId={team.id}
+        />
+      </div>
+    );
+  };
+  
 
   // Show loading state
   if (loading) {
@@ -452,10 +766,11 @@ const TeamDetail = () => {
         value={activeTab}
         onValueChange={setActiveTab}
       >
-        <TabsList className="grid grid-cols-3 mb-6">
+        <TabsList className="grid grid-cols-4 mb-6">
           <TabsTrigger value="players">Players</TabsTrigger>
           <TabsTrigger value="stats">Stats</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="prizes">Prizes</TabsTrigger>
         </TabsList>
 
         {/* Players Tab - Display team members */}
@@ -1232,6 +1547,73 @@ const TeamDetail = () => {
             </Card>
           </div>
         )}
+
+        {/* Prizes Tab - Show contest prizes */}
+        {activeTab === "prizes" && (
+          <div className="space-y-6">
+            <Card className="bg-gray-900/60 border-gray-800">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Trophy className="h-5 w-5 text-neon-green mr-2" />
+                  Contest Prizes
+                </CardTitle>
+                <CardDescription>
+                  View potential prize distribution based on current standings
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
+                    <h3 className="text-sm font-medium mb-2">Prize Pool</h3>
+                    <PrizePoolDisplay 
+                      prizePool={prizePool}
+                      loading={prizePoolLoading}
+                      error={prizePoolError}
+                    />
+                    
+                    <div className="mt-4 text-xs text-gray-400">
+                      <p>Join the contest by depositing USDC into the prize pool. Prize distribution is based on final team rankings after the match.</p>
+                    </div>
+                  </div>
+                  
+                  {prizeDistribution && (
+                    <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
+                      <h3 className="text-sm font-medium mb-2">Projected Prize Distribution</h3>
+                      <PrizeDistributionDisplay 
+                        distributions={prizeDistribution.distributions}
+                        percentages={prizeDistribution.percentages}
+                        amounts={prizeDistribution.amounts}
+                        teamId={team?.id}
+                      />
+                      
+                      <div className="mt-4 text-xs text-gray-400">
+                        <p>* Final distribution may vary based on actual participant count and performance</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {connected ? (
+                    <div className="flex justify-center">
+                      <Button 
+                        onClick={() => setShowPlayDialog(true)}
+                        className="bg-neon-green hover:bg-neon-green/90 text-black font-medium"
+                      >
+                        Play for Prize Pool
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex justify-center">
+                      <div className="mb-2 text-center text-sm text-gray-400">
+                        Connect your wallet to play for prizes
+                      </div>
+                      <WalletMultiButton className="max-w-xs" />
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </Tabs>
 
       {/* Play Contest Dialog */}
@@ -1243,6 +1625,12 @@ const TeamDetail = () => {
               Pool 10.00 USDC to participate in this contest and win rewards.
             </DialogDescription>
           </DialogHeader>
+          
+          {/* Prize Pool Display */}
+          {renderPoolInfo()}
+          
+          {/* Prize Distribution Display */}
+          {renderPrizeDistribution()}
 
           <div className="my-4 p-4 rounded-lg bg-gray-800/50 border border-gray-700">
             <div className="flex justify-between mb-3">
@@ -1257,8 +1645,8 @@ const TeamDetail = () => {
               <span>1,000+ participants</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Prize Pool:</span>
-              <span className="text-neon-green font-bold">5,000 USDC</span>
+              <span className="text-gray-400">Total Prize Pool:</span>
+              <span className="text-neon-green font-bold">{prizePool || "0"} USDC</span>
             </div>
           </div>
 
@@ -1269,6 +1657,7 @@ const TeamDetail = () => {
             <Button
               className="bg-blue-600 hover:bg-blue-700"
               onClick={() => {
+                payAmount()
                 // Here would be wallet integration code
                 toast({
                   title: "Transaction Initiated",

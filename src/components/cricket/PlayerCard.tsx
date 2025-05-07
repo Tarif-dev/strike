@@ -11,6 +11,9 @@ export interface PlayerData {
   image?: string;
   country: string;
   countryFlag: string;
+  captain?: boolean;
+  wicketkeeper?: boolean;
+  playerImageUrl?: string;
   stats: {
     matches?: number;
     runs?: number;
@@ -18,6 +21,9 @@ export interface PlayerData {
     average?: number;
     strikeRate?: number;
     economy?: number;
+    role?: string;
+    battingStyle?: string;
+    bowlingStyle?: string;
   };
   points?: number;
   selected?: boolean;

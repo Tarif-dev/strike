@@ -46,7 +46,7 @@ export const useSupabaseMatches = () => {
           }
 
           return {
-            id: match.match_id,
+            id: matchDetails.id,
             teams: matchDetails.teams || {
               home: { name: "TBD", code: "TBD", logo: "/team_logos/tbd.jpeg" },
               away: { name: "TBD", code: "TBD", logo: "/team_logos/tbd.jpeg" },

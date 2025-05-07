@@ -24,6 +24,9 @@ import ApiSettings from "@/pages/ApiSettings";
 import LandingPage from "@/pages/LandingPage";
 import AdminDashboard from "@/pages/admin/Dashboard";
 import CreateMatch from "@/pages/admin/CreateMatch";
+import MatchDetailAdmin from "@/pages/admin/MatchDetailAdmin";
+import ManageMatches from "./pages/admin/ManageMatches";
+import InitializeMatches from "./pages/admin/InitializeMatches";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -49,6 +52,7 @@ import {
 } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
 import "@solana/wallet-adapter-react-ui/styles.css";
+import AdminMatches from "./pages/admin/InitializeMatches";
 // require('@solana/wallet-adapter-react-ui/styles.css');
 
 // Create a client
@@ -72,7 +76,7 @@ function App() {
       new LedgerWalletAdapter(),
       new UnsafeBurnerWalletAdapter(),
     ],
-    [network]
+    []
   );
 
   return (
@@ -89,6 +93,7 @@ function App() {
                   <Route path="/auth/signup" element={<Signup />} />
                   <Route path="/auth/admin-signup" element={<AdminSignup />} />
                   <Route path="/auth/otp-login" element={<OtpLogin />} />
+                
                   <Route
                     path="/auth/forgot-password"
                     element={<ForgotPassword />}
@@ -132,7 +137,19 @@ function App() {
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route
                       path="/admin/create-match"
-                      element={<CreateMatch />}
+                      element={<AdminMatches />}
+                    />
+                    <Route
+                      path="/admin/match/:id/:matchId"
+                      element={<MatchDetailAdmin />}
+                    />
+                    <Route
+                      path="/admin/manage-matches"
+                      element={<ManageMatches />}
+                    />
+                    <Route
+                      path="/admin/initialize-matches"
+                      element={<InitializeMatches />}
                     />
                   </Route>
 

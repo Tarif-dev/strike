@@ -1,0 +1,3 @@
+Hello, world!
+This is a test script.
+Current time: Wed May 07 2025 12:25:21 GMT+0530 (India Standard Time)
