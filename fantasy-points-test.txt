@@ -1,0 +1,12 @@
+Reading scorecard from: /Users/mustafachaiwala/strike/src/samples/sample-scorecard.json
+Scorecard parsed successfully
+Number of innings: 2
+Calculating points for Rohit Sharma:
+Base runs: 76 * 1 = 76
+Boundaries: 7 fours * 1 = 7
+Sixes: 3 sixes * 2 = 6
+Half-century bonus: +20
+Strike rate: 128.81
+SR 120-140 bonus: +4
+
+Total fantasy points: 113

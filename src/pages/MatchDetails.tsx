@@ -43,7 +43,8 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"; 
+
 
 const MatchDetails = () => {
   const { id: matchId } = useParams();
@@ -51,6 +52,7 @@ const MatchDetails = () => {
   const [matchDetail, setMatchDetail] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("summary");
+ 
 
   useEffect(() => {
     // Find match from matches data

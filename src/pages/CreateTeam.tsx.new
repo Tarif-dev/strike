@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   ArrowLeft,
   Users,
@@ -33,7 +33,6 @@ import { useSupabaseMatch } from "@/hooks/useSupabaseMatch";
 // Components
 import PageContainer from "@/components/layout/PageContainer";
 import PlayerCard, { PlayerData } from "@/components/cricket/PlayerCard";
-import EnhancedPlayerCard from "@/components/cricket/EnhancedPlayerCard";
 import { Tabs } from "@/components/ui/tab";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,28 +40,10 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 
-// External libraries
+// Data
+import { countryFlags } from "@/data/mockData";
+import { players } from "@/data/playersData";
 import axios from 'axios';
-
-// Define country flags directly to avoid dependency on mockData
-const countryFlags = {
-  india: "🇮🇳",
-  australia: "🇦🇺",
-  england: "🇬🇧",
-  southAfrica: "🇿🇦",
-  westIndies: "🏝️",
-  newZealand: "🇳🇿",
-  pakistan: "🇵🇰",
-  sriLanka: "🇱🇰",
-  afghanistan: "🇦🇫",
-  bangladesh: "🇧🇩",
-  ireland: "🇮🇪",
-  scotland: "🇬🇧",
-  uae: "🇦🇪",
-  zimbabwe: "🇿🇼",
-  netherlands: "🇳🇱",
-  generic: "🏏"
-};
 
 // Cricbuzz API types
 import { 
@@ -73,9 +54,15 @@ import {
   SelectedPlayer, 
   Team 
 } from "@/types/cricbuzz";
-import { get } from "http";
 
-
+const options = {
+  method: 'GET',
+  url: 'https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/115336',
+  headers: {
+    'x-rapidapi-key': '014abe6e35msh76ef70851596118p1e000fjsn01ac2f8b6c4d',
+    'x-rapidapi-host': 'cricbuzz-cricket.p.rapidapi.com'
+  }
+};
 
 // Team balance constraints
 const TEAM_CONSTRAINTS = {
@@ -96,16 +83,15 @@ const mapPlayerRole = (role: string | undefined, keeper: boolean): PlayerRole =>
   }
   
   const roleUpper = role.toUpperCase();
-   if (roleUpper.includes('ALLROUNDER') || roleUpper.includes('ROUND')) {
-    return PlayerRole.ALL_ROUNDER;
-  }
   if (roleUpper.includes('BAT')) {
     return PlayerRole.BATSMAN;
   }
   if (roleUpper.includes('BOWL')) {
     return PlayerRole.BOWLER;
   }
- 
+  if (roleUpper.includes('ALL') || roleUpper.includes('ROUND')) {
+    return PlayerRole.ALL_ROUNDER;
+  }
   
   return PlayerRole.BATSMAN; // Default fallback
 };
@@ -121,33 +107,20 @@ const getPositionFromRole = (role: PlayerRole): string => {
   }
 };
 
-// Generate random points for players based on their role and captain status
-const generatePlayerPoints = (role: PlayerRole, isCaptain: boolean = false): number => {
-  // Base points by role
-  let basePoints = 0;
+// Generate random points for players based on their role
+const generatePlayerPoints = (role: PlayerRole): number => {
   switch(role) {
     case PlayerRole.WICKET_KEEPER:
-      basePoints = Math.floor(Math.random() * 200) + 700; // 700-900
-      break;
+      return Math.floor(Math.random() * 200) + 700; // 700-900
     case PlayerRole.BATSMAN:
-      basePoints = Math.floor(Math.random() * 200) + 600; // 600-800
-      break;
+      return Math.floor(Math.random() * 200) + 600; // 600-800
     case PlayerRole.BOWLER:
-      basePoints = Math.floor(Math.random() * 200) + 550; // 550-750
-      break;
+      return Math.floor(Math.random() * 200) + 550; // 550-750
     case PlayerRole.ALL_ROUNDER:
-      basePoints = Math.floor(Math.random() * 200) + 650; // 650-850
-      break;
+      return Math.floor(Math.random() * 200) + 650; // 650-850
     default:
-      basePoints = Math.floor(Math.random() * 200) + 600; // 600-800
+      return Math.floor(Math.random() * 200) + 600; // 600-800
   }
-  
-  // Apply captain bonus (10% extra points)
-  if (isCaptain) {
-    basePoints = Math.floor(basePoints * 1.1);
-  }
-  
-  return basePoints;
 };
 
 const CreateTeam = () => {
@@ -181,44 +154,6 @@ const CreateTeam = () => {
   const [sortBy, setSortBy] = useState("points");
   const [teamValidationError, setTeamValidationError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [apiError, setApiError] = useState<string | null>(null);
-
-  // Helper for consistent team logo paths
-  const getTeamLogoPath = useCallback((teamCode: string): string => {
-    // Make sure we have a valid team code
-    if (!teamCode) return "/team_logos/tbd.jpeg";
-    
-    // Normalize team code to lowercase
-    const normalizedCode = teamCode.toLowerCase();
-    
-    // Check if file exists, otherwise fallback
-    return `/team_logos/${normalizedCode}.jpeg`;
-  }, []);
-
-  // Function to get player image URL with fallback
-  const getPlayerImageUrl = useCallback((playerId: number, faceImageId: number | undefined) => {
-    // First try to find a local image (mostly for famous players)
-    const knownPlayerImages: Record<string, string> = {
-      "1413": "/players/virat_kohli.jpg",
-      "265": "/players/ms_dhoni.jpg", 
-      "969": "/players/jasprit_bumrah.jpg",
-      "509": "/players/rashid_khan.jpg",
-      "1446": "/players/rishabh_pant.jpg",
-      "1706": "/players/jos_buttler.jpg",
-      // Add more known players as needed
-    };
-
-    // Check if we have a local image for this player
-    if (knownPlayerImages[playerId.toString()]) {
-      return knownPlayerImages[playerId.toString()];
-    }
-
-    // Otherwise, try to use the Cricbuzz image if we have a faceImageId
-   
-
-    // Fallback to placeholder
-    return "/placeholder.svg";
-  }, []);
 
   // States for team players
   const [homeTeamPlayers, setHomeTeamPlayers] = useState<PlayerData[]>([]);
@@ -226,19 +161,9 @@ const CreateTeam = () => {
   const [activeTeamTab, setActiveTeamTab] = useState<"home" | "away">("home");
 
   // Function to fetch data from Cricbuzz API
-  const getTeamInfo = useCallback(async () => {
-    if (!matchId) return;
-    
+  const getTeamInfo = async () => {
     setLoadingCricbuzzData(true);
     try {
-      const options = {
-        method: 'GET',
-        url: `https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/${matchId}`,
-        headers: {
-          'x-rapidapi-key': 'bee2da4a33msh54fad7b338b78d2p19ea73jsndd8333ad3725',
-          'x-rapidapi-host': 'cricbuzz-cricket.p.rapidapi.com'
-        }
-      };
       const response = await axios.request(options);
       console.log('Cricbuzz API response:', response.data);
       setCricbuzzData(response.data);
@@ -248,78 +173,60 @@ const CreateTeam = () => {
       setCricbuzzError(error instanceof Error ? error.message : 'Failed to fetch match data');
       setLoadingCricbuzzData(false);
     }
-  }, [matchId]); // Add matchId as a dependency
+  };
 
   // Process Cricbuzz API data and convert to PlayerData format
-  const processMatchData = useCallback((data: CricbuzzResponse) => {
+  const processMatchData = (data: CricbuzzResponse) => {
     if (!data || !data.matchInfo) {
       console.error('Invalid match info data');
-      setApiError('Missing match information data');
       return;
     }
 
     try {
       const team1 = data.matchInfo.team1;
       const team2 = data.matchInfo.team2;
-      const venueInfo = data.venueInfo;
       
-      console.log(`Processing team data: ${team1.name} vs ${team2.name} at ${venueInfo.ground}`);
+      console.log(`Processing team data: ${team1.name} vs ${team2.name}`);
       
-      // Convert team 1 players to our format - filter out substitutes
+      // Convert team 1 players to our format
       const team1Players: PlayerData[] = team1.playerDetails.map(player => {
-          const playerRole = mapPlayerRole(player.role, player.keeper);
-          const points = generatePlayerPoints(playerRole, player.captain);
-          
-          return {
-            id: player.id.toString(),
-            name: player.name,
-            fullName: player.fullName || player.name,
-            team: team1.name,
-            teamLogo: getTeamLogoPath(team1.shortName),
-            position: getPositionFromRole(playerRole),
-            captain: player.captain,
-            wicketkeeper: player.keeper,
-            country: "International", // Default
-            countryFlag: countryFlags.india, // Default
-            stats: {
-              matches: 0,
-              battingStyle: player.battingStyle || "Unknown",
-              bowlingStyle: player.bowlingStyle || "N/A",
-              role: player.role || getPositionFromRole(playerRole)
-            },
-            playerImageUrl: getPlayerImageUrl(player.id, player.faceImageId),
-            points: points,
-            selected: false,
-          };
-        });
+        const playerRole = mapPlayerRole(player.role, player.keeper);
+        return {
+          id: player.id.toString(),
+          name: player.name,
+          fullName: player.fullName || player.name,
+          team: team1.name,
+          teamLogo: `/team-logos/${team1.shortName.toLowerCase()}.png`, // Fallback logo path
+          position: getPositionFromRole(playerRole),
+          country: "International", // Default
+          countryFlag: countryFlags.india, // Default
+          stats: {
+            matches: 0, // No stats in API, could be added later
+          },
+          points: generatePlayerPoints(playerRole),
+          selected: false,
+        };
+      });
       
-      // Convert team 2 players to our format - filter out substitutes
+      // Convert team 2 players to our format
       const team2Players: PlayerData[] = team2.playerDetails.map(player => {
-          const playerRole = mapPlayerRole(player.role, player.keeper);
-          const points = generatePlayerPoints(playerRole, player.captain);
-          
-          return {
-            id: player.id.toString(),
-            name: player.name,
-            fullName: player.fullName || player.name,
-            team: team2.name,
-            teamLogo: getTeamLogoPath(team2.shortName),
-            position: getPositionFromRole(playerRole),
-            captain: player.captain,
-            wicketkeeper: player.keeper,
-            country: "International", // Default
-            countryFlag: countryFlags.india, // Default
-            stats: {
-              matches: 0,
-              battingStyle: player.battingStyle || "Unknown",
-              bowlingStyle: player.bowlingStyle || "N/A",
-              role: player.role || getPositionFromRole(playerRole)
-            },
-            playerImageUrl: getPlayerImageUrl(player.id, player.faceImageId),
-            points: points,
-            selected: false,
-          };
-        });
+        const playerRole = mapPlayerRole(player.role, player.keeper);
+        return {
+          id: player.id.toString(),
+          name: player.name,
+          fullName: player.fullName || player.name,
+          team: team2.name,
+          teamLogo: `/team-logos/${team2.shortName.toLowerCase()}.png`, // Fallback logo path
+          position: getPositionFromRole(playerRole),
+          country: "International", // Default
+          countryFlag: countryFlags.india, // Default
+          stats: {
+            matches: 0, // No stats in API, could be added later
+          },
+          points: generatePlayerPoints(playerRole),
+          selected: false,
+        };
+      });
 
       console.log(`Processed ${team1Players.length} players for ${team1.name}`);
       console.log(`Processed ${team2Players.length} players for ${team2.name}`);
@@ -327,31 +234,28 @@ const CreateTeam = () => {
       // Update state with the processed player data
       setHomeTeamPlayers(team1Players);
       setAwayTeamPlayers(team2Players);
-      setApiError(null);
     } catch (error) {
       console.error('Error processing match data:', error);
       // Fallback to mock data or display an error
-      setApiError(error instanceof Error ? error.message : 'Error processing match data');
-      toast({
-        title: "Error Processing Match Data",
-        description: "There was an error processing the match data. Using fallback data.",
-        variant: "destructive",
-      });
-      // You could set fallback data here if needed
     }
-  }, [toast, getPlayerImageUrl, getTeamLogoPath]);
+  };
 
   // Effect to fetch Cricbuzz API data
   useEffect(() => {
     getTeamInfo();
-  }, [getTeamInfo]); // Add getTeamInfo as a dependency
+  }, []);
 
   // Effect to process Cricbuzz data when it changes
   useEffect(() => {
     if (cricbuzzData) {
       processMatchData(cricbuzzData);
     }
-  }, [cricbuzzData, processMatchData]);
+  }, [cricbuzzData]);
+
+  // Effect to validate team when selections change
+  useEffect(() => {
+    validateTeam();
+  }, [selectedPlayers, captain, viceCaptain]);
 
   // Derived states for player categories
   const currentPlayers = selectedPlayers.length;
@@ -364,55 +268,6 @@ const CreateTeam = () => {
   const currentAllRounders = selectedPlayers.filter(
     (p) => p.position === "All-rounder"
   ).length;
-  
-  // Validate if team meets all requirements
-  const validateTeam = useCallback(() => {
-    if (selectedPlayers.length < TEAM_CONSTRAINTS.MAX_PLAYERS) {
-      setTeamValidationError(
-        `Select ${TEAM_CONSTRAINTS.MAX_PLAYERS} players (${selectedPlayers.length}/${TEAM_CONSTRAINTS.MAX_PLAYERS})`
-      );
-      return false;
-    }
-
-    if (currentBatsmen < TEAM_CONSTRAINTS.MIN_BATSMEN) {
-      setTeamValidationError(
-        `Need at least ${TEAM_CONSTRAINTS.MIN_BATSMEN} batsmen (${currentBatsmen}/${TEAM_CONSTRAINTS.MIN_BATSMEN})`
-      );
-      return false;
-    }
-
-    if (currentBowlers < TEAM_CONSTRAINTS.MIN_BOWLERS) {
-      setTeamValidationError(
-        `Need at least ${TEAM_CONSTRAINTS.MIN_BOWLERS} bowlers (${currentBowlers}/${TEAM_CONSTRAINTS.MIN_BOWLERS})`
-      );
-      return false;
-    }
-
-    if (currentAllRounders < TEAM_CONSTRAINTS.MIN_ALL_ROUNDERS) {
-      setTeamValidationError(
-        `Need at least ${TEAM_CONSTRAINTS.MIN_ALL_ROUNDERS} all-rounders (${currentAllRounders}/${TEAM_CONSTRAINTS.MIN_ALL_ROUNDERS})`
-      );
-      return false;
-    }
-
-    if (!captain) {
-      setTeamValidationError("Select a captain");
-      return false;
-    }
-
-    if (!viceCaptain) {
-      setTeamValidationError("Select a vice captain");
-      return false;
-    }
-
-    setTeamValidationError(null);
-    return true;
-  }, [selectedPlayers.length, currentBatsmen, currentBowlers, currentAllRounders, captain, viceCaptain]);
-
-  // Effect to validate team when selections change
-  useEffect(() => {
-    validateTeam();
-  }, [validateTeam]);
 
   // Team balance summary
   const teamBalanceSummary = [
@@ -459,31 +314,75 @@ const CreateTeam = () => {
     const awayTeamName = supabaseMatch.teams.away.name;
     const awayTeamCode = supabaseMatch.teams.away.code;
 
-    console.log("No Cricbuzz data available - creating default players for teams:", homeTeamName, awayTeamName);
-    
-    // Create default players for both teams
-    const defaultHomePlayers = createDefaultPlayers(
-      homeTeamName,
-      homeTeamCode,
-      supabaseMatch.teams.home.logo
-    );
-    setHomeTeamPlayers(defaultHomePlayers);
+    console.log("Filtering players for teams:", homeTeamName, awayTeamName);
 
-    const defaultAwayPlayers = createDefaultPlayers(
-      awayTeamName,
-      awayTeamCode,
-      supabaseMatch.teams.away.logo
-    );
-    setAwayTeamPlayers(defaultAwayPlayers);
-
-    // Display a toast notification to inform user about using generated data
-    toast({
-      title: "Using Generated Player Data",
-      description: "Couldn't retrieve player data from Cricbuzz API. Using generated player data instead.",
-      variant: "default",
+    // More flexible filtering - check for partial matches in team names
+    const homeTeamFinal = players.filter((player) => {
+      return (
+        player.team === homeTeamName ||
+        player.team.includes(homeTeamName) ||
+        player.team.includes(homeTeamCode) ||
+        (homeTeamCode === "CSK" && player.team.includes("Chennai")) ||
+        (homeTeamCode === "MI" && player.team.includes("Mumbai")) ||
+        (homeTeamCode === "RCB" && player.team.includes("Bengaluru")) ||
+        player.team.includes("Bangalore") ||
+        (homeTeamCode === "KKR" && player.team.includes("Kolkata")) ||
+        (homeTeamCode === "DC" && player.team.includes("Delhi")) ||
+        (homeTeamCode === "PBKS" && player.team.includes("Punjab")) ||
+        (homeTeamCode === "GT" && player.team.includes("Gujarat")) ||
+        (homeTeamCode === "LSG" && player.team.includes("Lucknow")) ||
+        (homeTeamCode === "RR" && player.team.includes("Rajasthan")) ||
+        (homeTeamCode === "SRH" && player.team.includes("Hyderabad"))
+      );
     });
-    
-  }, [supabaseMatch, cricbuzzData, toast]);
+
+    const awayTeamFinal = players.filter((player) => {
+      return (
+        player.team === awayTeamName ||
+        player.team.includes(awayTeamName) ||
+        player.team.includes(awayTeamCode) ||
+        (awayTeamCode === "CSK" && player.team.includes("Chennai")) ||
+        (awayTeamCode === "MI" && player.team.includes("Mumbai")) ||
+        (awayTeamCode === "RCB" && player.team.includes("Bengaluru")) ||
+        player.team.includes("Bangalore") ||
+        (awayTeamCode === "KKR" && player.team.includes("Kolkata")) ||
+        (awayTeamCode === "DC" && player.team.includes("Delhi")) ||
+        (awayTeamCode === "PBKS" && player.team.includes("Punjab")) ||
+        (awayTeamCode === "GT" && player.team.includes("Gujarat")) ||
+        (awayTeamCode === "LSG" && player.team.includes("Lucknow")) ||
+        (awayTeamCode === "RR" && player.team.includes("Rajasthan")) ||
+        (awayTeamCode === "SRH" && player.team.includes("Hyderabad"))
+      );
+    });
+
+    console.log("Found home team players:", homeTeamFinal.length);
+    console.log("Found away team players:", awayTeamFinal.length);
+
+    // If no players found, try using mock data
+    if (homeTeamFinal.length === 0) {
+      // Create some default players for the home team
+      const defaultHomePlayers = createDefaultPlayers(
+        homeTeamName,
+        homeTeamCode,
+        supabaseMatch.teams.home.logo
+      );
+      setHomeTeamPlayers(defaultHomePlayers);
+    } else {
+      setHomeTeamPlayers(homeTeamFinal);
+    }
+
+    if (awayTeamFinal.length === 0) {
+      // Create some default players for the away team
+      const defaultAwayPlayers = createDefaultPlayers(
+        awayTeamName,
+        awayTeamCode,
+        supabaseMatch.teams.away.logo
+      );
+      setAwayTeamPlayers(defaultAwayPlayers);
+    } else {
+      setAwayTeamPlayers(awayTeamFinal);
+    }
+  }, [supabaseMatch, cricbuzzData]);
 
   // Helper function to create default players if none are found
   const createDefaultPlayers = (
@@ -493,37 +392,12 @@ const CreateTeam = () => {
   ): PlayerData[] => {
     const positions = ["Batsman", "Bowler", "All-rounder"];
     const defaultPlayers: PlayerData[] = [];
-    
-    // Number of players to create for each position
+
+    // Create 11 players for the team - 5 batsmen, 4 bowlers, 2 all-rounders
     const playerCounts = {
       Batsman: 5,
       Bowler: 4,
       "All-rounder": 2,
-    };
-    
-    // Player name templates
-    const firstNames = [
-      "Alex", "Chris", "Sam", "Jordan", "Taylor", "Morgan", "Riley", "Jamie", 
-      "Casey", "Drew", "Quinn", "Max", "Rowan", "Blake", "Avery", "Cameron"
-    ];
-    
-    const lastNames = [
-      "Smith", "Johnson", "Williams", "Patel", "Kumar", "Singh", "Khan", "Ali",
-      "Brown", "Davis", "Wilson", "Anderson", "Thompson", "Mitchell", "Watson", "Lee"
-    ];
-    
-    // Get a random name that will be consistent for the same team and position
-    const getPlayerName = (teamCode: string, position: string, index: number): { name: string, fullName: string } => {
-      const firstNameIndex = (teamCode.charCodeAt(0) + position.charCodeAt(0) + index) % firstNames.length;
-      const lastNameIndex = (teamCode.charCodeAt(1) + position.charCodeAt(1) + index) % lastNames.length;
-      
-      const firstName = firstNames[firstNameIndex];
-      const lastName = lastNames[lastNameIndex];
-      
-      return {
-        name: `${firstName} ${lastName.charAt(0)}.`,
-        fullName: `${firstName} ${lastName}`
-      };
     };
 
     // Generate players for each position
@@ -532,57 +406,43 @@ const CreateTeam = () => {
 
       for (let i = 1; i <= count; i++) {
         const playerId = `${teamCode.toLowerCase()}-${position.toLowerCase()}-${i}`;
-        const playerNameInfo = getPlayerName(teamCode, position, i);
-        
-        // Create a player with default stats based on position
-        const player: PlayerData = {
+        const playerName = `${teamCode} ${position} ${i}`;
+
+        defaultPlayers.push({
           id: playerId,
-          name: playerNameInfo.name,
-          fullName: playerNameInfo.fullName,
+          name: playerName,
           team: teamName,
-          teamLogo: teamLogo || `/team_logos/${teamCode.toLowerCase()}.jpeg`,
+          teamLogo: teamLogo,
           position: position,
           country: "International",
-          countryFlag: countryFlags.generic,
-          stats: {
-            matches: Math.floor(Math.random() * 40) + 20,
-            role: position,
-            battingStyle: position === "Batsman" ? "Right Handed Bat" : "Right Handed Bat",
-            bowlingStyle: position === "Bowler" ? "Right Arm Fast" : position === "All-rounder" ? "Right Arm Medium" : "N/A"
-          },
-          points: generatePlayerPoints(
-            position === "Batsman" ? PlayerRole.BATSMAN : 
-            position === "Bowler" ? PlayerRole.BOWLER : 
-            PlayerRole.ALL_ROUNDER
-          ),
-          selected: false,
-          playerImageUrl: "/placeholder.svg"
-        };
-        
-        // Add batting stats for batsmen and all-rounders
-        if (position === "Batsman" || position === "All-rounder") {
-          player.stats.runs = Math.floor(Math.random() * (position === "Batsman" ? 2000 : 1000)) + 500;
-          player.stats.average = Math.floor(Math.random() * 15) + 30;
-          player.stats.strikeRate = Math.floor(Math.random() * 20) + 130;
-        }
-        
-        // Add bowling stats for bowlers and all-rounders
-        if (position === "Bowler" || position === "All-rounder") {
-          player.stats.wickets = Math.floor(Math.random() * (position === "Bowler" ? 80 : 50)) + 20;
-          player.stats.economy = Math.random() * (position === "Bowler" ? 2 : 1.5) + 7;
-        }
-        
-        // Randomly add a wicketkeeper (only to batsmen)
-        if (position === "Batsman" && i === 1) {
-          player.wicketkeeper = true;
-        }
-        
-        // Randomly add a captain (usually a batsman or all-rounder)
-        if ((position === "Batsman" && i === 2) || (position === "All-rounder" && i === 1)) {
-          player.captain = true;
-        }
-        
-        defaultPlayers.push(player);
+          countryFlag: countryFlags.india,
+          stats:
+            position === "Batsman"
+              ? {
+                  matches: Math.floor(Math.random() * 50) + 20,
+                  runs: Math.floor(Math.random() * 2000) + 500,
+                  average: Math.floor(Math.random() * 15) + 30,
+                  strikeRate: Math.floor(Math.random() * 20) + 130,
+                }
+              : position === "Bowler"
+              ? {
+                  matches: Math.floor(Math.random() * 40) + 15,
+                  wickets: Math.floor(Math.random() * 80) + 20,
+                  economy: Math.random() * 2 + 7,
+                  average: Math.floor(Math.random() * 10) + 20,
+                }
+              : {
+                  matches: Math.floor(Math.random() * 45) + 25,
+                  runs: Math.floor(Math.random() * 1000) + 300,
+                  wickets: Math.floor(Math.random() * 50) + 15,
+                  average: Math.floor(Math.random() * 10) + 25,
+                  economy: Math.random() * 1.5 + 7.5,
+                  strikeRate: Math.floor(Math.random() * 15) + 120,
+                },
+          points:
+            Math.floor(Math.random() * 200) +
+            (position === "Batsman" ? 600 : position === "Bowler" ? 550 : 650),
+        });
       }
     }
 
@@ -591,20 +451,6 @@ const CreateTeam = () => {
 
   // Filter players based on active tab, role and search query
   const homeTeamFilteredPlayers = homeTeamPlayers.filter((player) => {
-    // Don't filter players in "All Players" tab
-    if (activeTab === "All Players") {
-      // just apply search if present
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim();
-        return (player.name?.toLowerCase().includes(query) || 
-                player.fullName?.toLowerCase().includes(query) ||
-                player.stats?.role?.toLowerCase().includes(query) ||
-                player.stats?.battingStyle?.toLowerCase().includes(query) ||
-                player.team?.toLowerCase().includes(query));
-      }
-      return true;
-    }
-    
     // Filter by position/role
     if (activeTab === "Batsmen" && player.position !== "Batsman") return false;
     if (activeTab === "Bowlers" && player.position !== "Bowler") return false;
@@ -613,31 +459,14 @@ const CreateTeam = () => {
     // Filter by search query if present
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
-      return (player.name?.toLowerCase().includes(query) || 
-              player.fullName?.toLowerCase().includes(query) ||
-              player.stats?.role?.toLowerCase().includes(query) ||
-              player.stats?.battingStyle?.toLowerCase().includes(query) ||
-              player.team?.toLowerCase().includes(query));
+      return player.name.toLowerCase().includes(query) || 
+             player.team.toLowerCase().includes(query);
     }
     
     return true;
   });
 
   const awayTeamFilteredPlayers = awayTeamPlayers.filter((player) => {
-    // Don't filter players in "All Players" tab
-    if (activeTab === "All Players") {
-      // just apply search if present
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim();
-        return (player.name?.toLowerCase().includes(query) || 
-                player.fullName?.toLowerCase().includes(query) ||
-                player.stats?.role?.toLowerCase().includes(query) ||
-                player.stats?.battingStyle?.toLowerCase().includes(query) ||
-                player.team?.toLowerCase().includes(query));
-      }
-      return true;
-    }
-    
     // Filter by position/role
     if (activeTab === "Batsmen" && player.position !== "Batsman") return false;
     if (activeTab === "Bowlers" && player.position !== "Bowler") return false;
@@ -646,11 +475,8 @@ const CreateTeam = () => {
     // Filter by search query if present
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
-      return (player.name?.toLowerCase().includes(query) || 
-              player.fullName?.toLowerCase().includes(query) ||
-              player.stats?.role?.toLowerCase().includes(query) ||
-              player.stats?.battingStyle?.toLowerCase().includes(query) ||
-              player.team?.toLowerCase().includes(query));
+      return player.name.toLowerCase().includes(query) || 
+             player.team.toLowerCase().includes(query);
     }
     
     return true;
@@ -765,6 +591,49 @@ const CreateTeam = () => {
   };
 
   // Validate if team meets all requirements
+  const validateTeam = () => {
+    if (selectedPlayers.length < TEAM_CONSTRAINTS.MAX_PLAYERS) {
+      setTeamValidationError(
+        `Select ${TEAM_CONSTRAINTS.MAX_PLAYERS} players (${selectedPlayers.length}/${TEAM_CONSTRAINTS.MAX_PLAYERS})`
+      );
+      return false;
+    }
+
+    if (currentBatsmen < TEAM_CONSTRAINTS.MIN_BATSMEN) {
+      setTeamValidationError(
+        `Need at least ${TEAM_CONSTRAINTS.MIN_BATSMEN} batsmen (${currentBatsmen}/${TEAM_CONSTRAINTS.MIN_BATSMEN})`
+      );
+      return false;
+    }
+
+    if (currentBowlers < TEAM_CONSTRAINTS.MIN_BOWLERS) {
+      setTeamValidationError(
+        `Need at least ${TEAM_CONSTRAINTS.MIN_BOWLERS} bowlers (${currentBowlers}/${TEAM_CONSTRAINTS.MIN_BOWLERS})`
+      );
+      return false;
+    }
+
+    if (currentAllRounders < TEAM_CONSTRAINTS.MIN_ALL_ROUNDERS) {
+      setTeamValidationError(
+        `Need at least ${TEAM_CONSTRAINTS.MIN_ALL_ROUNDERS} all-rounders (${currentAllRounders}/${TEAM_CONSTRAINTS.MIN_ALL_ROUNDERS})`
+      );
+      return false;
+    }
+
+    if (!captain) {
+      setTeamValidationError("Select a captain");
+      return false;
+    }
+
+    if (!viceCaptain) {
+      setTeamValidationError("Select a vice captain");
+      return false;
+    }
+
+    setTeamValidationError(null);
+    return true;
+  };
+
   // Handle team creation
   const handleCreateTeam = async () => {
     // Validate team name
@@ -800,36 +669,26 @@ const CreateTeam = () => {
 
     // Get match info for database - prefer Cricbuzz data if available
     const matchDetails = cricbuzzData ? {
-      match_id: String(cricbuzzData.matchInfo.matchId),
+      match_id: cricbuzzData.matchInfo.matchId,
       tournament: cricbuzzData.matchInfo.series.name,
       venue: cricbuzzData.venueInfo.ground,
       date: new Date(cricbuzzData.matchInfo.matchStartTimestamp).toISOString(),
-      match_format: cricbuzzData.matchInfo.matchFormat,
-      city: cricbuzzData.venueInfo.city,
-      country: cricbuzzData.venueInfo.country,
       teams: {
         home: {
-          id: String(cricbuzzData.matchInfo.team1.id),
+          id: cricbuzzData.matchInfo.team1.id,
           name: cricbuzzData.matchInfo.team1.name,
           code: cricbuzzData.matchInfo.team1.shortName,
-          logo: getTeamLogoPath(cricbuzzData.matchInfo.team1.shortName),
-          players_count: cricbuzzData.matchInfo.team1.playerDetails.length
+          logo: `/team-logos/${cricbuzzData.matchInfo.team1.shortName.toLowerCase()}.png`,
         },
         away: {
-          id: String(cricbuzzData.matchInfo.team2.id),
+          id: cricbuzzData.matchInfo.team2.id,
           name: cricbuzzData.matchInfo.team2.name,
           code: cricbuzzData.matchInfo.team2.shortName,
-          logo: getTeamLogoPath(cricbuzzData.matchInfo.team2.shortName),
-          players_count: cricbuzzData.matchInfo.team2.playerDetails.length
+          logo: `/team-logos/${cricbuzzData.matchInfo.team2.shortName.toLowerCase()}.png`,
         },
       },
-      toss_winner: cricbuzzData.matchInfo.state?.includes('won the toss') ? 
-        cricbuzzData.matchInfo.state.split(' won the toss')[0] : null,
-      toss_decision: cricbuzzData.matchInfo.state?.includes('elected to') ? 
-        (cricbuzzData.matchInfo.state.includes('bat') ? 'bat' : 'bowl') : null,
-      status: cricbuzzData.matchInfo.status,
     } : supabaseMatch ? {
-      match_id: String(supabaseMatch.id),
+      match_id: supabaseMatch.id,
       tournament: supabaseMatch.tournament.name,
       venue: supabaseMatch.venue,
       date: supabaseMatch.startTime,
@@ -859,13 +718,6 @@ const CreateTeam = () => {
     try {
       // Start saving process
       setIsSaving(true);
-
-      // Show a loading toast
-      toast({
-        title: "Creating Team",
-        description: "Saving your team to the database...",
-        variant: "default",
-      });
 
       console.log("Creating team with user:", user.id);
 
@@ -954,14 +806,6 @@ const CreateTeam = () => {
       });
     }
   };
-  const getInitials = (name: string) => {
-    const names = name.split(" ");
-    let result=""
-    for(let i = 0; i < names.length; i++) {
-      result += names[i][0].toLowerCase();
-    }
-    return result;
-  }
 
   // Clear all selections
   const clearSelections = () => {
@@ -991,12 +835,12 @@ const CreateTeam = () => {
       home: {
         name: cricbuzzData.matchInfo.team1.name,
         code: cricbuzzData.matchInfo.team1.shortName,
-        logo: getTeamLogoPath(cricbuzzData.matchInfo.team1.shortName),
+        logo: `/team-logos/${cricbuzzData.matchInfo.team1.shortName.toLowerCase()}.png`,
       },
       away: {
         name: cricbuzzData.matchInfo.team2.name,
         code: cricbuzzData.matchInfo.team2.shortName,
-        logo: getTeamLogoPath(cricbuzzData.matchInfo.team2.shortName),
+        logo: `/team-logos/${cricbuzzData.matchInfo.team2.shortName.toLowerCase()}.png`,
       }
     },
     venue: cricbuzzData.venueInfo.ground,
@@ -1004,45 +848,6 @@ const CreateTeam = () => {
       name: cricbuzzData.matchInfo.series.name
     }
   } : supabaseMatch;
-
-  // Enhanced player data display with improved styling
-  const PlayerDataDisplay = ({ player }: { player: PlayerData }) => {
-    return (
-      <div className="overflow-hidden">
-        <div className="font-medium text-sm truncate">
-          {player.name}
-        </div>
-        {player.fullName && player.fullName !== player.name && (
-          <div className="text-xs text-gray-500 truncate">
-            {player.fullName}
-          </div>
-        )}
-        <div className="text-xs text-gray-400 flex items-center gap-1">
-          <span className="truncate">
-            {player.position}
-          </span>
-          <span className="text-gray-600">•</span>
-          <span className="text-xs text-neon-green">
-            {((player.points || 0) / 100).toFixed(1)} Cr
-          </span>
-        </div>
-        {player.stats?.battingStyle && (
-          <div className="text-xs text-gray-500 mt-1">
-            Batting: <span className="text-gray-400">{player.stats.battingStyle}</span>
-            {player.stats.bowlingStyle && player.stats.bowlingStyle !== 'N/A' && (
-              <span className="ml-1">• Bowl: <span className="text-gray-400">{player.stats.bowlingStyle}</span></span>
-            )}
-          </div>
-        )}
-        {player.captain && (
-          <div className="text-xs text-amber-400 mt-0.5">Team Captain</div>
-        )}
-        {player.wicketkeeper && (
-          <div className="text-xs text-blue-400 mt-0.5">Wicketkeeper</div>
-        )}
-      </div>
-    );
-  };
 
   return (
     <PageContainer className="pb-24 pt-4 relative">
@@ -1084,7 +889,7 @@ const CreateTeam = () => {
             <Loader2 className="w-6 h-6 mx-auto animate-spin" />
             <p>Loading match details...</p>
           </div>
-        ) : cricbuzzError ? (
+        ) : matchError || cricbuzzError ? (
           <div className="text-center py-6 text-red-400">
             <AlertTriangle className="w-6 h-6 mx-auto mb-2" />
             <p>Failed to load match details</p>
@@ -1095,11 +900,11 @@ const CreateTeam = () => {
             <div className="flex flex-col md:flex-row items-center justify-between p-4 bg-gray-800/60 rounded-lg">
               <div className="flex flex-col items-center mb-3 md:mb-0">
                 <img
-                  src={activeMatchInfo?.teams?.home?.logo || getTeamLogoPath(activeMatchInfo?.teams?.home?.code)}
-                  alt={activeMatchInfo?.teams?.home?.name}
+                  src={activeMatchInfo.teams.home.logo}
+                  alt={activeMatchInfo.teams.home.name}
                   className="w-16 h-16 mb-2"
                   onError={(e) => {
-                    e.currentTarget.src = "/team_logos/tbd.jpeg";
+                    e.currentTarget.src = "/team-logos/default.png";
                   }}
                 />
                 <span className="font-medium text-lg">
@@ -1120,11 +925,11 @@ const CreateTeam = () => {
 
               <div className="flex flex-col items-center mt-3 md:mt-0">
                 <img
-                  src={activeMatchInfo?.teams?.away?.logo || getTeamLogoPath(activeMatchInfo?.teams?.away?.code)}
-                  alt={activeMatchInfo?.teams?.away?.name}
+                  src={activeMatchInfo.teams.away.logo}
+                  alt={activeMatchInfo.teams.away.name}
                   className="w-16 h-16 mb-2"
                   onError={(e) => {
-                    e.currentTarget.src = "/team_logos/tbd.jpeg";
+                    e.currentTarget.src = "/team-logos/default.png";
                   }}
                 />
                 <span className="font-medium text-lg">
@@ -1381,11 +1186,11 @@ const CreateTeam = () => {
           >
             {activeMatchInfo && (
               <img
-                src={activeMatchInfo?.teams?.home?.logo || getTeamLogoPath(activeMatchInfo?.teams?.home?.code)}
-                alt={activeMatchInfo?.teams?.home?.name}
+                src={activeMatchInfo.teams.home.logo}
+                alt={activeMatchInfo.teams.home.name}
                 className="w-5 h-5 mr-1"
                 onError={(e) => {
-                  e.currentTarget.src = "/team_logos/tbd.jpeg";
+                  e.currentTarget.src = "/team-logos/default.png";
                 }}
               />
             )}
@@ -1401,11 +1206,11 @@ const CreateTeam = () => {
           >
             {activeMatchInfo && (
               <img
-                src={activeMatchInfo?.teams?.away?.logo || getTeamLogoPath(activeMatchInfo?.teams?.away?.code)}
-                alt={activeMatchInfo?.teams?.away?.name}
+                src={activeMatchInfo.teams.away.logo}
+                alt={activeMatchInfo.teams.away.name}
                 className="w-5 h-5 mr-1"
                 onError={(e) => {
-                  e.currentTarget.src = "/team_logos/tbd.jpeg";
+                  e.currentTarget.src = "/team-logos/default.png";
                 }}
               />
             )}
@@ -1436,11 +1241,11 @@ const CreateTeam = () => {
             <div className="flex items-center gap-2 mb-3">
               {activeMatchInfo && (
                 <img
-                  src={activeMatchInfo?.teams?.home?.logo || getTeamLogoPath(activeMatchInfo?.teams?.home?.code)}
-                  alt={activeMatchInfo?.teams?.home?.name}
+                  src={activeMatchInfo.teams.home.logo}
+                  alt={activeMatchInfo.teams.home.name}
                   className="w-6 h-6"
                   onError={(e) => {
-                    e.currentTarget.src = "/team_logos/tbd.jpeg";
+                    e.currentTarget.src = "/team-logos/default.png";
                   }}
                 />
               )}
@@ -1595,11 +1400,11 @@ const CreateTeam = () => {
             <div className="flex items-center gap-2 mb-3">
               {activeMatchInfo && (
                 <img
-                  src={activeMatchInfo?.teams?.away?.logo || getTeamLogoPath(activeMatchInfo?.teams?.away?.code)}
-                  alt={activeMatchInfo?.teams?.away?.name}
+                  src={activeMatchInfo.teams.away.logo}
+                  alt={activeMatchInfo.teams.away.name}
                   className="w-6 h-6"
                   onError={(e) => {
-                    e.currentTarget.src = "/team_logos/tbd.jpeg";
+                    e.currentTarget.src = "/team-logos/default.png";
                   }}
                 />
               )}

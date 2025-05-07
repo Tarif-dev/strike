@@ -15,6 +15,7 @@ import {
   ChevronDown,
   AlertTriangle,
   Loader,
+  PlayCircle
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import PageContainer from "@/components/layout/PageContainer";
@@ -35,7 +36,7 @@ const AdminDashboard = () => {
     <PageContainer>
       <div className="mt-8 space-y-6 px-4">
         {/* Quick action buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Button
             className="bg-cricket-lime text-cricket-dark-green hover:bg-cricket-lime/90 h-auto py-6"
             onClick={() => navigate("/admin/create-match")}
@@ -43,6 +44,16 @@ const AdminDashboard = () => {
             <div className="flex flex-col items-center">
               <Plus className="h-8 w-8 mb-2" />
               <span className="text-lg font-medium">Create Match</span>
+            </div>
+          </Button>
+          
+          <Button
+            className="bg-neon-green text-cricket-dark-green hover:bg-neon-green/90 h-auto py-6"
+            onClick={() => navigate("/admin/initialize-matches")}
+          >
+            <div className="flex flex-col items-center">
+              <PlayCircle className="h-8 w-8 mb-2" />
+              <span className="text-lg font-medium">Initialize API Matches</span>
             </div>
           </Button>
 

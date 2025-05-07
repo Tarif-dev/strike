@@ -86,6 +86,7 @@ const teams = [
 ];
 
 const CreateMatch = () => {
+  
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -268,6 +269,7 @@ const CreateMatch = () => {
       );
 
       // Use the shorter match ID for Solana PDA derivation
+      console.log("short match id", shortMatchId);
       const matchIdBuffer = Buffer.from(shortMatchId);
 
       setTxStatus("Deriving program addresses...");

@@ -1,0 +1,106 @@
+Reading scorecard from: /Users/mustafachaiwala/strike/src/samples/sample-scorecard.json
+Scorecard parsed successfully
+Number of innings: 2
+
+========== FANTASY POINTS RESULTS ==========
+
+Glenn Maxwell (ID: 208): 158 points
+  Batting: 45 runs off 28 balls
+  Boundaries: 4 fours, 2 sixes
+  Strike Rate: 160.71
+  Fielding: 1 catches, 1 direct run outs
+  Role: Captain (points multiplied by 2)
+
+Virat Kohli (ID: 102): 128 points
+  Batting: 82 runs off 63 balls
+  Boundaries: 8 fours, 4 sixes
+  Strike Rate: 130.16
+  Fielding: 1 indirect run outs
+
+Rohit Sharma (ID: 101): 113 points
+  Batting: 76 runs off 59 balls
+  Boundaries: 7 fours, 3 sixes
+  Strike Rate: 128.81
+
+David Warner (ID: 206): 95 points
+  Batting: 59 runs off 42 balls
+  Boundaries: 6 fours, 2 sixes
+  Strike Rate: 140.48
+
+Rishabh Pant (ID: 104): 61 points
+  Batting: 29 runs off 15 balls
+  Boundaries: 2 fours, 2 sixes
+  Strike Rate: 193.33
+  Fielding: 1 catches, 1 stumpings
+  Role: Wicket Keeper
+
+Mohammed Shami (ID: 302): 58 points
+  Bowling: 2 wickets for 35 runs in 4 overs
+  Economy: 8.75
+
+KL Rahul (ID: 103): 56 points
+  Batting: 48 runs off 41 balls
+  Boundaries: 4 fours, 1 sixes
+  Strike Rate: 117.07
+
+Steven Smith (ID: 207): 46 points
+  Batting: 33 runs off 29 balls
+  Boundaries: 3 fours, 0 sixes
+  Strike Rate: 113.79
+  Fielding: 1 catches
+
+Jasprit Bumrah (ID: 301): 41 points
+  Bowling: 1 wickets for 22 runs in 4 overs
+  Maidens: 1
+  Economy: 5.50
+
+Hardik Pandya (ID: 105): 38 points
+  Batting: 16 runs off 8 balls
+  Boundaries: 1 fours, 1 sixes
+  Strike Rate: 200.00
+  Role: Captain (points multiplied by 2)
+
+Mitchell Starc (ID: 201): 38 points
+  Batting: 12 runs off 10 balls
+  Boundaries: 1 fours, 0 sixes
+  Strike Rate: 120.00
+  Bowling: 1 wickets for 38 runs in 4 overs
+  Economy: 9.50
+
+Marcus Stoinis (ID: 210): 34 points
+  Batting: 24 runs off 14 balls
+  Boundaries: 2 fours, 1 sixes
+  Strike Rate: 171.43
+
+Josh Hazlewood (ID: 203): 25 points
+  Bowling: 1 wickets for 32 runs in 4 overs
+  Economy: 8.00
+
+Yuzvendra Chahal (ID: 304): 25 points
+  Bowling: 1 wickets for 32 runs in 4 overs
+  Economy: 8.00
+
+Pat Cummins (ID: 202): 23 points
+  Bowling: 1 wickets for 36 runs in 4 overs
+  Economy: 9.00
+
+Mohammed Siraj (ID: 303): 21 points
+  Bowling: 1 wickets for 38 runs in 4 overs
+  Economy: 9.50
+
+Ravindra Jadeja (ID: 305): 14 points
+  Bowling: 0 wickets for 30 runs in 4 overs
+  Economy: 7.50
+  Fielding: 1 catches, 1 indirect run outs
+
+Alex Carey (ID: 209): -5 points
+  Batting: 0 runs off 2 balls
+  Role: Wicket Keeper
+
+Adam Zampa (ID: 204): -6 points
+  Bowling: 0 wickets for 42 runs in 4 overs
+  Economy: 10.50
+
+Glenn Maxwell (ID: 205): -6 points
+  Bowling: 0 wickets for 45 runs in 4 overs
+  Economy: 11.25
