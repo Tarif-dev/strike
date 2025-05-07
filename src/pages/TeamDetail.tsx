@@ -59,7 +59,15 @@ import { IDL } from "@/idl/strike_contracts_new";
 import { fetchPrizePool, usePrizePool } from "@/utils/prize-pool";
 import PrizePoolDisplay from "@/components/cricket/PrizePoolDisplay";
 import PrizeDistributionDisplay from "@/components/cricket/PrizeDistributionDisplay";
-import { calculatePrizeDistribution, calculateTeamPrize } from "@/utils/prize-distribution";
+import {
+  calculatePrizeDistribution,
+  calculateTeamPrize,
+} from "@/utils/prize-distribution";
+import {
+  PrizeDistributionResult,
+  PrizePoolDisplayProps,
+} from "@/interfaces/prize-distribution";
+import { TeamData } from "@/types/match";
 // import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 
 // Define team type from Supabase
@@ -106,9 +114,9 @@ const TeamDetail = () => {
   const [txSignature, setTxSignature] = useState("");
   const [txComplete, setTxComplete] = useState(false);
   const [walletError, setWalletError] = useState("");
-  const [matchId, setmatchId] = useState('');
+  const [matchId, setmatchId] = useState("");
   const { connection } = useConnection();
-   const wallet = useWallet();
+  const wallet = useWallet();
   const {
     publicKey,
     connected,
@@ -117,227 +125,279 @@ const TeamDetail = () => {
     select,
     sendTransaction,
   } = wallet;
-  
+
   // State for prize distribution
-  const [prizeDistribution, setPrizeDistribution] = useState<PrizeDistributionResult | null>(null);
-  
+  const [prizeDistribution, setPrizeDistribution] =
+    useState<PrizeDistributionResult | null>(null);
+
   // Use our custom hook for prize pool
-  const { 
-    prizePool, 
+  const {
+    prizePool,
     loading: prizePoolLoading,
     error: prizePoolError,
-    refetch: refetchPrizePool
+    refetch: refetchPrizePool,
   } = usePrizePool(matchId, connection, wallet);
-
-  // Calculate prize distribution based on team rankings when prize pool data changes
-
 
   // Calculate prize distribution based on team rankings when prize pool data changes
   useEffect(() => {
     if (team && prizePool && Number(prizePool) > 0) {
       // In a real application, this would be fetched from the backend
       // For demonstration, we'll create mock data with the current team at the top
-      const mockRankedTeams = [
-        { 
-          id: team.id, 
-          team_name: team.team_name, 
-          total_points: team.total_points || 0
+      const mockRankedTeams: TeamData[] = [
+        {
+          id: team.id,
+          team_name: team.team_name,
+          total_points: team.total_points || 0,
+          user_id: team.user_id,
+          match_id: team.match_id,
+          players: Array.isArray(team.players) ? team.players : [],
+          captain_id: team.captain_id,
+          vice_captain_id: team.vice_captain_id,
+          created_at: team.created_at,
+          updated_at: team.updated_at,
+          match_details: team.match_details,
         },
         // Add mock competitors to demonstrate distribution UI
-        { 
-          id: 'competitor-1', 
-          team_name: 'Competitor Team 1', 
-          total_points: Math.max(0, (team.total_points || 0) - 20) 
+        {
+          id: "competitor-1",
+          team_name: "Competitor Team 1",
+          total_points: Math.max(0, (team.total_points || 0) - 20),
+          user_id: "mock-user-1",
+          match_id: team.match_id,
+          players: [],
+          captain_id: "",
+          vice_captain_id: "",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          match_details: team.match_details,
         },
-        { 
-          id: 'competitor-2', 
-          team_name: 'Competitor Team 2', 
-          total_points: Math.max(0, (team.total_points || 0) - 40)
-        }
+        {
+          id: "competitor-2",
+          team_name: "Competitor Team 2",
+          total_points: Math.max(0, (team.total_points || 0) - 40),
+          user_id: "mock-user-2",
+          match_id: team.match_id,
+          players: [],
+          captain_id: "",
+          vice_captain_id: "",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          match_details: team.match_details,
+        },
       ];
-      
+
       // Calculate distribution using our utility function
-      const distribution = calculatePrizeDistribution(mockRankedTeams, prizePool);
+      const distribution = calculatePrizeDistribution(
+        mockRankedTeams,
+        prizePool
+      );
       setPrizeDistribution(distribution);
     }
   }, [team, prizePool]);
-  
 
-  
   const { setVisible } = useWalletModal();
   useEffect(() => {
-      if (connected) {
-        console.log("connection", connection);
-        setWalletError("");
-      }
-    }, [connected]);
+    if (connected) {
+      console.log("connection", connection);
+      setWalletError("");
+    }
+  }, [connected]);
 
-    const ensureWalletConnection = async () => {
-      if (!connected && !connecting) {
-        setWalletError("Wallet connection lost. Attempting to reconnect...");
-  
-        // If wallet was previously selected, try to reconnect
-        if (wallet.wallet) {
-          try {
-            // Attempt to disconnect and reconnect
-            await disconnect();
-            setTimeout(() => {
-              select(wallet.wallet.adapter.name);
-            }, 500);
-            return false;
-          } catch (error) {
-            console.error("Error reconnecting wallet:", error);
-            setWalletError(
-              "Failed to reconnect wallet. Please connect manually."
-            );
-            return false;
-          }
-        } else {
-          setWalletError("Wallet not connected. Please connect your wallet.");
+  const ensureWalletConnection = async () => {
+    if (!connected && !connecting) {
+      setWalletError("Wallet connection lost. Attempting to reconnect...");
+
+      // If wallet was previously selected, try to reconnect
+      if (wallet.wallet) {
+        try {
+          // Attempt to disconnect and reconnect
+          await disconnect();
+          setTimeout(() => {
+            select(wallet.wallet.adapter.name);
+          }, 500);
+          return false;
+        } catch (error) {
+          console.error("Error reconnecting wallet:", error);
+          setWalletError(
+            "Failed to reconnect wallet. Please connect manually."
+          );
           return false;
         }
+      } else {
+        setWalletError("Wallet not connected. Please connect your wallet.");
+        return false;
       }
-      return true;
-    };
-    const PROGRAM_ID = new PublicKey(
-        "2Bnp9uikuv1EuAfHbcXizF8FcqNDKQg7hfuKbLC9y6hT"
-      );
-      const USDC_MINT = new PublicKey(
-        "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
-      );
-      const TOKEN_PROGRAM=new PublicKey(
-        "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-      )
-      const ASSOCIATED_TOKEN_PROGRAM=new PublicKey(
-        "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-      )
-      const onSubmit = async (values) => {
-          if (!user) {
-            toast({
-              variant: "destructive",
-              title: "Authentication required",
-              description: "You must be logged in to create matches",
-            });
-            return;
-          }
-      
-          // Check wallet connection status and attempt reconnection if needed
-          if (!(await ensureWalletConnection())) {
-            toast({
-              variant: "destructive",
-              title: "Wallet connection issue",
-              description:
-                walletError || "Please connect your Solana wallet to create a match",
-            });
-            return;
-          }
-          if (!connected || !publicKey) {
-            toast({
-              variant: "destructive",
-              title: "Wallet not connected",
-              description: "Please connect your Solana wallet to create a match",
-            });
-            return;
-          }
-          setIsSubmitting(true);
+    }
+    return true;
+  };
+  const PROGRAM_ID = new PublicKey(
+    "2Bnp9uikuv1EuAfHbcXizF8FcqNDKQg7hfuKbLC9y6hT"
+  );
+  const USDC_MINT = new PublicKey(
+    "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
+  );
+  const TOKEN_PROGRAM = new PublicKey(
+    "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+  );
+  const ASSOCIATED_TOKEN_PROGRAM = new PublicKey(
+    "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+  );
+  const onSubmit = async (values) => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Authentication required",
+        description: "You must be logged in to create matches",
+      });
+      return;
+    }
+
+    // Check wallet connection status and attempt reconnection if needed
+    if (!(await ensureWalletConnection())) {
+      toast({
+        variant: "destructive",
+        title: "Wallet connection issue",
+        description:
+          walletError || "Please connect your Solana wallet to create a match",
+      });
+      return;
+    }
+    if (!connected || !publicKey) {
+      toast({
+        variant: "destructive",
+        title: "Wallet not connected",
+        description: "Please connect your Solana wallet to create a match",
+      });
+      return;
+    }
+    setIsSubmitting(true);
     setIsBlockchainProcessing(false);
-    setWalletError(""); 
-     const provider = new anchor.AnchorProvider(connection, wallet, {
-            commitment: "confirmed",
-          });
-          const program = new Program(IDL, provider);
-          const shortMatchId = matchId
+    setWalletError("");
+    const provider = new anchor.AnchorProvider(connection, wallet, {
+      commitment: "confirmed",
+    });
+    const program = new Program(IDL, provider);
+    const shortMatchId = matchId;
 
-          console.log("short match id", shortMatchId);
-          const matchIdBuffer = Buffer.from(shortMatchId);
-        setTxStatus("Deriving program address...")
-        const [matchPoolPDA, matchBump] = await PublicKey.findProgramAddress(
-          [Buffer.from("match_pool"), matchIdBuffer],
-          PROGRAM_ID
-        );
-         const [poolTokenPDA, tokenBump] = await PublicKey.findProgramAddress(
-                [Buffer.from("pool_token"), matchIdBuffer],
-                PROGRAM_ID
-              );
-              setTxStatus("Building transaction...");
-              const userTokenAccount =  PublicKey.findProgramAddressSync([
-                wallet.publicKey.toBuffer(),
-                TOKEN_PROGRAM.toBuffer(),
-                USDC_MINT.toBuffer()
-              ],
-              ASSOCIATED_TOKEN_PROGRAM
-               )[0];
-               console.log("userTokenAccount",userTokenAccount.toString());
-               const amountLamports = new BN(parseFloat("10") * 1_000_000);
-              const tx = await program.methods
-        .deposit(amountLamports)
-        .accounts({
-          matchPool: matchPoolPDA,
-          poolTokenAccount: poolTokenPDA,
-          userTokenAccount: userTokenAccount,
-          user: publicKey,
-          tokenProgram: TOKEN_PROGRAM,
-          systemProgram: anchor.web3.SystemProgram.programId,
-        })
-        .transaction();
-        const transaction = new Transaction();
-        transaction.add(tx);
-        const { blockhash } = await connection.getLatestBlockhash("confirmed");
-        transaction.recentBlockhash = blockhash;
-        transaction.feePayer = publicKey;
-        // Add right before sendTransaction
-        try {
-          console.log("Simulating transaction before sending...");
-          const { value: simulationResult } =
-            await connection.simulateTransaction(transaction);
+    console.log("short match id", shortMatchId);
+    const matchIdBuffer = Buffer.from(shortMatchId);
+    setTxStatus("Deriving program address...");
+    const [matchPoolPDA, matchBump] = await PublicKey.findProgramAddress(
+      [Buffer.from("match_pool"), matchIdBuffer],
+      PROGRAM_ID
+    );
+    const [poolTokenPDA, tokenBump] = await PublicKey.findProgramAddress(
+      [Buffer.from("pool_token"), matchIdBuffer],
+      PROGRAM_ID
+    );
+    setTxStatus("Building transaction...");
+    const userTokenAccount = PublicKey.findProgramAddressSync(
+      [
+        wallet.publicKey.toBuffer(),
+        TOKEN_PROGRAM.toBuffer(),
+        USDC_MINT.toBuffer(),
+      ],
+      ASSOCIATED_TOKEN_PROGRAM
+    )[0];
+    console.log("userTokenAccount", userTokenAccount.toString());
+    const amountLamports = new BN(parseFloat("10") * 1_000_000);
+    const tx = await program.methods
+      .deposit(amountLamports)
+      .accounts({
+        matchPool: matchPoolPDA,
+        poolTokenAccount: poolTokenPDA,
+        userTokenAccount: userTokenAccount,
+        user: publicKey,
+        tokenProgram: TOKEN_PROGRAM,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .transaction();
+    const transaction = new Transaction();
+    transaction.add(tx);
+    const { blockhash } = await connection.getLatestBlockhash("confirmed");
+    transaction.recentBlockhash = blockhash;
+    transaction.feePayer = publicKey;
+    // Add right before sendTransaction
+    try {
+      console.log("Simulating transaction before sending...");
+      const { value: simulationResult } = await connection.simulateTransaction(
+        transaction
+      );
 
-          console.log("Simulation result:", simulationResult);
+      console.log("Simulation result:", simulationResult);
 
-          if (simulationResult.err) {
-            console.error("Simulation error:", simulationResult.err);
-            // Parse and display a more user-friendly error
-            if (simulationResult.logs) {
-              console.error("Simulation logs:", simulationResult.logs);
-              const programErrorLog = simulationResult.logs
-                .filter(
-                  (log) =>
-                    log.includes("Program log:") ||
-                    log.includes("Program failed")
-                )
-                .join("\n");
+      if (simulationResult.err) {
+        console.error("Simulation error:", simulationResult.err);
+        // Parse and display a more user-friendly error
+        if (simulationResult.logs) {
+          console.error("Simulation logs:", simulationResult.logs);
+          const programErrorLog = simulationResult.logs
+            .filter(
+              (log) =>
+                log.includes("Program log:") || log.includes("Program failed")
+            )
+            .join("\n");
 
-              if (programErrorLog) {
-                throw new Error(`Program simulation error: ${programErrorLog}`);
-              }
-            }
-            throw new Error(
-              `Simulation failed: ${JSON.stringify(simulationResult.err)}`
-            );
-          } else {
-            console.log("Simulation successful. Proceeding with transaction.");
+          if (programErrorLog) {
+            throw new Error(`Program simulation error: ${programErrorLog}`);
           }
-        } catch (simError) {
-          console.error("Error during simulation:", simError);
-          throw new Error(`Transaction simulation failed: ${simError.message}`);
         }
+        throw new Error(
+          `Simulation failed: ${JSON.stringify(simulationResult.err)}`
+        );
+      } else {
+        console.log("Simulation successful. Proceeding with transaction.");
+      }
+    } catch (simError) {
+      console.error("Error during simulation:", simError);
+      throw new Error(`Transaction simulation failed: ${simError.message}`);
+    }
 
-      
-      // Send the transaction
-      const signature = await sendTransaction(transaction, connection);
-      await connection.confirmTransaction(signature, "confirmed");
-      
+    // Send the transaction
+    const signature = await sendTransaction(transaction, connection);
+    await connection.confirmTransaction(signature, "confirmed");
+
+    // After successful payment, update the team in the database with the wallet address
+    if (publicKey) {
+      try {
+        const { error: updateError } = await supabase
+          .from("teams")
+          .update({ wallet_address: publicKey.toString() })
+          .eq("id", id);
+
+        if (updateError) {
+          console.error("Error updating wallet address:", updateError);
+          // We don't throw here as the payment was successful
+          toast({
+            title: "Deposit successful",
+            description: `You have successfully deposited ${10} USDC, but there was an issue saving your wallet information.`,
+          });
+        } else {
+          toast({
+            title: "Deposit successful",
+            description: `You have successfully deposited ${10} USDC`,
+          });
+        }
+      } catch (walletUpdateError) {
+        console.error("Exception updating wallet address:", walletUpdateError);
+        toast({
+          title: "Deposit successful",
+          description: `You have successfully deposited ${10} USDC, but there was an issue saving your wallet information.`,
+        });
+      }
+    } else {
       toast({
         title: "Deposit successful",
         description: `You have successfully deposited ${10} USDC`,
       });
-      
-}
+    }
+  };
 
   // Add state for Play button and dialog
   const [showPlayDialog, setShowPlayDialog] = useState(false);
   const [totalPoolDeposits, setTotalPoolDeposits] = useState<string>("0");
   const [loadingPoolData, setLoadingPoolData] = useState(false);
- 
+
   // Fetch team data from Supabase
   useEffect(() => {
     if (id) {
@@ -345,30 +405,30 @@ const TeamDetail = () => {
     }
   }, [id]);
   useEffect(() => {
-    console.log("waiting")
+    console.log("waiting");
     if (matchId && connected) {
       fetchTotalPoolDeposits();
     }
   }, [matchId, connected]);
-  
+
   const fetchTotalPoolDeposits = async () => {
     if (!matchId || !connection) {
       console.log("Match ID or connection not available");
       return;
     }
-    
+
     try {
       setLoadingPoolData(true);
-      
+
       // Use the utility function to fetch the prize pool
       const poolAmount = await fetchPrizePool(matchId, connection, wallet);
       setTotalPoolDeposits(poolAmount);
-      
     } catch (error) {
       console.error("Error fetching pool deposits:", error);
       toast({
         title: "Error fetching pool data",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     } finally {
@@ -398,7 +458,7 @@ const TeamDetail = () => {
       } else if (data) {
         // Process players data
         const playersList = data.players as any[];
-        setmatchId(data.match_id)
+        setmatchId(data.match_id);
 
         // Add mock player data to enhance the UI
         const teamPlayers = playersList.map((playerData) => {
@@ -458,27 +518,25 @@ const TeamDetail = () => {
       return "Unknown date";
     }
   };
-  const payAmount=async()=>{
-     onSubmit(10);
-  }
-  
+  const payAmount = async () => {
+    onSubmit(10);
+  };
+
   // Use the PrizePoolDisplay component to show prize pool information
   const renderPoolInfo = () => {
     if (!matchId) return null;
-    
+
     // Return the reusable PrizePoolDisplay component
-    return (
-      <PrizePoolDisplay matchId={matchId} />
-    );
+    return <PrizePoolDisplay matchId={matchId} />;
   };
-  
+
   // Render the prize distribution section
   const renderPrizeDistribution = () => {
     if (!prizeDistribution || !team) return null;
-    
+
     return (
       <div className="mt-4">
-        <PrizeDistributionDisplay 
+        <PrizeDistributionDisplay
           distributions={prizeDistribution.distributions}
           percentages={prizeDistribution.percentages}
           amounts={prizeDistribution.amounts}
@@ -487,7 +545,6 @@ const TeamDetail = () => {
       </div>
     );
   };
-  
 
   // Show loading state
   if (loading) {
@@ -1565,36 +1622,41 @@ const TeamDetail = () => {
                 <div className="space-y-6">
                   <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
                     <h3 className="text-sm font-medium mb-2">Prize Pool</h3>
-                    <PrizePoolDisplay 
-                      prizePool={prizePool}
-                      loading={prizePoolLoading}
-                      error={prizePoolError}
-                    />
-                    
+                    <PrizePoolDisplay matchId={matchId} />
+
                     <div className="mt-4 text-xs text-gray-400">
-                      <p>Join the contest by depositing USDC into the prize pool. Prize distribution is based on final team rankings after the match.</p>
+                      <p>
+                        Join the contest by depositing USDC into the prize pool.
+                        Prize distribution is based on final team rankings after
+                        the match.
+                      </p>
                     </div>
                   </div>
-                  
+
                   {prizeDistribution && (
                     <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
-                      <h3 className="text-sm font-medium mb-2">Projected Prize Distribution</h3>
-                      <PrizeDistributionDisplay 
+                      <h3 className="text-sm font-medium mb-2">
+                        Projected Prize Distribution
+                      </h3>
+                      <PrizeDistributionDisplay
                         distributions={prizeDistribution.distributions}
                         percentages={prizeDistribution.percentages}
                         amounts={prizeDistribution.amounts}
                         teamId={team?.id}
                       />
-                      
+
                       <div className="mt-4 text-xs text-gray-400">
-                        <p>* Final distribution may vary based on actual participant count and performance</p>
+                        <p>
+                          * Final distribution may vary based on actual
+                          participant count and performance
+                        </p>
                       </div>
                     </div>
                   )}
-                  
+
                   {connected ? (
                     <div className="flex justify-center">
-                      <Button 
+                      <Button
                         onClick={() => setShowPlayDialog(true)}
                         className="bg-neon-green hover:bg-neon-green/90 text-black font-medium"
                       >
@@ -1625,10 +1687,10 @@ const TeamDetail = () => {
               Pool 10.00 USDC to participate in this contest and win rewards.
             </DialogDescription>
           </DialogHeader>
-          
+
           {/* Prize Pool Display */}
           {renderPoolInfo()}
-          
+
           {/* Prize Distribution Display */}
           {renderPrizeDistribution()}
 
@@ -1646,7 +1708,9 @@ const TeamDetail = () => {
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Total Prize Pool:</span>
-              <span className="text-neon-green font-bold">{prizePool || "0"} USDC</span>
+              <span className="text-neon-green font-bold">
+                {prizePool || "0"} USDC
+              </span>
             </div>
           </div>
 
@@ -1657,7 +1721,7 @@ const TeamDetail = () => {
             <Button
               className="bg-blue-600 hover:bg-blue-700"
               onClick={() => {
-                payAmount()
+                payAmount();
                 // Here would be wallet integration code
                 toast({
                   title: "Transaction Initiated",
