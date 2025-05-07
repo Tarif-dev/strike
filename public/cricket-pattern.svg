@@ -1,0 +1,26 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <!-- Cricket bat -->
+  <g opacity="0.3" transform="translate(50, 50) scale(0.4) rotate(45)">
+    <rect x="30" y="0" width="40" height="200" rx="20" fill="#39FF14" />
+    <rect x="20" y="200" width="60" height="150" rx="5" fill="#39FF14" />
+  </g>
+  
+  <!-- Cricket ball -->
+  <circle cx="250" cy="150" r="20" fill="#39FF14" opacity="0.3" />
+  <path d="M 240 140 Q 250 150 260 140 M 240 160 Q 250 150 260 160" stroke="#000" stroke-width="2" opacity="0.3" />
+  
+  <!-- Stumps -->
+  <g transform="translate(150, 250) scale(0.5)">
+    <rect x="40" y="0" width="8" height="100" fill="#39FF14" opacity="0.3" />
+    <rect x="60" y="0" width="8" height="100" fill="#39FF14" opacity="0.3" />
+    <rect x="80" y="0" width="8" height="100" fill="#39FF14" opacity="0.3" />
+    <rect x="35" y="0" width="60" height="8" fill="#39FF14" opacity="0.3" />
+  </g>
+  
+  <!-- Cricket helmet outline -->
+  <g transform="translate(300, 300) scale(0.4)">
+    <path d="M 50 50 Q 50 0 100 0 Q 150 0 150 50 Q 150 100 100 120 Q 50 100 50 50" stroke="#39FF14" stroke-width="5" fill="none" opacity="0.3" />
+    <rect x="70" y="70" width="60" height="30" stroke="#39FF14" stroke-width="5" fill="none" opacity="0.3" />
+  </g>
+</svg>
