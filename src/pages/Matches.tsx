@@ -23,15 +23,16 @@ import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { IDL } from "@/idl/strike_contracts_new";
 import { Program, BN } from "@coral-xyz/anchor";
 import * as anchor from "@coral-xyz/anchor";
-import axios from 'axios';
+import axios from "axios";
+import { supabase } from "@/integrations/supabase/client";
 
 const options = {
-  method: 'GET',
-  url: 'https://cricbuzz-cricket.p.rapidapi.com/matches/v1/upcoming',
+  method: "GET",
+  url: "https://cricbuzz-cricket.p.rapidapi.com/matches/v1/upcoming",
   headers: {
-    'x-rapidapi-key': '014abe6e35msh76ef70851596118p1e000fjsn01ac2f8b6c4d',
-    'x-rapidapi-host': 'cricbuzz-cricket.p.rapidapi.com'
-  }
+    "x-rapidapi-key": "014abe6e35msh76ef70851596118p1e000fjsn01ac2f8b6c4d",
+    "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com",
+  },
 };
 
 // Initialize program ID outside of component
@@ -45,6 +46,8 @@ const Matches = () => {
   const [currentMonth, setCurrentMonth] = useState("");
   const [prizePools, setPrizePools] = useState<Record<string, string>>({});
   const [loadingPrizePools, setLoadingPrizePools] = useState(false);
+  const [teamsCount, setTeamsCount] = useState<Record<string, number>>({});
+  const [loadingTeamsCount, setLoadingTeamsCount] = useState(false);
   const wallet = useWallet();
   const { connection } = useConnection();
   const {
@@ -55,8 +58,6 @@ const Matches = () => {
     connected,
     publicKey,
   } = wallet;
-  
-  
 
   // Make sure matches is always an array and status is a valid type
   const safeMatches: MatchData[] = Array.isArray(matches)
@@ -103,19 +104,22 @@ const Matches = () => {
     if (!connection || !connected) {
       return;
     }
-    
+
     try {
       setLoadingPrizePools(true);
-      
+
       // Create provider and program
       const provider = new anchor.AnchorProvider(connection, wallet, {
         commitment: "confirmed",
       });
-      const program = new Program(IDL as any, PROGRAM_ID, provider);
-      
+      anchor.setProvider(provider);
+
+      // Use 'any' type to bypass TypeScript's strict checking for the Anchor program
+      const program = new Program(IDL as any, provider);
+
       // Create a map to store prize pools
       const poolsMap: Record<string, string> = {};
-      
+
       // Fetch prize pools for all matches
       for (const match of filteredMatches) {
         try {
@@ -123,24 +127,38 @@ const Matches = () => {
           console.log("Fetching prize pool for match:", match.id);
           const shortMatchId = match.id.split("-")[0];
           const matchIdBuffer = Buffer.from(shortMatchId);
-          
+
           // Derive the match pool PDA
           const [matchPoolPDA] = await PublicKey.findProgramAddress(
             [Buffer.from("match_pool"), matchIdBuffer],
             PROGRAM_ID
           );
-          
-          // Fetch the match pool account data using bracket notation
-          const matchPoolAccount = await program.account["matchPool"].fetch(matchPoolPDA);
-          
-          // Get the total deposited amount
-          const totalDeposited = matchPoolAccount.totalDeposited;
-          
-          // Convert from lamports to USDC (assuming 6 decimals for USDC)
-          const totalDepositedUsdc = (totalDeposited.toNumber() / 1_000_000).toFixed(2);
-          
-          // Store in the map
-          poolsMap[match.id] = totalDepositedUsdc;
+
+          try {
+            // Use any type to bypass TypeScript's strict checking for account structure
+            const matchPoolAccount: any = await (
+              program.account as any
+            ).matchPool.fetch(matchPoolPDA);
+
+            // Get the total deposited amount and safely convert it
+            let totalDepositedUsdc = "0.00";
+            if (matchPoolAccount && matchPoolAccount.totalDeposited) {
+              // Handle BN conversion safely
+              const totalDeposited = matchPoolAccount.totalDeposited;
+              totalDepositedUsdc = (Number(totalDeposited) / 1_000_000).toFixed(
+                2
+              );
+            }
+
+            // Store in the map
+            poolsMap[match.id] = totalDepositedUsdc;
+          } catch (accountError) {
+            console.log(
+              `Error fetching account for match ${match.id}:`,
+              accountError
+            );
+            poolsMap[match.id] = "0.00";
+          }
         } catch (error) {
           console.log(`No pool found for match ${match.id}`);
           // If no pool exists, set to 0
@@ -156,6 +174,47 @@ const Matches = () => {
     }
   }, [connection, connected, wallet, filteredMatches]);
 
+  // Function to fetch the team counts for each match
+  const fetchTeamCounts = useCallback(async () => {
+    if (!matches || matches.length === 0) return;
+
+    try {
+      setLoadingTeamsCount(true);
+
+      // Create a map to store team counts
+      const countsMap: Record<string, number> = {};
+
+      // Initialize all matches with zero teams
+      matches.forEach((match) => {
+        countsMap[match.id] = 0;
+      });
+
+      // Fetch all teams and count them per match
+      const { data, error } = await supabase.from("teams").select("match_id");
+
+      if (error) {
+        console.error("Error fetching team counts:", error);
+        return;
+      }
+
+      // Count teams for each match
+      if (data) {
+        data.forEach((team) => {
+          if (team.match_id) {
+            countsMap[team.match_id] = (countsMap[team.match_id] || 0) + 1;
+          }
+        });
+      }
+
+      console.log("Team counts fetched:", countsMap);
+      setTeamsCount(countsMap);
+    } catch (error) {
+      console.error("Error fetching team counts:", error);
+    } finally {
+      setLoadingTeamsCount(false);
+    }
+  }, [matches]);
+
   // Set current month on component mount
   useEffect(() => {
     // Set the current month for display
@@ -164,13 +223,20 @@ const Matches = () => {
       now.toLocaleString("default", { month: "long", year: "numeric" })
     );
   }, []);
-  
+
   // Fetch prize pools when wallet is connected and we have matches
   useEffect(() => {
     if (connected && publicKey && matches.length > 0) {
       fetchPrizePools();
     }
   }, [connected, publicKey, matches, fetchPrizePools]);
+
+  // Fetch team counts when matches are loaded
+  useEffect(() => {
+    if (matches.length > 0) {
+      fetchTeamCounts();
+    }
+  }, [matches, fetchTeamCounts]);
 
   // Group upcoming matches by date
   const groupedUpcomingMatches =
@@ -271,18 +337,23 @@ const Matches = () => {
                         {date}
                       </h3>
                       <div className="space-y-4">
-                        {prizePools && matches.map((match) => {
-                          console.log("Match ID from loop:", match.id);
-                          console.log("Prize Pool from loop :", prizePools[match.id]);
-                          return(
-                            <MatchCard
-                              key={match.id}
-                              match={match}
-                              showFantasyFeatures={true}
-                              prizePool={prizePools[match.id]}
-                            />
-                          );
-                        })}
+                        {prizePools &&
+                          matches.map((match) => {
+                            console.log("Match ID from loop:", match.id);
+                            console.log(
+                              "Prize Pool from loop :",
+                              prizePools[match.id]
+                            );
+                            return (
+                              <MatchCard
+                                key={match.id}
+                                match={match}
+                                showFantasyFeatures={true}
+                                prizePool={prizePools[match.id]}
+                                teamsCount={teamsCount[match.id]}
+                              />
+                            );
+                          })}
                       </div>
                     </div>
                   )
@@ -295,6 +366,7 @@ const Matches = () => {
                       match={match}
                       showFantasyFeatures={activeTab !== "Completed"}
                       prizePool={prizePools && prizePools[match.id]}
+                      teamsCount={teamsCount[match.id]}
                     />
                   ))}
                 </div>

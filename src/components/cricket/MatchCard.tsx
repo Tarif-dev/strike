@@ -62,6 +62,7 @@ interface MatchCardProps {
   className?: string;
   featured?: boolean;
   prizePool?: string;
+  teamsCount?: number;
 }
 
 export default function MatchCard({
@@ -69,7 +70,8 @@ export default function MatchCard({
   showFantasyFeatures = false,
   className,
   featured = false,
-  prizePool
+  prizePool,
+  teamsCount,
 }: MatchCardProps) {
   const navigate = useNavigate();
 
@@ -316,7 +318,7 @@ export default function MatchCard({
                         Prize Pool
                       </div>
                       <div className="text-neon-green font-bold">
-                        {prizePool||"0"} USDC
+                        {prizePool || "0"} USDC
                       </div>
                     </div>
                   </div>
@@ -326,7 +328,10 @@ export default function MatchCard({
                     <div>
                       <div className="text-xs text-gray-400 mb-0.5">Teams</div>
                       <div className="text-white font-medium">
-                        {fantasyData.teamsCreated.toLocaleString()}
+                        {(teamsCount !== undefined
+                          ? teamsCount
+                          : 0
+                        ).toLocaleString()}
                       </div>
                     </div>
                   </div>
