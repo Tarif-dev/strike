@@ -4,8 +4,6 @@ import Home from "@/pages/Home";
 import Matches from "@/pages/Matches";
 import MatchDetail from "@/pages/MatchDetail";
 import MatchDetails from "@/pages/MatchDetails";
-import Players from "@/pages/Players";
-import PlayerDetail from "@/pages/PlayerDetail";
 import CreateTeam from "@/pages/CreateTeam";
 import TeamDetail from "@/pages/TeamDetail";
 import Profile from "@/pages/Profile";
@@ -93,7 +91,7 @@ function App() {
                   <Route path="/auth/signup" element={<Signup />} />
                   <Route path="/auth/admin-signup" element={<AdminSignup />} />
                   <Route path="/auth/otp-login" element={<OtpLogin />} />
-                
+
                   <Route
                     path="/auth/forgot-password"
                     element={<ForgotPassword />}
@@ -114,8 +112,6 @@ function App() {
                       element={<Contests />}
                     />
                     <Route path="/contests/:matchId" element={<Contests />} />
-                    <Route path="/players" element={<Players />} />
-                    <Route path="/players/:id" element={<PlayerDetail />} />
                     {/* Redirect all leagues routes to matches */}
                     <Route
                       path="/leagues/*"

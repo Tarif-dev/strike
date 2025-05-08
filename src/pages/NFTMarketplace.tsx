@@ -270,6 +270,23 @@ const NFTCard = ({ nft }) => {
               </div>
             ))}
           </div>
+
+          <div className="space-x-2 mt-4 flex">
+            <Badge
+              className="bg-neon-green/20 text-neon-green hover:bg-neon-green/30 cursor-pointer"
+              onClick={() => {
+                /* Badge click handler */
+              }}
+            >
+              {nft.series}
+            </Badge>
+            <Link
+              to="/matches"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input shadow-sm h-8 px-3 py-2 bg-neon-green/20 text-neon-green hover:bg-neon-green/30"
+            >
+              View Player
+            </Link>
+          </div>
         </CardContent>
 
         <CardFooter className="pt-0 pb-4">

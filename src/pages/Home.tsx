@@ -68,14 +68,9 @@ const Home = () => {
   const [prizePools, setPrizePools] = useState<Record<string, string>>({});
   const [loadingPrizePools, setLoadingPrizePools] = useState(false);
   const navigate = useNavigate(); // add this import if not already present
-  
+
   const wallet = useWallet();
-  const {
-    connecting,
-    disconnect,
-    select,
-    sendTransaction,
-  } = wallet;
+  const { connecting, disconnect, select, sendTransaction } = wallet;
   const PROGRAM_ID = new PublicKey(
     "2Bnp9uikuv1EuAfHbcXizF8FcqNDKQg7hfuKbLC9y6hT"
   );
@@ -83,53 +78,62 @@ const Home = () => {
     if (!connection || !connected) {
       return;
     }
-    
+
     try {
       setLoadingPrizePools(true);
-      
+
       // Create provider and program
       const provider = new anchor.AnchorProvider(connection, wallet, {
         commitment: "confirmed",
       });
       const program = new Program(IDL, provider);
-      
+
       // Create a map to store prize pools
       const poolsMap: Record<string, string> = {};
-      
+
       // Fetch prize pools for all matches
       const matchesToFetch = [...liveMatches, ...upcomingMatches];
-      
+
       for (const match of matchesToFetch) {
         try {
           // Use the match ID for PDA derivation
           console.log("Fetching prize pool for match:", match.id);
           const shortMatchId = match.id.split("-")[0];
           const matchIdBuffer = Buffer.from(shortMatchId);
-          
+
           // Derive the match pool PDA
           const [matchPoolPDA] = await PublicKey.findProgramAddress(
             [Buffer.from("match_pool"), matchIdBuffer],
             PROGRAM_ID
           );
-          
-          // Fetch the match pool account data
-          const matchPoolAccount = await program.account.matchPool.fetch(matchPoolPDA);
-          
-          // Get the total deposited amount
-          const totalDeposited = matchPoolAccount.totalDeposited;
-          
-          // Convert from lamports to USDC (assuming 6 decimals for USDC)
-          const totalDepositedUsdc = (totalDeposited.toNumber() / 1_000_000).toFixed(2);
-          
-          // Store in the map
-          poolsMap[match.id] = totalDepositedUsdc;
+
+          // Fetch the match pool account data using a type assertion
+          try {
+            // Using "as any" to bypass TypeScript type checking for the fetch method
+            const matchPoolAccount = await (
+              program.account as any
+            ).MatchPool.fetch(matchPoolPDA);
+
+            // Get the total deposited amount
+            const totalDeposited = matchPoolAccount.total_deposited;
+
+            // Convert from lamports to USDC (assuming 6 decimals for USDC)
+            const totalDepositedUsdc = (
+              totalDeposited.toNumber() / 1_000_000
+            ).toFixed(2);
+
+            // Store in the map
+            poolsMap[match.id] = totalDepositedUsdc;
+          } catch (error) {
+            console.log(`No pool found for match ${match.id}: ${error}`);
+            // If no pool exists, set to 0
+            poolsMap[match.id] = "0.00";
+          }
         } catch (error) {
-          console.log(`No pool found for match ${match.id}`);
-          // If no pool exists, set to 0
-          poolsMap[match.id] = "0.00";
+          console.log(`Error processing match ${match.id}: ${error}`);
         }
       }
-       console.log("Prize pools fetched:", poolsMap);
+      console.log("Prize pools fetched:", poolsMap);
       setPrizePools(poolsMap);
     } catch (error) {
       console.error("Error fetching prize pools:", error);
@@ -142,7 +146,7 @@ const Home = () => {
       fetchPrizePools();
     }
   }, [connected, publicKey]);
-  
+
   // USDC token mint address (as specified)
   const USDC_MINT = new PublicKey(
     "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
@@ -258,7 +262,6 @@ const Home = () => {
   };
 
   // Get user photo URL
-  
 
   useEffect(() => {
     // Show notification toast if there are unread notifications
@@ -580,7 +583,7 @@ const Home = () => {
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-bold text-lg">Top Performers</h2>
             <Link
-              to="/players"
+              to="/matches"
               className="text-neon-green text-sm flex items-center"
             >
               View All <ChevronRight className="h-4 w-4 ml-1" />
@@ -589,7 +592,7 @@ const Home = () => {
 
           <div className="space-y-3">
             {topPlayers.map((player, index) => (
-              <Link to={`/players/${player.id}`} key={player.id}>
+              <Link to={`/matches`} key={player.id}>
                 <Card className="bg-gray-900/80 hover:bg-gray-900 border border-gray-800/50 transition-colors">
                   <div className="p-3 flex items-center">
                     <div className="flex items-center flex-1 gap-3">
