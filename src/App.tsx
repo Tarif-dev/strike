@@ -25,6 +25,7 @@ import LandingPage from "@/pages/LandingPage";
 import AdminDashboard from "@/pages/admin/Dashboard";
 import CreateMatch from "@/pages/admin/CreateMatch";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { NFTProvider } from "@/contexts/NFTContext";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
@@ -82,64 +83,69 @@ function App() {
           <WalletModalProvider>
             <BrowserRouter>
               <AuthProvider>
-                <Routes>
-                  {/* Public routes */}
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="/auth/login" element={<Login />} />
-                  <Route path="/auth/signup" element={<Signup />} />
-                  <Route path="/auth/admin-signup" element={<AdminSignup />} />
-                  <Route path="/auth/otp-login" element={<OtpLogin />} />
-                  <Route
-                    path="/auth/forgot-password"
-                    element={<ForgotPassword />}
-                  />
-                  <Route
-                    path="/auth/reset-password"
-                    element={<ResetPassword />}
-                  />
-                  <Route path="/auth/callback" element={<AuthCallback />} />
+                <NFTProvider>
+                  <Routes>
+                    {/* Public routes */}
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/auth/login" element={<Login />} />
+                    <Route path="/auth/signup" element={<Signup />} />
+                    <Route
+                      path="/auth/admin-signup"
+                      element={<AdminSignup />}
+                    />
+                    <Route path="/auth/otp-login" element={<OtpLogin />} />
+                    <Route
+                      path="/auth/forgot-password"
+                      element={<ForgotPassword />}
+                    />
+                    <Route
+                      path="/auth/reset-password"
+                      element={<ResetPassword />}
+                    />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
 
-                  {/* Protected routes */}
-                  <Route element={<ProtectedRoute />}>
-                    <Route path="/home" element={<Home />} />
-                    <Route path="/matches" element={<Matches />} />
-                    <Route path="/matches/:id" element={<MatchDetails />} />
-                    <Route
-                      path="/matches/:id/contests"
-                      element={<Contests />}
-                    />
-                    <Route path="/contests/:matchId" element={<Contests />} />
-                    <Route path="/players" element={<Players />} />
-                    <Route path="/players/:id" element={<PlayerDetail />} />
-                    {/* Redirect all leagues routes to matches */}
-                    <Route
-                      path="/leagues/*"
-                      element={<Navigate to="/matches" replace />}
-                    />
-                    <Route path="/teams/create" element={<CreateTeam />} />
-                    <Route path="/teams/:id" element={<TeamDetail />} />
-                    <Route path="/wallet" element={<Wallet />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/api-settings" element={<ApiSettings />} />
-                    <Route
-                      path="/nft-marketplace"
-                      element={<NFTMarketplace />}
-                    />
-                  </Route>
+                    {/* Protected routes */}
+                    <Route element={<ProtectedRoute />}>
+                      <Route path="/home" element={<Home />} />
+                      <Route path="/matches" element={<Matches />} />
+                      <Route path="/matches/:id" element={<MatchDetails />} />
+                      <Route
+                        path="/matches/:id/contests"
+                        element={<Contests />}
+                      />
+                      <Route path="/contests/:matchId" element={<Contests />} />
+                      <Route path="/players" element={<Players />} />
+                      <Route path="/players/:id" element={<PlayerDetail />} />
+                      {/* Redirect all leagues routes to matches */}
+                      <Route
+                        path="/leagues/*"
+                        element={<Navigate to="/matches" replace />}
+                      />
+                      <Route path="/teams/create" element={<CreateTeam />} />
+                      <Route path="/teams/:id" element={<TeamDetail />} />
+                      <Route path="/wallet" element={<Wallet />} />
+                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/api-settings" element={<ApiSettings />} />
+                      <Route
+                        path="/nft-marketplace"
+                        element={<NFTMarketplace />}
+                      />
+                    </Route>
 
-                  {/* Admin routes */}
-                  <Route element={<AdminRoute />}>
-                    <Route path="/admin" element={<AdminDashboard />} />
-                    <Route
-                      path="/admin/create-match"
-                      element={<CreateMatch />}
-                    />
-                  </Route>
+                    {/* Admin routes */}
+                    <Route element={<AdminRoute />}>
+                      <Route path="/admin" element={<AdminDashboard />} />
+                      <Route
+                        path="/admin/create-match"
+                        element={<CreateMatch />}
+                      />
+                    </Route>
 
-                  {/* Fallback for unknown routes */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                <Toaster />
+                    {/* Fallback for unknown routes */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                  <Toaster />
+                </NFTProvider>
               </AuthProvider>
             </BrowserRouter>
           </WalletModalProvider>
