@@ -19,6 +19,7 @@ import {
   Shield,
   HelpCircle,
   Globe,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
+import { useNFT } from "@/contexts/NFTContext";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 // Marquee component for trending players
 const TrendingMarquee = () => {
@@ -134,9 +138,38 @@ const RarityBadge = ({ rarity }) => {
   );
 };
 
-// Modern NFT Card Component
-const NFTCard = ({ nft }) => {
+// Modern NFT Card Component - Updated to use real NFT data
+const NFTCard = ({ nft, onBuy }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const { isAdmin } = useNFT();
+  const { publicKey, connected } = useWallet();
+
+  // Determine rarity based on attributes
+  const determineRarity = (performance) => {
+    if (performance >= 90) return "Legendary";
+    if (performance >= 80) return "Epic";
+    return "Rare";
+  };
+
+  // Check if the NFT is owned by the current user
+  const isOwner = publicKey && nft.owner === publicKey.toString();
+
+  // Get role from attributes
+  const getRole = () => {
+    const roleAttr = nft.attributes.find((attr) => attr.trait_type === "Role");
+    return roleAttr ? roleAttr.value : "Player";
+  };
+
+  // Calculate performance score as average of numerical attributes
+  const performanceScore =
+    nft.attributes
+      .filter(
+        (attr) => !isNaN(Number(attr.value)) && attr.trait_type !== "Price"
+      )
+      .reduce((sum, attr) => sum + parseInt(attr.value), 0) /
+      nft.attributes.filter(
+        (attr) => !isNaN(attr.value) && attr.trait_type !== "Price"
+      ).length || 80;
 
   return (
     <motion.div
@@ -150,7 +183,7 @@ const NFTCard = ({ nft }) => {
         <div className="relative">
           <div className="aspect-[4/5] overflow-hidden">
             <img
-              src={nft.imageUrl}
+              src={nft.image}
               alt={nft.name}
               className="w-full h-full object-cover transition-all duration-700"
               style={{
@@ -164,15 +197,8 @@ const NFTCard = ({ nft }) => {
           </div>
 
           <div className="absolute top-3 right-3 flex flex-col gap-2">
-            <RarityBadge rarity={nft.rarity} />
+            <RarityBadge rarity={determineRarity(performanceScore)} />
           </div>
-
-          {nft.isLive && (
-            <Badge className="absolute top-3 left-3 bg-crimson-red/90 hover:bg-crimson-red flex gap-1 shadow-lg animate-pulse">
-              <Zap size={14} className="animate-pulse" />
-              Live Auction
-            </Badge>
-          )}
 
           <div className="absolute bottom-3 left-3">
             <TeamBadge team={nft.team} />
@@ -209,7 +235,7 @@ const NFTCard = ({ nft }) => {
                 {nft.name}
               </h3>
               <p className="text-sm text-platinum-silver mt-0.5 flex items-center">
-                {nft.position} •{" "}
+                {getRole()} •{" "}
                 <span className="text-xs text-platinum-silver ml-1">
                   {nft.team}
                 </span>
@@ -217,7 +243,7 @@ const NFTCard = ({ nft }) => {
             </div>
             <div className="relative">
               <Avatar className="h-10 w-10 ring-2 ring-gunmetal-grey">
-                <AvatarImage src={nft.playerAvatar} alt={nft.name} />
+                <AvatarImage src={nft.image} alt={nft.name} />
                 <AvatarFallback className="bg-midnight-black text-soft-white">
                   {nft.name[0]}
                 </AvatarFallback>
@@ -233,43 +259,51 @@ const NFTCard = ({ nft }) => {
               <span
                 className={cn(
                   "font-semibold",
-                  nft.performanceScore >= 90
+                  performanceScore >= 90
                     ? "text-electric-lime"
-                    : nft.performanceScore >= 80
+                    : performanceScore >= 80
                     ? "text-royal-blue"
                     : "text-royal-gold"
                 )}
               >
-                {nft.performanceScore}
+                {Math.round(performanceScore)}
               </span>
               <span className="text-platinum-silver">/100</span>
             </div>
           </div>
           <Progress
-            value={nft.performanceScore}
+            value={performanceScore}
             className={cn(
               "h-1.5 rounded-full bg-grey-800",
               "[&>[data-state=progress]]:bg-gradient-to-r",
-              nft.performanceScore >= 90
+              performanceScore >= 90
                 ? "[&>[data-state=progress]]:from-electric-lime [&>[data-state=progress]]:to-deep-emerald"
-                : nft.performanceScore >= 80
+                : performanceScore >= 80
                 ? "[&>[data-state=progress]]:from-royal-blue [&>[data-state=progress]]:to-deep-emerald"
                 : "[&>[data-state=progress]]:from-royal-gold [&>[data-state=progress]]:to-gold-600"
             )}
           />
 
           <div className="grid grid-cols-3 gap-2 mt-4 text-xs">
-            {nft.attributes.map((attr, i) => (
-              <div
-                key={i}
-                className="flex flex-col items-center justify-center bg-midnight-black rounded-lg py-2.5"
-              >
-                <span className="text-platinum-silver mb-0.5">{attr.name}</span>
-                <span className="font-semibold text-sm text-soft-white">
-                  {attr.value}
-                </span>
-              </div>
-            ))}
+            {nft.attributes
+              .filter(
+                (attr) =>
+                  attr.trait_type !== "Price" && attr.trait_type !== "Role"
+              )
+              .slice(0, 3)
+              .map((attr, i) => (
+                <div
+                  key={i}
+                  className="flex flex-col items-center justify-center bg-midnight-black rounded-lg py-2.5"
+                >
+                  <span className="text-platinum-silver mb-0.5">
+                    {attr.trait_type}
+                  </span>
+                  <span className="font-semibold text-sm text-soft-white">
+                    {attr.value}
+                  </span>
+                </div>
+              ))}
           </div>
         </CardContent>
 
@@ -277,12 +311,16 @@ const NFTCard = ({ nft }) => {
           <div className="w-full flex justify-between items-center">
             <div>
               <p className="text-base font-bold text-soft-white">
-                {nft.price} ETH
+                {nft.price} USDC
               </p>
-              <p className="text-xs text-platinum-silver">${nft.usdPrice}</p>
+              <p className="text-xs text-platinum-silver">${nft.price}</p>
             </div>
-            <Button className="bg-gradient-to-r from-deep-emerald to-emerald-700 hover:from-emerald-700 hover:to-deep-emerald text-soft-white border-0 shadow-md shadow-emerald-500/20">
-              Buy Now
+            <Button
+              className="bg-gradient-to-r from-deep-emerald to-emerald-700 hover:from-emerald-700 hover:to-deep-emerald text-soft-white border-0 shadow-md shadow-emerald-500/20"
+              onClick={() => onBuy(nft)}
+              disabled={isOwner || !connected}
+            >
+              {isOwner ? "Owned" : "Buy Now"}
             </Button>
           </div>
         </CardFooter>
@@ -564,137 +602,164 @@ const LiveAuctionsSection = () => {
 };
 
 export default function NFTMarketplace() {
+  const {
+    nfts,
+    loading,
+    error,
+    purchaseNFT,
+    createNFTCollection,
+    mintPlayerNFT,
+    isAdmin,
+    collectionAddress,
+  } = useNFT();
+  const { connected, publicKey } = useWallet();
+
   const [filter, setFilter] = useState("all");
   const [sort, setSort] = useState("recent");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [isCreatingCollection, setIsCreatingCollection] = useState(false);
+  const [isMinting, setIsMinting] = useState(false);
+  const [selectedToken, setSelectedToken] = useState(null);
 
-  // Mock NFT data with real player images
-  const nfts = [
+  const tokenOptions = [
     {
-      id: "1",
-      name: "Virat Kohli",
-      team: "Royal Challengers Bangalore",
-      position: "Batsman",
-      imageUrl: "/players/virat_kohli.jpg",
-      playerAvatar: "/players/virat_kohli.jpg",
-      price: 1.85,
-      usdPrice: 4350,
-      performanceScore: 94,
-      rarity: "Legendary",
-      isLive: true,
-      attributes: [
-        { name: "Batting", value: 96 },
-        { name: "Fielding", value: 88 },
-        { name: "Experience", value: 97 },
-      ],
+      mint: "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr",
+      symbol: "MockUSDC",
+      name: "Mock USDC",
     },
     {
-      id: "2",
-      name: "Jasprit Bumrah",
-      team: "Mumbai Indians",
-      position: "Bowler",
-      imageUrl: "/players/jasprit_bumrah.jpg",
-      playerAvatar: "/players/jasprit_bumrah.jpg",
-      price: 1.65,
-      usdPrice: 3880,
-      performanceScore: 92,
-      rarity: "Legendary",
-      isLive: false,
-      attributes: [
-        { name: "Bowling", value: 96 },
-        { name: "Fielding", value: 82 },
-        { name: "Experience", value: 90 },
-      ],
+      mint: "So11111111111111111111111111111111111111112",
+      symbol: "SOL",
+      name: "Solana",
     },
     {
-      id: "3",
-      name: "MS Dhoni",
-      team: "Chennai Super Kings",
-      position: "Keeper/Batsman",
-      imageUrl: "/players/ms_dhoni.jpg",
-      playerAvatar: "/players/ms_dhoni.jpg",
-      price: 2.15,
-      usdPrice: 5050,
-      performanceScore: 91,
-      rarity: "Legendary",
-      isLive: false,
-      attributes: [
-        { name: "Keeping", value: 95 },
-        { name: "Batting", value: 89 },
-        { name: "Leadership", value: 99 },
-      ],
+      mint: "USDC1111111111111111111111111111111111111111",
+      symbol: "USDC",
+      name: "USD Coin",
     },
     {
-      id: "4",
-      name: "Rashid Khan",
-      team: "Gujarat Titans",
-      position: "Bowler",
-      imageUrl: "/players/rashid_khan.jpg",
-      playerAvatar: "/players/rashid_khan.jpg",
-      price: 1.25,
-      usdPrice: 2940,
-      performanceScore: 90,
-      rarity: "Epic",
-      isLive: true,
-      attributes: [
-        { name: "Bowling", value: 94 },
-        { name: "Fielding", value: 86 },
-        { name: "Batting", value: 75 },
-      ],
+      mint: "DA11111111111111111111111111111111111111111",
+      symbol: "DAI",
+      name: "Dai",
     },
-    {
-      id: "5",
-      name: "Jos Buttler",
-      team: "Rajasthan Royals",
-      position: "Keeper/Batsman",
-      imageUrl: "/players/jos_buttler.jpg",
-      playerAvatar: "/players/jos_buttler.jpg",
-      price: 1.45,
-      usdPrice: 3410,
-      performanceScore: 89,
-      rarity: "Epic",
-      isLive: false,
-      attributes: [
-        { name: "Batting", value: 93 },
-        { name: "Keeping", value: 88 },
-        { name: "Power-hitting", value: 95 },
-      ],
-    },
-    {
-      id: "6",
-      name: "Rishabh Pant",
-      team: "Delhi Capitals",
-      position: "Keeper/Batsman",
-      imageUrl: "/players/rishabh_pant.jpg",
-      playerAvatar: "/players/rishabh_pant.jpg",
-      price: 1.15,
-      usdPrice: 2705,
-      performanceScore: 87,
-      rarity: "Epic",
-      isLive: true,
-      attributes: [
-        { name: "Batting", value: 89 },
-        { name: "Keeping", value: 86 },
-        { name: "Agility", value: 90 },
-      ],
-    },
+    // Add more tokens as needed
   ];
+
+  // Handle NFT purchase
+  const handleBuyNFT = async (nft) => {
+    if (!connected) {
+      return;
+    }
+
+    setIsPurchasing(true);
+    try {
+      await purchaseNFT(nft);
+    } catch (error) {
+      console.error("Error purchasing NFT:", error);
+    } finally {
+      setIsPurchasing(false);
+    }
+  };
+
+  // Handle collection creation - for admin only
+  const handleCreateCollection = async () => {
+    if (!isAdmin()) return;
+
+    setIsCreatingCollection(true);
+    try {
+      await createNFTCollection();
+    } catch (error) {
+      console.error("Error creating collection:", error);
+    } finally {
+      setIsCreatingCollection(false);
+    }
+  };
+
+  // Handle NFT minting - for admin only
+  const handleMintNFT = async (player) => {
+    if (!isAdmin()) return;
+
+    setIsMinting(true);
+    try {
+      // Example for minting the first player as an NFT
+      await mintPlayerNFT({
+        name: player.name,
+        image: player.image,
+        description: player.description,
+        team: player.team,
+        attributes: player.attributes,
+        price: player.price,
+      });
+    } catch (error) {
+      console.error("Error minting NFT:", error);
+    } finally {
+      setIsMinting(false);
+    }
+  };
+
+  // Filter NFTs based on search query and type
+  const filteredNFTs = nfts.filter((nft) => {
+    // Filter by search query
+    if (
+      searchQuery &&
+      !nft.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ) {
+      return false;
+    }
+
+    // Filter by rarity
+    const performanceScore =
+      nft.attributes
+        .filter(
+          (attr) => !isNaN(Number(attr.value)) && attr.trait_type !== "Price"
+        )
+        .reduce((sum, attr) => sum + parseInt(attr.value), 0) /
+        nft.attributes.filter(
+          (attr) => !isNaN(Number(attr.value)) && attr.trait_type !== "Price"
+        ).length || 80;
+
+    if (filter === "legendary" && performanceScore < 90) return false;
+    if (filter === "epic" && (performanceScore < 80 || performanceScore >= 90))
+      return false;
+    if (filter === "rare" && performanceScore >= 80) return false;
+
+    return true;
+  });
+
+  // Sort NFTs
+  const sortedNFTs = [...filteredNFTs].sort((a, b) => {
+    if (sort === "price-low") return a.price - b.price;
+    if (sort === "price-high") return b.price - a.price;
+    if (sort === "performance") {
+      const aPerformance =
+        a.attributes
+          .filter(
+            (attr) => !isNaN(Number(attr.value)) && attr.trait_type !== "Price"
+          )
+          .reduce((sum, attr) => sum + parseInt(attr.value), 0) /
+          a.attributes.filter(
+            (attr) => !isNaN(Number(attr.value)) && attr.trait_type !== "Price"
+          ).length || 0;
+
+      const bPerformance =
+        b.attributes
+          .filter(
+            (attr) => !isNaN(Number(attr.value)) && attr.trait_type !== "Price"
+          )
+          .reduce((sum, attr) => sum + parseInt(attr.value), 0) /
+          b.attributes.filter(
+            (attr) => !isNaN(Number(attr.value)) && attr.trait_type !== "Price"
+          ).length || 0;
+
+      return bPerformance - aPerformance;
+    }
+    // Default sort by recent (id)
+    return b.id.localeCompare(a.id);
+  });
 
   return (
     <div className="min-h-screen bg-midnight-black text-soft-white">
-      {/* Back button navigation */}
-      {/* <div className="fixed top-4 left-4 z-50">
-        <Link to="/home">
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-full border-gunmetal-grey bg-midnight-black text-soft-white hover:bg-gunmetal-grey"
-          >
-            <ChevronLeft size={16} className="mr-1" />
-            Back to Home
-          </Button>
-        </Link>
-      </div> */}
-
       {/* Trending ticker */}
       <TrendingMarquee />
 
@@ -725,24 +790,58 @@ export default function NFTMarketplace() {
 
                 <p className="text-xl text-soft-white/90 max-w-xl mb-8 leading-relaxed">
                   Collect, trade, and own exclusive digital collectibles of your
-                  favorite cricket players and iconic moments from IPL history.
+                  favorite cricket players on the Solana blockchain. Commission
+                  goes to the players themselves!
                 </p>
 
                 <div className="flex flex-wrap gap-4">
-                  <Button
-                    size="lg"
-                    className="bg-soft-white text-deep-emerald hover:bg-soft-white/90 rounded-full px-8 py-6"
-                  >
-                    Start Collecting
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-soft-white text-soft-white hover:bg-soft-white/10 rounded-full px-8 py-6"
-                  >
-                    Learn More
-                  </Button>
+                  {connected ? (
+                    <Button
+                      size="lg"
+                      className="bg-soft-white text-deep-emerald hover:bg-soft-white/90 rounded-full px-8 py-6"
+                      onClick={() =>
+                        window.scrollTo({
+                          top: document.getElementById("explore-nfts")
+                            ?.offsetTop,
+                          behavior: "smooth",
+                        })
+                      }
+                    >
+                      Start Collecting
+                    </Button>
+                  ) : (
+                    <div className="px-2 py-1 bg-soft-white rounded-full shadow-lg">
+                      <WalletMultiButton />
+                    </div>
+                  )}
+                  {isAdmin() && (
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="border-soft-white text-soft-white hover:bg-soft-white/10 rounded-full px-8 py-6"
+                      onClick={handleCreateCollection}
+                      disabled={isCreatingCollection}
+                    >
+                      {isCreatingCollection ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating Collection...
+                        </>
+                      ) : (
+                        "Create Collection"
+                      )}
+                    </Button>
+                  )}
                 </div>
+
+                {collectionAddress && (
+                  <p className="mt-4 text-sm text-soft-white/70">
+                    Collection Address:{" "}
+                    <span className="text-soft-white/90 font-mono text-xs">
+                      {collectionAddress}
+                    </span>
+                  </p>
+                )}
               </motion.div>
             </div>
 
@@ -767,7 +866,7 @@ export default function NFTMarketplace() {
                         <div className="flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full">
                           <Star className="h-4 w-4 text-royal-gold fill-royal-gold" />
                           <span className="text-xs font-bold text-soft-white">
-                            DIAMOND TIER
+                            NFT COLLECTION
                           </span>
                         </div>
                       </div>
@@ -776,10 +875,10 @@ export default function NFTMarketplace() {
                       <div className="absolute bottom-4 left-4 z-20">
                         <div className="flex items-center gap-2 bg-black/80 backdrop-blur-md px-3 py-2 rounded-lg">
                           <span className="text-xs text-soft-white/80">
-                            Current Value
+                            Cricket Stars
                           </span>
                           <span className="text-base font-bold text-royal-gold">
-                            87.5 ETH
+                            Exclusive NFTs
                           </span>
                         </div>
                       </div>
@@ -787,7 +886,7 @@ export default function NFTMarketplace() {
                       {/* Limited edition overlay */}
                       <div className="absolute top-4 right-4 z-20">
                         <div className="bg-crimson-red/90 px-2.5 py-1 rounded-full text-xs font-bold text-soft-white">
-                          #1 of 1
+                          On Solana
                         </div>
                       </div>
 
@@ -802,16 +901,13 @@ export default function NFTMarketplace() {
                         {/* Image overlay gradient */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30"></div>
 
-                        {/* Animated particles effect */}
-                        <div className="absolute inset-0 bg-[url('/players/sparkle.png')] bg-repeat opacity-30 mix-blend-screen animate-shimmer"></div>
-
                         {/* Bottom content overlay */}
                         <div className="absolute bottom-0 inset-x-0 p-4 flex flex-col gap-1">
                           <h3 className="text-xl font-bold text-soft-white drop-shadow-md">
-                            T20 World Cup 2011
+                            Cricket Player NFTs
                           </h3>
                           <p className="text-sm text-soft-white/90 drop-shadow-md">
-                            World's Most Valuable Cricket NFT
+                            Collect your favorite players
                           </p>
 
                           <div className="mt-2 flex justify-between items-center">
@@ -822,7 +918,7 @@ export default function NFTMarketplace() {
                                 </div>
                               </div>
                               <span className="text-xs text-soft-white/80">
-                                Authenticated by BCCI
+                                Powered by Metaplex
                               </span>
                             </div>
                           </div>
@@ -859,7 +955,7 @@ export default function NFTMarketplace() {
         <LiveAuctionsSection />
 
         {/* Filters and search */}
-        <div className="mt-16 mb-8">
+        <div id="explore-nfts" className="mt-16 mb-8">
           <h2 className="text-2xl font-bold mb-6 text-soft-white">
             Explore NFTs
           </h2>
@@ -871,12 +967,19 @@ export default function NFTMarketplace() {
                 <Input
                   placeholder="Search players, teams or collections..."
                   className="pl-10 rounded-full border-gunmetal-grey focus:ring-2 focus:ring-neon-green/30 bg-gunmetal-grey text-soft-white placeholder:text-grey-600"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
 
             <div className="flex flex-wrap gap-3 w-full lg:w-auto">
-              <Tabs defaultValue="all" className="w-full lg:w-auto">
+              <Tabs
+                defaultValue="all"
+                className="w-full lg:w-auto"
+                onValueChange={setFilter}
+                value={filter}
+              >
                 <TabsList className="bg-midnight-black p-1 rounded-full border border-gunmetal-grey">
                   <TabsTrigger
                     value="all"
@@ -920,24 +1023,29 @@ export default function NFTMarketplace() {
                   className="w-56 rounded-xl bg-gunmetal-grey border-grey-800"
                 >
                   <DropdownMenuGroup>
-                    <DropdownMenuItem className="text-soft-white hover:bg-grey-800">
+                    <DropdownMenuItem
+                      className="text-soft-white hover:bg-grey-800"
+                      onClick={() => setFilter("all")}
+                    >
                       All NFTs
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-soft-white hover:bg-grey-800">
-                      Batsmen
+                    <DropdownMenuItem
+                      className="text-soft-white hover:bg-grey-800"
+                      onClick={() => setFilter("legendary")}
+                    >
+                      Legendary
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-soft-white hover:bg-grey-800">
-                      Bowlers
+                    <DropdownMenuItem
+                      className="text-soft-white hover:bg-grey-800"
+                      onClick={() => setFilter("epic")}
+                    >
+                      Epic
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-soft-white hover:bg-grey-800">
-                      All-rounders
-                    </DropdownMenuItem>
-                    <Separator className="bg-grey-800" />
-                    <DropdownMenuItem className="text-soft-white hover:bg-grey-800">
-                      Live auctions
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-soft-white hover:bg-grey-800">
-                      Verified only
+                    <DropdownMenuItem
+                      className="text-soft-white hover:bg-grey-800"
+                      onClick={() => setFilter("rare")}
+                    >
+                      Rare
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
@@ -958,16 +1066,28 @@ export default function NFTMarketplace() {
                   className="w-56 rounded-xl bg-gunmetal-grey border-grey-800"
                 >
                   <DropdownMenuGroup>
-                    <DropdownMenuItem className="text-soft-white hover:bg-grey-800">
+                    <DropdownMenuItem
+                      className="text-soft-white hover:bg-grey-800"
+                      onClick={() => setSort("recent")}
+                    >
                       Recently added
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-soft-white hover:bg-grey-800">
+                    <DropdownMenuItem
+                      className="text-soft-white hover:bg-grey-800"
+                      onClick={() => setSort("price-low")}
+                    >
                       Price: Low to High
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-soft-white hover:bg-grey-800">
+                    <DropdownMenuItem
+                      className="text-soft-white hover:bg-grey-800"
+                      onClick={() => setSort("price-high")}
+                    >
                       Price: High to Low
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-soft-white hover:bg-grey-800">
+                    <DropdownMenuItem
+                      className="text-soft-white hover:bg-grey-800"
+                      onClick={() => setSort("performance")}
+                    >
                       Performance score
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
@@ -978,52 +1098,127 @@ export default function NFTMarketplace() {
         </div>
 
         {/* NFT Grid with staggered animation */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {nfts.map((nft, index) => (
-            <motion.div
-              key={nft.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="h-10 w-10 animate-spin text-deep-emerald" />
+            <span className="ml-4 text-soft-white text-lg">
+              Loading NFTs...
+            </span>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sortedNFTs.length > 0 ? (
+              sortedNFTs.map((nft, index) => (
+                <motion.div
+                  key={nft.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <NFTCard nft={nft} onBuy={handleBuyNFT} />
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-3 text-center py-16">
+                <p className="text-platinum-silver text-lg">
+                  No NFTs found matching your criteria.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {isAdmin() && (
+          <div className="mt-12 flex justify-center">
+            <Button
+              className="bg-gradient-to-r from-royal-gold to-gold-400 hover:from-gold-400 hover:to-royal-gold text-midnight-black rounded-full px-8 shadow-lg"
+              onClick={() =>
+                handleMintNFT({
+                  name: "Virat Kohli",
+                  image: "/players/virat_kohli.jpg",
+                  description:
+                    "One of the greatest batsmen in cricket history.",
+                  team: "RCB",
+                  price: 10,
+                  attributes: [
+                    { trait_type: "Role", value: "Batsman" },
+                    { trait_type: "Batting", value: "95" },
+                    { trait_type: "Fielding", value: "88" },
+                  ],
+                })
+              }
+              disabled={isMinting || !collectionAddress}
             >
-              <NFTCard nft={nft} />
-            </motion.div>
-          ))}
-        </div>
+              {isMinting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Minting NFT...
+                </>
+              ) : (
+                "Mint New Player NFT"
+              )}
+            </Button>
+          </div>
+        )}
 
-        {/* Load more button */}
-        <div className="mt-12 flex justify-center">
-          <Button
-            variant="outline"
-            size="lg"
-            className="rounded-full px-8 border-gunmetal-grey bg-midnight-black text-soft-white hover:bg-gunmetal-grey"
-          >
-            Load More
-          </Button>
-        </div>
-
-        {/* CTA section */}
+        {/* CTA section with token selection dropdown */}
         <div className="mt-20 mb-10 bg-gradient-to-r from-deep-emerald to-emerald-700 rounded-2xl overflow-hidden">
           <div className="relative px-8 py-12 text-soft-white">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_50%,rgba(57,255,20,0.15),transparent)]"></div>
 
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div>
+              <div className="text-center md:text-left">
                 <h3 className="text-2xl font-bold mb-2">
                   Ready to start your NFT collection?
                 </h3>
                 <p className="text-soft-white/80 max-w-md">
                   Join thousands of cricket fans collecting and trading unique
-                  digital player cards.
+                  digital player cards on Solana using any SPL token.
                 </p>
               </div>
 
-              <Button
-                size="lg"
-                className="bg-gunmetal-grey text-neon-green hover:bg-grey-800 rounded-full px-8 shadow-lg"
-              >
-                Connect Wallet
-              </Button>
+              <div className="flex flex-col gap-4">
+                {connected && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-soft-white">Pay with:</span>
+                    <select
+                      className="px-3 py-2 rounded-lg bg-gunmetal-grey border border-grey-800 text-soft-white"
+                      value={selectedToken?.symbol}
+                      onChange={(e) => {
+                        const token = tokenOptions.find(
+                          (t) => t.symbol === e.target.value
+                        );
+                        if (token) setSelectedToken(token);
+                      }}
+                    >
+                      {tokenOptions.map((token) => (
+                        <option key={token.mint} value={token.symbol}>
+                          {token.name} ({token.symbol})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {!connected ? (
+                  <div className="px-3 py-2 bg-gunmetal-grey rounded-full shadow-lg">
+                    <WalletMultiButton />
+                  </div>
+                ) : (
+                  <Button
+                    size="lg"
+                    className="bg-gunmetal-grey text-neon-green hover:bg-grey-800 rounded-full px-8 shadow-lg"
+                    onClick={() =>
+                      window.scrollTo({
+                        top: document.getElementById("explore-nfts")?.offsetTop,
+                        behavior: "smooth",
+                      })
+                    }
+                  >
+                    Explore NFTs
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
