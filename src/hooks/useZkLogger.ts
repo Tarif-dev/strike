@@ -2,9 +2,7 @@ import { useEffect } from "react";
 
 type LogLevel = "info" | "success" | "error" | "warn";
 
-// Simple logger hook to add ZK Compression specific logs
 export const useZkLogger = (isEnabled: boolean = true) => {
-  // Initialize some test logs on mount
   useEffect(() => {
     if (!isEnabled) return;
 
@@ -13,7 +11,6 @@ export const useZkLogger = (isEnabled: boolean = true) => {
       "ZK Compression is a Solana primitive that enables state compression using Zero-Knowledge proofs"
     );
 
-    // Log environment information
     console.info("Environment:", {
       isLocalnet: true,
       jsRuntimeVersion: process.version || "unknown",
@@ -21,7 +18,6 @@ export const useZkLogger = (isEnabled: boolean = true) => {
       timestamp: new Date().toISOString(),
     });
 
-    // Add more detailed initial logs
     console.info(
       "Ready for ZK Compression operations. Start the local validator with ./start-zk-validator.sh"
     );

@@ -26,6 +26,8 @@ import MatchDetailAdmin from "@/pages/admin/MatchDetailAdmin";
 import ManageMatches from "./pages/admin/ManageMatches";
 import InitializeMatches from "./pages/admin/InitializeMatches";
 import ZkCompression from "@/pages/ZkCompression";
+import ZkCompressionPage from "@/pages/ZkCompressionPage";
+import MagicBlockPage from "@/pages/MagicBlockPage";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ZkCompressionProvider } from "@/contexts/ZkCompressionContext";
 import { Toaster } from "@/components/ui/toaster";
@@ -134,8 +136,9 @@ function App() {
                       />
                       <Route
                         path="/zk-compression"
-                        element={<ZkCompression />}
+                        element={<ZkCompressionPage />}
                       />
+                      <Route path="/magicblock" element={<MagicBlockPage />} />
                     </Route>
 
                     {/* Admin routes */}

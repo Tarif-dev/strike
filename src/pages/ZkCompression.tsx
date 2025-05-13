@@ -20,6 +20,9 @@ import TokenBalanceCard from "@/components/common/TokenBalanceCard";
 import LoadingOverlay from "@/components/common/LoadingOverlay";
 import ZkTutorial from "@/components/common/ZkTutorial";
 import ZkDebugConsole from "@/components/common/ZkDebugConsole";
+import ZkFutureIntegration from "@/components/common/ZkFutureIntegration";
+import Navbar from "@/components/layout/Navbar";
+import PageContainer from "@/components/layout/PageContainer";
 
 export default function ZkCompression() {
   const {
@@ -37,7 +40,7 @@ export default function ZkCompression() {
     requestUserAirdrop,
   } = useZkCompression();
 
-  const [amount, setAmount] = useState<number>(1000000000); // 1 token with 9 decimals
+  const [amount, setAmount] = useState<number>(1000000000);
   const [localNetStatus, setLocalNetStatus] = useState<
     "idle" | "checking" | "running" | "not-running"
   >("idle");
@@ -53,7 +56,6 @@ export default function ZkCompression() {
   const [isBalanceLoading, setIsBalanceLoading] = useState<boolean>(false);
   const [loadingMessage, setLoadingMessage] = useState<string>("");
 
-  // Update balances directly in frontend state
   const updateBalances = useCallback(
     (
       type: "mint" | "transfer",
@@ -74,10 +76,9 @@ export default function ZkCompression() {
     []
   );
 
-  // Initialize balances to 0
   const fetchTokenBalances = () => {
     if (!mint || (!payer && !userWallet)) return;
-    
+
     if (payer && payerBalance === null) {
       setPayerBalance(0);
     }
@@ -86,7 +87,6 @@ export default function ZkCompression() {
     }
   };
 
-  // Create a new compressed token mint
   const handleCreateMint = async () => {
     if (!connection || !payer) return;
 
@@ -121,7 +121,6 @@ export default function ZkCompression() {
     }
   };
 
-  // Mint compressed tokens to the payer's wallet
   const handleMintToSelf = async () => {
     if (!connection || !payer || !mint) return;
 
@@ -159,7 +158,6 @@ export default function ZkCompression() {
     }
   };
 
-  // Mint compressed tokens to the user's wallet
   const handleMintToUser = async () => {
     if (!connection || !payer || !userWallet || !mint) return;
 
@@ -197,7 +195,6 @@ export default function ZkCompression() {
     }
   };
 
-  // Transfer compressed tokens from payer to user
   const handleTransferToUser = async () => {
     if (!connection || !payer || !userWallet || !mint) return;
 
@@ -206,7 +203,7 @@ export default function ZkCompression() {
       setTransactionStatus("pending");
       setTransactionSignature(null);
 
-      const transferAmount = Math.min(amount, amount / 2); // Transfer half the amount or the full amount, whichever is smaller
+      const transferAmount = Math.min(amount, amount / 2);
       setLoadingMessage(
         `Transferring ${transferAmount / 1e9} tokens to user wallet...`
       );
@@ -240,7 +237,6 @@ export default function ZkCompression() {
     }
   };
 
-  // Check if local validator is running
   const checkLocalValidator = async () => {
     setLocalNetStatus("checking");
     try {
@@ -259,7 +255,6 @@ export default function ZkCompression() {
     }
   };
 
-  // Simplified effect for balance updates
   useEffect(() => {
     if (mint && (payer?.publicKey || userWallet?.publicKey)) {
       fetchTokenBalances();
@@ -271,331 +266,324 @@ export default function ZkCompression() {
   ]);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      {/* Loading Overlay */}
-      <LoadingOverlay isVisible={!!loadingMessage} message={loadingMessage} />
+    <PageContainer>
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <LoadingOverlay isVisible={!!loadingMessage} message={loadingMessage} />
 
-      <h1 className="text-3xl font-bold text-neon-green mb-8">
-        ZK Compression Demo
-      </h1>
+        <h1 className="text-3xl font-bold text-neon-green mb-8">
+          ZK Compression Demo
+        </h1>
 
-      {/* ZK Tutorial Guide */}
-      <ZkTutorial />
+        <ZkTutorial />
 
-      {/* ZK Info Card */}
-      <ZkInfoCard />
+        <ZkFutureIntegration />
 
-      {/* Connection Status */}
-      <div className="bg-gray-900 rounded-lg p-6 mb-8 border border-neon-green/20">
-        <h2 className="text-xl font-semibold text-neon-green mb-4">
-          Connection Status
-        </h2>
+        <ZkInfoCard />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <p className="text-gray-300 mb-2">
-              Network: {isLocalnet ? "Localnet" : "Devnet"}
-            </p>
-            {connectionStatus && (
-              <>
-                <p className="text-gray-300 mb-2">
-                  Current Slot: {connectionStatus.slot}
-                </p>
-                <p className="text-gray-300 mb-2">
-                  Indexer Health: {JSON.stringify(connectionStatus.health)}
-                </p>
-              </>
-            )}
+        <div className="bg-gray-900 rounded-lg p-6 mb-8 border border-neon-green/20">
+          <h2 className="text-xl font-semibold text-neon-green mb-4">
+            Connection Status
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <p className="text-gray-300 mb-2">
+                Network: {isLocalnet ? "Localnet" : "Devnet"}
+              </p>
+              {connectionStatus && (
+                <>
+                  <p className="text-gray-300 mb-2">
+                    Current Slot: {connectionStatus.slot}
+                  </p>
+                  <p className="text-gray-300 mb-2">
+                    Indexer Health: {JSON.stringify(connectionStatus.health)}
+                  </p>
+                </>
+              )}
+            </div>
+
+            <div>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => switchNetwork(true)}
+                  disabled={isLoading || isLocalnet}
+                  className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
+                >
+                  Switch to Localnet
+                </button>
+
+                <button
+                  onClick={() => switchNetwork(false)}
+                  disabled={isLoading || !isLocalnet}
+                  className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
+                >
+                  Switch to Devnet
+                </button>
+
+                <button
+                  onClick={checkLocalValidator}
+                  disabled={isLoading || !isLocalnet}
+                  className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
+                >
+                  Check Local Validator
+                </button>
+
+                {localNetStatus === "checking" && (
+                  <p className="text-yellow-500">
+                    Checking local validator status...
+                  </p>
+                )}
+                {localNetStatus === "running" && (
+                  <p className="text-green-500">
+                    Local validator is running! ✅
+                  </p>
+                )}
+                {localNetStatus === "not-running" && (
+                  <div>
+                    <p className="text-red-500 mb-2">
+                      Local validator is not running ❌
+                    </p>
+                    <p className="text-gray-400 text-sm">
+                      Run{" "}
+                      <code className="bg-gray-800 px-1 py-0.5 rounded">
+                        light test-validator
+                      </code>{" "}
+                      in your terminal
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div>
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={() => switchNetwork(true)}
-                disabled={isLoading || isLocalnet}
-                className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
-              >
-                Switch to Localnet
-              </button>
+          {errorMessage && (
+            <div className="bg-red-900/30 border border-red-500 rounded-md p-3 mt-4">
+              <p className="text-red-400">{errorMessage}</p>
+            </div>
+          )}
+        </div>
 
-              <button
-                onClick={() => switchNetwork(false)}
-                disabled={isLoading || !isLocalnet}
-                className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
-              >
-                Switch to Devnet
-              </button>
+        <div className="bg-gray-900 rounded-lg p-6 mb-8 border border-neon-green/20">
+          <h2 className="text-xl font-semibold text-neon-green mb-4">
+            ZK Compression Wallets
+          </h2>
 
-              <button
-                onClick={checkLocalValidator}
-                disabled={isLoading || !isLocalnet}
-                className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
-              >
-                Check Local Validator
-              </button>
-
-              {localNetStatus === "checking" && (
-                <p className="text-yellow-500">
-                  Checking local validator status...
-                </p>
-              )}
-              {localNetStatus === "running" && (
-                <p className="text-green-500">Local validator is running! ✅</p>
-              )}
-              {localNetStatus === "not-running" && (
-                <div>
-                  <p className="text-red-500 mb-2">
-                    Local validator is not running ❌
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="border border-gray-700 rounded-md p-4">
+              <h3 className="text-lg font-medium text-neon-green mb-2">
+                Payer Wallet (Admin)
+              </h3>
+              {payer ? (
+                <>
+                  <p
+                    className="text-gray-300 break-all mb-4 cursor-pointer hover:text-neon-green transition"
+                    onClick={() =>
+                      copyToClipboard(
+                        payer.publicKey.toBase58(),
+                        "Payer wallet address copied"
+                      )
+                    }
+                  >
+                    {payer.publicKey.toBase58()}
+                    <span className="ml-2 text-xs text-gray-500">
+                      (click to copy)
+                    </span>
                   </p>
-                  <p className="text-gray-400 text-sm">
-                    Run{" "}
-                    <code className="bg-gray-800 px-1 py-0.5 rounded">
-                      light test-validator
-                    </code>{" "}
-                    in your terminal
+                  <button
+                    onClick={requestPayerAirdrop}
+                    disabled={isLoading || !connection}
+                    className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
+                  >
+                    Request SOL Airdrop
+                  </button>
+                </>
+              ) : (
+                <p className="text-gray-400">Wallet not initialized</p>
+              )}
+            </div>
+
+            <div className="border border-gray-700 rounded-md p-4">
+              <h3 className="text-lg font-medium text-neon-green mb-2">
+                User Wallet
+              </h3>
+              {userWallet ? (
+                <>
+                  <p
+                    className="text-gray-300 break-all mb-4 cursor-pointer hover:text-neon-green transition"
+                    onClick={() =>
+                      copyToClipboard(
+                        userWallet.publicKey.toBase58(),
+                        "User wallet address copied"
+                      )
+                    }
+                  >
+                    {userWallet.publicKey.toBase58()}
+                    <span className="ml-2 text-xs text-gray-500">
+                      (click to copy)
+                    </span>
                   </p>
-                </div>
+                  <button
+                    onClick={requestUserAirdrop}
+                    disabled={isLoading || !connection}
+                    className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
+                  >
+                    Request SOL Airdrop
+                  </button>
+                </>
+              ) : (
+                <p className="text-gray-400">Wallet not initialized</p>
               )}
             </div>
           </div>
         </div>
 
-        {errorMessage && (
-          <div className="bg-red-900/30 border border-red-500 rounded-md p-3 mt-4">
-            <p className="text-red-400">{errorMessage}</p>
-          </div>
-        )}
-      </div>
+        <TokenBalanceCard
+          mint={mint}
+          payerBalance={payerBalance}
+          userBalance={userBalance}
+          isLoading={isBalanceLoading}
+          onRefreshClick={fetchTokenBalances}
+        />
 
-      {/* Wallets */}
-      <div className="bg-gray-900 rounded-lg p-6 mb-8 border border-neon-green/20">
-        <h2 className="text-xl font-semibold text-neon-green mb-4">
-          ZK Compression Wallets
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Payer Wallet */}
-          <div className="border border-gray-700 rounded-md p-4">
-            <h3 className="text-lg font-medium text-neon-green mb-2">
-              Payer Wallet (Admin)
-            </h3>
-            {payer ? (
-              <>
-                <p
-                  className="text-gray-300 break-all mb-4 cursor-pointer hover:text-neon-green transition"
-                  onClick={() =>
-                    copyToClipboard(
-                      payer.publicKey.toBase58(),
-                      "Payer wallet address copied"
-                    )
-                  }
-                >
-                  {payer.publicKey.toBase58()}
-                  <span className="ml-2 text-xs text-gray-500">
-                    (click to copy)
-                  </span>
-                </p>
-                <button
-                  onClick={requestPayerAirdrop}
-                  disabled={isLoading || !connection}
-                  className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
-                >
-                  Request SOL Airdrop
-                </button>
-              </>
-            ) : (
-              <p className="text-gray-400">Wallet not initialized</p>
-            )}
-          </div>
-
-          {/* User Wallet */}
-          <div className="border border-gray-700 rounded-md p-4">
-            <h3 className="text-lg font-medium text-neon-green mb-2">
-              User Wallet
-            </h3>
-            {userWallet ? (
-              <>
-                <p
-                  className="text-gray-300 break-all mb-4 cursor-pointer hover:text-neon-green transition"
-                  onClick={() =>
-                    copyToClipboard(
-                      userWallet.publicKey.toBase58(),
-                      "User wallet address copied"
-                    )
-                  }
-                >
-                  {userWallet.publicKey.toBase58()}
-                  <span className="ml-2 text-xs text-gray-500">
-                    (click to copy)
-                  </span>
-                </p>
-                <button
-                  onClick={requestUserAirdrop}
-                  disabled={isLoading || !connection}
-                  className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
-                >
-                  Request SOL Airdrop
-                </button>
-              </>
-            ) : (
-              <p className="text-gray-400">Wallet not initialized</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Token Balances */}
-      <TokenBalanceCard
-        mint={mint}
-        payerBalance={payerBalance}
-        userBalance={userBalance}
-        isLoading={isBalanceLoading}
-        onRefreshClick={fetchTokenBalances}
-      />
-
-      {/* Compressed Token Operations */}
-      <div className="bg-gray-900 rounded-lg p-6 mb-8 border border-neon-green/20">
-        <h2 className="text-xl font-semibold text-neon-green mb-4">
-          ZK Compressed Token Operations
-        </h2>
-
-        {/* Token Mint */}
-        <div className="mb-6">
-          <h3 className="text-lg font-medium text-neon-green mb-2">
-            Token Mint
-          </h3>
-          {mint ? (
-            <p
-              className="text-gray-300 break-all mb-4 cursor-pointer hover:text-neon-green transition"
-              onClick={() =>
-                copyToClipboard(mint.toBase58(), "Token mint address copied")
-              }
-            >
-              Current Mint: {mint.toBase58()}
-              <span className="ml-2 text-xs text-gray-500">
-                (click to copy)
-              </span>
-            </p>
-          ) : (
-            <p className="text-yellow-500 mb-4">
-              No token mint created yet. Create one below.
-            </p>
-          )}
-
-          <button
-            onClick={handleCreateMint}
-            disabled={isLoading || !connection || !payer}
-            className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
-          >
-            Create New ZK Compressed Token Mint
-          </button>
-        </div>
-
-        {/* Token Amount */}
-        <div className="mb-6">
-          <h3 className="text-lg font-medium text-neon-green mb-2">
-            Token Amount
-          </h3>
-          <div className="flex items-center gap-4">
-            <input
-              type="number"
-              value={amount / 1e9}
-              onChange={(e) => setAmount(parseFloat(e.target.value) * 1e9)}
-              className="bg-gray-800 border border-gray-700 rounded-md p-2 text-white w-32"
-            />
-            <span className="text-gray-300">tokens (with 9 decimals)</span>
-          </div>
-        </div>
-
-        {/* Token Operations */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button
-            onClick={handleMintToSelf}
-            disabled={isLoading || !connection || !payer || !mint}
-            className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
-          >
-            Mint to Payer
-          </button>
-
-          <button
-            onClick={handleMintToUser}
-            disabled={
-              isLoading || !connection || !payer || !mint || !userWallet
-            }
-            className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
-          >
-            Mint to User
-          </button>
-
-          <button
-            onClick={handleTransferToUser}
-            disabled={
-              isLoading || !connection || !payer || !mint || !userWallet
-            }
-            className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
-          >
-            Transfer to User
-          </button>
-        </div>
-      </div>
-
-      {/* Transaction Status */}
-      {transactionType && (
-        <div className="bg-gray-900 rounded-lg p-6 border border-neon-green/20">
+        <div className="bg-gray-900 rounded-lg p-6 mb-8 border border-neon-green/20">
           <h2 className="text-xl font-semibold text-neon-green mb-4">
-            Transaction Status
+            ZK Compressed Token Operations
           </h2>
 
-          <p className="text-gray-300 mb-2">Operation: {transactionType}</p>
-
-          <p className="mb-4">
-            Status:{" "}
-            {transactionStatus === "pending" && (
-              <span className="text-yellow-500">Pending...</span>
-            )}
-            {transactionStatus === "success" && (
-              <span className="text-green-500">Success! ✅</span>
-            )}
-            {transactionStatus === "error" && (
-              <span className="text-red-500">Failed ❌</span>
-            )}
-          </p>
-
-          {transactionSignature && (
-            <div>
-              <p className="text-gray-300 mb-2">Transaction Signature:</p>
+          <div className="mb-6">
+            <h3 className="text-lg font-medium text-neon-green mb-2">
+              Token Mint
+            </h3>
+            {mint ? (
               <p
-                className="text-gray-400 break-all bg-gray-800 p-3 rounded-md cursor-pointer hover:bg-gray-700 transition"
+                className="text-gray-300 break-all mb-4 cursor-pointer hover:text-neon-green transition"
                 onClick={() =>
-                  copyToClipboard(
-                    transactionSignature,
-                    "Transaction signature copied"
-                  )
+                  copyToClipboard(mint.toBase58(), "Token mint address copied")
                 }
               >
-                {transactionSignature}
+                Current Mint: {mint.toBase58()}
                 <span className="ml-2 text-xs text-gray-500">
                   (click to copy)
                 </span>
               </p>
+            ) : (
+              <p className="text-yellow-500 mb-4">
+                No token mint created yet. Create one below.
+              </p>
+            )}
 
-              {!isLocalnet && (
-                <a
-                  href={`https://explorer.solana.com/tx/${transactionSignature}?cluster=devnet`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-neon-green hover:underline mt-2 inline-block"
-                >
-                  View on Solana Explorer →
-                </a>
-              )}
+            <button
+              onClick={handleCreateMint}
+              disabled={isLoading || !connection || !payer}
+              className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
+            >
+              Create New ZK Compressed Token Mint
+            </button>
+          </div>
+
+          <div className="mb-6">
+            <h3 className="text-lg font-medium text-neon-green mb-2">
+              Token Amount
+            </h3>
+            <div className="flex items-center gap-4">
+              <input
+                type="number"
+                value={amount / 1e9}
+                onChange={(e) => setAmount(parseFloat(e.target.value) * 1e9)}
+                className="bg-gray-800 border border-gray-700 rounded-md p-2 text-white w-32"
+              />
+              <span className="text-gray-300">tokens (with 9 decimals)</span>
             </div>
-          )}
-        </div>
-      )}
+          </div>
 
-      {/* Debug Console */}
-      <ZkDebugConsole isEnabled={true} />
-    </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button
+              onClick={handleMintToSelf}
+              disabled={isLoading || !connection || !payer || !mint}
+              className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
+            >
+              Mint to Payer
+            </button>
+
+            <button
+              onClick={handleMintToUser}
+              disabled={
+                isLoading || !connection || !payer || !mint || !userWallet
+              }
+              className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
+            >
+              Mint to User
+            </button>
+
+            <button
+              onClick={handleTransferToUser}
+              disabled={
+                isLoading || !connection || !payer || !mint || !userWallet
+              }
+              className="bg-gray-800 hover:bg-gray-700 text-neon-green disabled:text-gray-500 px-4 py-2 rounded-md transition"
+            >
+              Transfer to User
+            </button>
+          </div>
+        </div>
+
+        {transactionType && (
+          <div className="bg-gray-900 rounded-lg p-6 border border-neon-green/20">
+            <h2 className="text-xl font-semibold text-neon-green mb-4">
+              Transaction Status
+            </h2>
+
+            <p className="text-gray-300 mb-2">Operation: {transactionType}</p>
+
+            <p className="mb-4">
+              Status:{" "}
+              {transactionStatus === "pending" && (
+                <span className="text-yellow-500">Pending...</span>
+              )}
+              {transactionStatus === "success" && (
+                <span className="text-green-500">Success! ✅</span>
+              )}
+              {transactionStatus === "error" && (
+                <span className="text-red-500">Failed ❌</span>
+              )}
+            </p>
+
+            {transactionSignature && (
+              <div>
+                <p className="text-gray-300 mb-2">Transaction Signature:</p>
+                <p
+                  className="text-gray-400 break-all bg-gray-800 p-3 rounded-md cursor-pointer hover:bg-gray-700 transition"
+                  onClick={() =>
+                    copyToClipboard(
+                      transactionSignature,
+                      "Transaction signature copied"
+                    )
+                  }
+                >
+                  {transactionSignature}
+                  <span className="ml-2 text-xs text-gray-500">
+                    (click to copy)
+                  </span>
+                </p>
+
+                {!isLocalnet && (
+                  <a
+                    href={`https://explorer.solana.com/tx/${transactionSignature}?cluster=devnet`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-neon-green hover:underline mt-2 inline-block"
+                  >
+                    View on Solana Explorer →
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        <ZkDebugConsole isEnabled={true} />
+      </div>
+      <Navbar />
+    </PageContainer>
   );
 }

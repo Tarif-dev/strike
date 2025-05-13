@@ -1,4 +1,4 @@
-import { Home, Calendar, Trophy, User, Wallet, Gem } from "lucide-react";
+import { Home, Calendar, User, Wallet, Gem, Zap, FileKey } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -11,8 +11,17 @@ export default function Navbar() {
     { icon: Gem, path: "/nft-marketplace", label: "NFTs" },
     { icon: Wallet, path: "/wallet", label: "Wallet" },
     { icon: User, path: "/profile", label: "Profile" },
-    { icon: Trophy, path: "/zk-compression", label: "ZK Demo" },
   ];
+
+  const zkDemoItem = {
+    path: "/zk-compression",
+    label: "ZK Demo",
+  };
+
+  const magicBlockItem = {
+    path: "/magicblock",
+    label: "MagicBlock",
+  };
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-gray-950/95 backdrop-blur-md border-t border-neon-green/20 p-2 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
@@ -39,6 +48,52 @@ export default function Navbar() {
             </Link>
           );
         })}
+
+        {(() => {
+          const isActive =
+            location.pathname === zkDemoItem.path ||
+            location.pathname.startsWith(zkDemoItem.path);
+          return (
+            <Link
+              key={zkDemoItem.path}
+              to={zkDemoItem.path}
+              className={cn(
+                "flex flex-col items-center p-2 rounded-lg transition-colors",
+                isActive
+                  ? "text-pink-400 neon-text"
+                  : "text-pink-400/50 hover:text-pink-400/80"
+              )}
+            >
+              <FileKey
+                className={cn("h-5 w-5", isActive ? "fill-pink-500/10" : "")}
+              />
+              <span className="text-xs mt-1">{zkDemoItem.label}</span>
+            </Link>
+          );
+        })()}
+
+        {(() => {
+          const isActive =
+            location.pathname === magicBlockItem.path ||
+            location.pathname.startsWith(magicBlockItem.path);
+          return (
+            <Link
+              key={magicBlockItem.path}
+              to={magicBlockItem.path}
+              className={cn(
+                "flex flex-col items-center p-2 rounded-lg transition-colors",
+                isActive
+                  ? "text-yellow-400 neon-text"
+                  : "text-yellow-400/50 hover:text-yellow-400/80"
+              )}
+            >
+              <Zap
+                className={cn("h-5 w-5", isActive ? "fill-yellow-500/10" : "")}
+              />
+              <span className="text-xs mt-1">{magicBlockItem.label}</span>
+            </Link>
+          );
+        })()}
       </div>
     </nav>
   );

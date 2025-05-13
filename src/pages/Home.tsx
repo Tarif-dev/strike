@@ -32,6 +32,11 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import BlockchainFeatureShowcase from "@/components/common/BlockchainFeatureShowcase";
+import MagicBlockBanner from "@/components/common/MagicBlockBanner";
+import ZkCompressionBanner from "@/components/common/ZkCompressionBanner";
+import TechFeatureCards from "@/components/common/TechFeatureCards";
+import ZkCompressionMetrics from "@/components/common/ZkCompressionMetrics";
 
 // Hooks and contexts
 import { useAuth } from "@/contexts/AuthContext";
@@ -209,8 +214,8 @@ const Home = () => {
     currentHour < 12
       ? "Good Morning"
       : currentHour < 18
-      ? "Good Afternoon"
-      : "Good Evening";
+        ? "Good Afternoon"
+        : "Good Evening";
 
   // Format today's date
   const today = new Date();
@@ -432,6 +437,37 @@ const Home = () => {
               </Button>
             </div>
           </div>
+        </motion.div>
+
+        {/* Blockchain Technology Feature Cards */}
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <TechFeatureCards />
+        </motion.div>
+
+        {/* Technology Banners */}
+        <motion.div
+          className="mb-8 space-y-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.35 }}
+        >
+          <MagicBlockBanner className="rounded-xl" />
+          <ZkCompressionBanner className="rounded-xl" />
+        </motion.div>
+
+        {/* ZK Compression Metrics */}
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.37 }}
+        >
+          <ZkCompressionMetrics />
         </motion.div>
 
         {/* Upcoming matches */}

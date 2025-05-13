@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
 import InitialsAvatar from "@/components/common/InitialsAvatar";
+import ZkBadge from "@/components/common/ZkBadge";
+import MagicBlockBadge from "@/components/common/MagicBlockBadge";
 
 export interface PlayerData {
   id: string;
@@ -75,6 +77,10 @@ export default function PlayerCard({
           <div className="text-sm text-muted-foreground flex items-center gap-2">
             <img src={player.teamLogo} alt={player.team} className="w-4 h-4" />
             <span>{player.position}</span>
+            <div className="flex gap-1">
+              <ZkBadge className="scale-75" />
+              <MagicBlockBadge className="scale-75" />
+            </div>
           </div>
         </div>
         {player.points !== undefined && (
@@ -106,6 +112,10 @@ export default function PlayerCard({
           <div className="flex items-center gap-2 mt-1">
             <img src={player.teamLogo} alt={player.team} className="w-5 h-5" />
             <span className="text-sm">{player.team}</span>
+            <div className="flex gap-1 ml-1">
+              <ZkBadge />
+              <MagicBlockBadge />
+            </div>
           </div>
         </div>
         {player.points !== undefined && (

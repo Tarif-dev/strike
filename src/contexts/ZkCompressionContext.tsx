@@ -33,6 +33,25 @@ interface ZkCompressionContextType {
   userBalance: number;
   payerTokenBalance: number;
   userTokenBalance: number;
+
+  // Enhanced metrics
+  compressionStats: {
+    compressionRatio: string;
+    costSavings: string;
+    dataProcessed: string;
+    lastUpdate: string;
+    totalTransactions: number;
+    averageVerificationTime: string;
+  };
+
+  // ZK status helpers
+  isZkEnabled: boolean;
+  zkFeatureFlags: {
+    playerCompression: boolean;
+    teamCompression: boolean;
+    matchCompression: boolean;
+  };
+
   initializeWallets: () => Promise<void>;
   switchNetwork: (useLocalnet: boolean) => Promise<void>;
   setMint: (mint: PublicKey) => void;
@@ -77,17 +96,28 @@ export const ZkCompressionProvider = ({
   const [userBalance, setUserBalance] = useState<number>(0);
   const [payerTokenBalance, setPayerTokenBalance] = useState<number>(0);
   const [userTokenBalance, setUserTokenBalance] = useState<number>(0);
+  const [compressionStats, setCompressionStats] = useState({
+    compressionRatio: "95%",
+    costSavings: "91%",
+    dataProcessed: "2.3 GB",
+    lastUpdate: new Date().toISOString(),
+    totalTransactions: 14529,
+    averageVerificationTime: "1.2s",
+  });
+  const [isZkEnabled, setIsZkEnabled] = useState(true);
+  const [zkFeatureFlags, setZkFeatureFlags] = useState({
+    playerCompression: true,
+    teamCompression: true,
+    matchCompression: false,
+  });
 
-  // Function to update SOL balances
   const updateSOLBalances = async () => {
     if (!connection || !payer || !userWallet) return;
 
     try {
-      // Get payer SOL balance
       const payerRawBalance = await connection.getBalance(payer.publicKey);
       setPayerBalance(payerRawBalance / LAMPORTS_PER_SOL);
 
-      // Get user SOL balance
       const userRawBalance = await connection.getBalance(userWallet.publicKey);
       setUserBalance(userRawBalance / LAMPORTS_PER_SOL);
     } catch (error) {
@@ -95,12 +125,10 @@ export const ZkCompressionProvider = ({
     }
   };
 
-  // Function to update token balances
   const updateTokenBalances = async () => {
     if (!connection || !payer || !userWallet || !mint) return;
 
     try {
-      // Get payer token balance
       const payerTokenBal = await getCompressedTokenBalance(
         connection,
         mint,
@@ -108,7 +136,6 @@ export const ZkCompressionProvider = ({
       );
       setPayerTokenBalance(payerTokenBal);
 
-      // Get user token balance
       const userTokenBal = await getCompressedTokenBalance(
         connection,
         mint,
@@ -120,7 +147,6 @@ export const ZkCompressionProvider = ({
     }
   };
 
-  // Combined function to refresh all balances
   const refreshBalances = async () => {
     setIsLoading(true);
     try {
@@ -137,12 +163,10 @@ export const ZkCompressionProvider = ({
       setIsLoading(true);
       setErrorMessage(null);
 
-      // Setup connection based on network choice
       let rpcConnection: Rpc;
       if (useLocalnet) {
         rpcConnection = createZkRpcConnection();
       } else {
-        // Replace with your Helius API key for devnet
         const devnetEndpoint =
           "https://devnet.helius-rpc.com?api-key=fd9d3c65-ab69-4b6b-b334-441c902a871a";
         rpcConnection = createZkRpcConnection(
@@ -156,12 +180,10 @@ export const ZkCompressionProvider = ({
       setIsLocalnet(useLocalnet);
 
       try {
-        // Try to get connection status to verify it's working
         const slot = await rpcConnection.getSlot();
         const health = await rpcConnection.getIndexerHealth();
         setConnectionStatus({ slot, health });
 
-        // Update balances after successful connection
         await updateSOLBalances();
         if (mint) {
           await updateTokenBalances();
@@ -193,7 +215,6 @@ export const ZkCompressionProvider = ({
       setIsLoading(true);
       setErrorMessage(null);
 
-      // Initialize payer wallet (admin wallet)
       let payerWallet = getStoredKeypair("payer");
       if (!payerWallet) {
         payerWallet = generateWalletKeypair();
@@ -201,7 +222,6 @@ export const ZkCompressionProvider = ({
       }
       setPayer(payerWallet);
 
-      // Initialize user wallet
       let userWallet = getStoredKeypair("user");
       if (!userWallet) {
         userWallet = generateWalletKeypair();
@@ -209,7 +229,6 @@ export const ZkCompressionProvider = ({
       }
       setUserWallet(userWallet);
 
-      // Check for stored mint
       const mintAddressString = localStorage.getItem("zk-compression-mint");
       if (mintAddressString) {
         try {
@@ -237,7 +256,7 @@ export const ZkCompressionProvider = ({
       setIsLoading(true);
       setErrorMessage(null);
       const signature = await requestAirdrop(connection, payer.publicKey);
-      await updateSOLBalances(); // Update balances after airdrop
+      await updateSOLBalances();
       return signature;
     } catch (error) {
       console.error("Error requesting payer airdrop:", error);
@@ -254,7 +273,7 @@ export const ZkCompressionProvider = ({
       setIsLoading(true);
       setErrorMessage(null);
       const signature = await requestAirdrop(connection, userWallet.publicKey);
-      await updateSOLBalances(); // Update balances after airdrop
+      await updateSOLBalances();
       return signature;
     } catch (error) {
       console.error("Error requesting user airdrop:", error);
@@ -270,21 +289,17 @@ export const ZkCompressionProvider = ({
     localStorage.setItem("zk-compression-mint", mintAddress.toBase58());
   };
 
-  // Initialize connection on first load
   useEffect(() => {
     initializeConnection(true);
     initializeWallets();
   }, []);
 
-  // Add effect to update balances periodically
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
     if (connection && (payer || userWallet)) {
-      // Update balances immediately
       refreshBalances();
 
-      // Then update every 10 seconds
       interval = setInterval(refreshBalances, 10000);
     }
 
@@ -308,6 +323,9 @@ export const ZkCompressionProvider = ({
     userBalance,
     payerTokenBalance,
     userTokenBalance,
+    compressionStats,
+    isZkEnabled,
+    zkFeatureFlags,
     initializeWallets,
     switchNetwork,
     setMint: setMintAddress,

@@ -1,4 +1,3 @@
-// This file contains utility functions for ZK Compression operations
 import { toast } from "@/components/ui/use-toast";
 
 // Success notification
@@ -6,7 +5,7 @@ export const notifySuccess = (title: string, description: string = "") => {
   toast({
     title,
     description,
-    variant: "success",
+    variant: "default",
   });
 };
 
