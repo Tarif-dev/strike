@@ -11,6 +11,7 @@ export default function Navbar() {
     { icon: Gem, path: "/nft-marketplace", label: "NFTs" },
     { icon: Wallet, path: "/wallet", label: "Wallet" },
     { icon: User, path: "/profile", label: "Profile" },
+    { icon: Trophy, path: "/zk-compression", label: "ZK Demo" },
   ];
 
   return (
