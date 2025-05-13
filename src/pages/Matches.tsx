@@ -25,14 +25,7 @@ import { Program, BN } from "@coral-xyz/anchor";
 import * as anchor from "@coral-xyz/anchor";
 import axios from 'axios';
 
-const options = {
-  method: 'GET',
-  url: 'https://cricbuzz-cricket.p.rapidapi.com/matches/v1/upcoming',
-  headers: {
-    'x-rapidapi-key': '014abe6e35msh76ef70851596118p1e000fjsn01ac2f8b6c4d',
-    'x-rapidapi-host': 'cricbuzz-cricket.p.rapidapi.com'
-  }
-};
+
 
 // Initialize program ID outside of component
 const PROGRAM_ID = new PublicKey(
@@ -45,6 +38,7 @@ const Matches = () => {
   const [currentMonth, setCurrentMonth] = useState("");
   const [prizePools, setPrizePools] = useState<Record<string, string>>({});
   const [loadingPrizePools, setLoadingPrizePools] = useState(false);
+  const [contestantsMap, setContestantsMap] = useState<Record<string, number>>({});
   const wallet = useWallet();
   const { connection } = useConnection();
   const {
@@ -56,7 +50,9 @@ const Matches = () => {
     publicKey,
   } = wallet;
   
-  
+  useEffect(() => {
+     console.log("admin allowed matches",matches)
+  }, [matches])
 
   // Make sure matches is always an array and status is a valid type
   const safeMatches: MatchData[] = Array.isArray(matches)
@@ -111,17 +107,17 @@ const Matches = () => {
       const provider = new anchor.AnchorProvider(connection, wallet, {
         commitment: "confirmed",
       });
-      const program = new Program(IDL as any, PROGRAM_ID, provider);
+      const program = new Program(IDL,provider);
       
       // Create a map to store prize pools
       const poolsMap: Record<string, string> = {};
-      
+      const contestantsMap: Record<string, number> = {};
       // Fetch prize pools for all matches
       for (const match of filteredMatches) {
         try {
           // Use the match ID for PDA derivation
-          console.log("Fetching prize pool for match:", match.id);
-          const shortMatchId = match.id.split("-")[0];
+         
+          const shortMatchId = match.id
           const matchIdBuffer = Buffer.from(shortMatchId);
           
           // Derive the match pool PDA
@@ -132,6 +128,7 @@ const Matches = () => {
           
           // Fetch the match pool account data using bracket notation
           const matchPoolAccount = await program.account["matchPool"].fetch(matchPoolPDA);
+          console.log("Match pool account:", matchPoolAccount);
           
           // Get the total deposited amount
           const totalDeposited = matchPoolAccount.totalDeposited;
@@ -141,14 +138,17 @@ const Matches = () => {
           
           // Store in the map
           poolsMap[match.id] = totalDepositedUsdc;
+          contestantsMap[match.id] = matchPoolAccount?.deposits?.length || 0;
         } catch (error) {
           console.log(`No pool found for match ${match.id}`);
           // If no pool exists, set to 0
           poolsMap[match.id] = "0.00";
+          contestantsMap[match.id] = 0;
         }
       }
       console.log("Prize pools fetched:", poolsMap);
       setPrizePools(poolsMap);
+      setContestantsMap(contestantsMap);
     } catch (error) {
       console.error("Error fetching prize pools:", error);
     } finally {
@@ -170,7 +170,7 @@ const Matches = () => {
     if (connected && publicKey && matches.length > 0) {
       fetchPrizePools();
     }
-  }, [connected, publicKey, matches, fetchPrizePools]);
+  }, [connected, publicKey, matches]);
 
   // Group upcoming matches by date
   const groupedUpcomingMatches =
@@ -280,6 +280,7 @@ const Matches = () => {
                               match={match}
                               showFantasyFeatures={true}
                               prizePool={prizePools[match.id]}
+                              contestants={contestantsMap[match.id] || 0}
                             />
                           );
                         })}
@@ -295,6 +296,7 @@ const Matches = () => {
                       match={match}
                       showFantasyFeatures={activeTab !== "Completed"}
                       prizePool={prizePools && prizePools[match.id]}
+                       contestants={contestantsMap[match.id] || 0}
                     />
                   ))}
                 </div>

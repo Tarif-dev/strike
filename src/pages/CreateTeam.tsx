@@ -4,14 +4,10 @@ import {
   Users,
   AlertTriangle,
   Zap,
-  Trophy,
-  Crown,
-  User,
+ 
   Filter,
   X,
-  CheckCircle,
-  ChevronDown,
-  ChevronUp,
+  
   Plus,
   Minus,
   Shield,
@@ -29,8 +25,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import InitialsAvatar from "@/components/common/InitialsAvatar";
 import { useSupabaseMatch } from "@/hooks/useSupabaseMatch";
-
-// Components
+ 
 import PageContainer from "@/components/layout/PageContainer";
 import PlayerCard, { PlayerData } from "@/components/cricket/PlayerCard";
 import EnhancedPlayerCard from "@/components/cricket/EnhancedPlayerCard";
@@ -40,7 +35,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-
+import {API_KEY} from "../utils/config"
 // External libraries
 import axios from 'axios';
 
@@ -166,7 +161,7 @@ const CreateTeam = () => {
   
   // States for Cricbuzz API data
   const [cricbuzzData, setCricbuzzData] = useState<CricbuzzResponse | null>(null);
-  const [loadingCricbuzzData, setLoadingCricbuzzData] = useState<boolean>(true);
+  const [loadingCricbuzzData, setLoadingCricbuzzData] = useState<boolean>(false);
   const [cricbuzzError, setCricbuzzError] = useState<string | null>(null);
 
   // States
@@ -198,20 +193,10 @@ const CreateTeam = () => {
   // Function to get player image URL with fallback
   const getPlayerImageUrl = useCallback((playerId: number, faceImageId: number | undefined) => {
     // First try to find a local image (mostly for famous players)
-    const knownPlayerImages: Record<string, string> = {
-      "1413": "/players/virat_kohli.jpg",
-      "265": "/players/ms_dhoni.jpg", 
-      "969": "/players/jasprit_bumrah.jpg",
-      "509": "/players/rashid_khan.jpg",
-      "1446": "/players/rishabh_pant.jpg",
-      "1706": "/players/jos_buttler.jpg",
-      // Add more known players as needed
-    };
+    
 
     // Check if we have a local image for this player
-    if (knownPlayerImages[playerId.toString()]) {
-      return knownPlayerImages[playerId.toString()];
-    }
+   
 
     // Otherwise, try to use the Cricbuzz image if we have a faceImageId
    
@@ -235,10 +220,11 @@ const CreateTeam = () => {
         method: 'GET',
         url: `https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/${matchId}`,
         headers: {
-          'x-rapidapi-key': 'bee2da4a33msh54fad7b338b78d2p19ea73jsndd8333ad3725',
+          'x-rapidapi-key': "014abe6e35msh76ef70851596118p1e000fjsn01ac2f8b6c4d",
           'x-rapidapi-host': 'cricbuzz-cricket.p.rapidapi.com'
         }
       };
+      console.log('Fetching Cricbuzz data with options:', options);
       const response = await axios.request(options);
       console.log('Cricbuzz API response:', response.data);
       setCricbuzzData(response.data);
@@ -249,6 +235,14 @@ const CreateTeam = () => {
       setLoadingCricbuzzData(false);
     }
   }, [matchId]); // Add matchId as a dependency
+  useEffect(() => {
+    if (matchId) {
+      getTeamInfo();
+    } else {
+      console.error('No match ID provided');
+      setCricbuzzError('No match ID provided');
+    }
+  }, [matchId]);
 
   // Process Cricbuzz API data and convert to PlayerData format
   const processMatchData = useCallback((data: CricbuzzResponse) => {
@@ -343,7 +337,8 @@ const CreateTeam = () => {
 
   // Effect to fetch Cricbuzz API data
   useEffect(() => {
-    getTeamInfo();
+    console.log("API",API_KEY)
+    // getTeamInfo();
   }, [getTeamInfo]); // Add getTeamInfo as a dependency
 
   // Effect to process Cricbuzz data when it changes
