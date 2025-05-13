@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { API_KEY } from "@/utils/config";
 
 /**
  * InitializeMatches - Admin Page
@@ -90,7 +91,7 @@ const options = {
   method: 'GET',
   url: 'https://cricbuzz-cricket.p.rapidapi.com/matches/v1/upcoming',
   headers: {
-    'x-rapidapi-key': 'bee2da4a33msh54fad7b338b78d2p19ea73jsndd8333ad3725',
+    'x-rapidapi-key': "014abe6e35msh76ef70851596118p1e000fjsn01ac2f8b6c4d",
     'x-rapidapi-host': 'cricbuzz-cricket.p.rapidapi.com'
   }
 };
