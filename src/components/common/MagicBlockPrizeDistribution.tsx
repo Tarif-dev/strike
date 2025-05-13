@@ -105,8 +105,8 @@ const MagicBlockPrizeDistribution: React.FC<
       </div>
 
       <p className="text-xs text-gray-400 text-center">
-        MagicBlock's parallel transaction processing enables instant settlement
-        for {totalParticipants.toLocaleString()} contest participants
+        MagicBlock&apos;s parallel transaction processing enables instant
+        settlement for {totalParticipants.toLocaleString()} contest participants
       </p>
     </div>
   );

@@ -33,7 +33,7 @@ const MagicBlockPage = () => {
               </h1>
               <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
                 Experience lightning-fast transactions, real-time updates, and
-                seamless gameplay powered by MagicBlock's high-performance
+                seamless gameplay powered by MagicBlock&apos;s high-performance
                 infrastructure on Solana
               </p>
             </motion.div>
@@ -135,10 +135,10 @@ const MagicBlockPage = () => {
                     Real-Time Match Updates
                   </h3>
                   <p className="text-gray-300 mb-4">
-                    MagicBlock's infrastructure processes live cricket match
-                    data in milliseconds, providing users with instant score
-                    updates, player statistics, and performance analytics as the
-                    match progresses.
+                    MagicBlock&apos;s infrastructure processes live cricket
+                    match data in milliseconds, providing users with instant
+                    score updates, player statistics, and performance analytics
+                    as the match progresses.
                   </p>
                   <ul className="space-y-2 text-gray-400">
                     <li className="flex items-start gap-2">
@@ -177,7 +177,7 @@ const MagicBlockPage = () => {
                   <p className="text-gray-300 mb-4">
                     Strike handles millions of concurrent fantasy cricket
                     transactions during peak match moments thanks to
-                    MagicBlock's high-throughput parallel processing
+                    MagicBlock&apos;s high-throughput parallel processing
                     capabilities.
                   </p>
                   <ul className="space-y-2 text-gray-400">
@@ -215,9 +215,9 @@ const MagicBlockPage = () => {
                     Advanced Cricket Analytics
                   </h3>
                   <p className="text-gray-300 mb-4">
-                    MagicBlock's computational power enables Strike to process
-                    complex cricket data models and provide actionable insights
-                    that help users build winning fantasy teams.
+                    MagicBlock&apos;s computational power enables Strike to
+                    process complex cricket data models and provide actionable
+                    insights that help users build winning fantasy teams.
                   </p>
                   <ul className="space-y-2 text-gray-400">
                     <li className="flex items-start gap-2">
@@ -255,8 +255,8 @@ const MagicBlockPage = () => {
                     Instant Settlements &amp; Rewards
                   </h3>
                   <p className="text-gray-300 mb-4">
-                    Strike leverages MagicBlock's lightning-fast finality to
-                    distribute winnings and update user wallets immediately
+                    Strike leverages MagicBlock&apos;s lightning-fast finality
+                    to distribute winnings and update user wallets immediately
                     after match completion.
                   </p>
                   <ul className="space-y-2 text-gray-400">
@@ -264,7 +264,7 @@ const MagicBlockPage = () => {
                       <div className="h-5 w-5 rounded-full bg-yellow-500/20 flex items-center justify-center text-xs mt-0.5">
                         ✓
                       </div>
-                      Instant prize distribution to winners' wallets
+                      Instant prize distribution to winners&apos; wallets
                     </li>
                     <li className="flex items-start gap-2">
                       <div className="h-5 w-5 rounded-full bg-yellow-500/20 flex items-center justify-center text-xs mt-0.5">

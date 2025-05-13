@@ -235,8 +235,8 @@ const NFTCard = ({ nft }) => {
                   nft.performanceScore >= 90
                     ? "text-electric-lime"
                     : nft.performanceScore >= 80
-                    ? "text-royal-blue"
-                    : "text-royal-gold"
+                      ? "text-royal-blue"
+                      : "text-royal-gold"
                 )}
               >
                 {nft.performanceScore}
@@ -252,8 +252,8 @@ const NFTCard = ({ nft }) => {
               nft.performanceScore >= 90
                 ? "[&>[data-state=progress]]:from-electric-lime [&>[data-state=progress]]:to-deep-emerald"
                 : nft.performanceScore >= 80
-                ? "[&>[data-state=progress]]:from-royal-blue [&>[data-state=progress]]:to-deep-emerald"
-                : "[&>[data-state=progress]]:from-royal-gold [&>[data-state=progress]]:to-gold-600"
+                  ? "[&>[data-state=progress]]:from-royal-blue [&>[data-state=progress]]:to-deep-emerald"
+                  : "[&>[data-state=progress]]:from-royal-gold [&>[data-state=progress]]:to-gold-600"
             )}
           />
 
@@ -827,7 +827,7 @@ export default function NFTMarketplace() {
                             T20 World Cup 2011
                           </h3>
                           <p className="text-sm text-soft-white/90 drop-shadow-md">
-                            World's Most Valuable Cricket NFT
+                            World&apos;s Most Valuable Cricket NFT
                           </p>
 
                           <div className="mt-2 flex justify-between items-center">

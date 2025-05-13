@@ -21,7 +21,7 @@ const MagicBlockIntegration = () => {
           </Badge>
 
           <p className="text-gray-300 mb-6">
-            Strike leverages MagicBlock's high-performance blockchain
+            Strike leverages MagicBlock&apos;s high-performance blockchain
             infrastructure to provide ultra-low latency responses for real-time
             fantasy cricket gameplay on Solana. This enables transaction
             finality in milliseconds rather than seconds, creating a seamless

@@ -128,7 +128,7 @@ const MagicBlockMatchInfo: React.FC<MagicBlockMatchInfoProps> = ({
 
       <div className="mt-3 text-center">
         <p className="text-xs text-gray-400">
-          MagicBlock's high-performance Solana infrastructure powers this{" "}
+          MagicBlock&apos;s high-performance Solana infrastructure powers this{" "}
           {matchType} match at {stadium}
         </p>
       </div>

@@ -110,8 +110,8 @@ const MagicBlockTeamCreator: React.FC<MagicBlockTeamCreatorProps> = ({
         <div className="flex items-start gap-2 text-xs">
           <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
           <span className="text-gray-300">
-            MagicBlock's parallel processing ensures instant team validation and
-            on-chain registration
+            MagicBlock&apos;s parallel processing ensures instant team
+            validation and on-chain registration
           </span>
         </div>
 

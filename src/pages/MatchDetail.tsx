@@ -337,7 +337,7 @@ const MatchDetail = () => {
             ) : (
               <div className="text-center py-10">
                 <p className="text-muted-foreground">
-                  Match hasn't started yet
+                  Match hasn&apos;t started yet
                 </p>
                 <p className="mt-2 text-sm text-cricket-lime">
                   Scorecard will be available when the match begins
@@ -523,7 +523,7 @@ const MatchDetail = () => {
             ) : (
               <div className="text-center py-10">
                 <p className="text-muted-foreground">
-                  Match hasn't started yet
+                  Match hasn&apos;t started yet
                 </p>
                 <p className="mt-2 text-sm text-cricket-lime">
                   Statistics will be available when the match begins

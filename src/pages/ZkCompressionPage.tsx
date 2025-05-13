@@ -1088,8 +1088,8 @@ const compressPlayerData = async (playerData) => {
 
           <footer className="text-center text-sm text-gray-500">
             <p>
-              ZK Compression technology is powered by Solana's state compression
-              features.
+              ZK Compression technology is powered by Solana&apos;s state
+              compression features.
             </p>
             <p className="mt-1">
               © 2025 Strike Fantasy Cricket. All rights reserved.

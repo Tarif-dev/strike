@@ -581,8 +581,8 @@ const Profile = () => {
                     No Teams Created Yet
                   </h3>
                   <p className="text-gray-400 mb-6 max-w-md mx-auto">
-                    You haven't created any fantasy teams yet. Create a team to
-                    participate in contests and win prizes!
+                    You haven&apos;t created any fantasy teams yet. Create a
+                    team to participate in contests and win prizes!
                   </p>
                   <Link to="/teams/create">
                     <Button className="bg-neon-green text-gray-900 hover:bg-neon-green/90">

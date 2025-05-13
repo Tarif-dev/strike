@@ -136,8 +136,8 @@ const MagicBlockMatchStatistics = () => {
 
       <div className="text-center mt-3">
         <p className="text-xs text-gray-400">
-          MagicBlock's infrastructure enables sub-10ms transaction finality for
-          real-time fantasy cricket updates
+          MagicBlock&apos;s infrastructure enables sub-10ms transaction finality
+          for real-time fantasy cricket updates
         </p>
       </div>
     </div>

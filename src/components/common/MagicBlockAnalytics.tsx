@@ -159,7 +159,7 @@ const MagicBlockAnalytics: React.FC<MagicBlockAnalyticsProps> = ({
 
       <div className="text-center mt-3">
         <p className="text-xs text-gray-400">
-          MagicBlock's infrastructure enables real-time cricket analytics
+          MagicBlock&apos;s infrastructure enables real-time cricket analytics
           processing with sub-10ms latency
         </p>
       </div>

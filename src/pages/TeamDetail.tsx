@@ -1114,7 +1114,7 @@ const TeamDetail = () => {
                 </div>
                 <h3 className="text-xl font-medium mb-2">No Players Found</h3>
                 <p className="text-gray-400 max-w-md mx-auto">
-                  This team doesn't have any players yet.
+                  This team doesn&apos;t have any players yet.
                 </p>
               </div>
             )}
