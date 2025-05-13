@@ -25,6 +25,8 @@ import { Program, BN } from "@coral-xyz/anchor";
 import * as anchor from "@coral-xyz/anchor";
 import axios from "axios";
 import { supabase } from "@/integrations/supabase/client";
+import MagicBlockBanner from "@/components/common/MagicBlockBanner";
+import ZkCompressionBanner from "@/components/common/ZkCompressionBanner";
 
 const options = {
   method: "GET",
@@ -272,7 +274,7 @@ const Matches = () => {
                         MEGA CONTEST
                       </div>
                       <div className="bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full text-xs font-medium">
-                        ₹10 CRORE PRIZE
+                        10M USDC PRIZE
                       </div>
                     </div>
                     <h3 className="text-xl font-bold">
@@ -289,6 +291,12 @@ const Matches = () => {
               </div>
             </div>
           )}
+
+          {/* ZK Compression Banner */}
+          <ZkCompressionBanner className="rounded-xl mt-4" />
+
+          {/* MagicBlock Banner */}
+          <MagicBlockBanner className="rounded-xl" />
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -380,10 +388,10 @@ const Matches = () => {
                     {activeTab === "Live"
                       ? "There are no live matches at the moment. Check back later or explore upcoming matches."
                       : activeTab === "Upcoming"
-                      ? "There are no upcoming matches scheduled. Check back later or create one from the admin panel."
-                      : activeTab === "Completed"
-                      ? "No completed matches found. Match history will appear here."
-                      : "No matches available. Check back later for updates."}
+                        ? "There are no upcoming matches scheduled. Check back later or create one from the admin panel."
+                        : activeTab === "Completed"
+                          ? "No completed matches found. Match history will appear here."
+                          : "No matches available. Check back later for updates."}
                   </p>
                 </div>
               )}

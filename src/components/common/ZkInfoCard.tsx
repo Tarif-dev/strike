@@ -81,7 +81,7 @@ const ZkInfoCard = () => {
         <div className="mt-4">
           <p className="text-sm text-gray-400">
             This demo shows how to create, mint, and transfer ZK Compressed
-            tokens on Solana using Light Protocol's implementation.
+            tokens on Solana using Light Protocol&apos;s implementation.
           </p>
         </div>
       </div>
