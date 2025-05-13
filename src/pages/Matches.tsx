@@ -46,8 +46,9 @@ const Matches = () => {
   const [currentMonth, setCurrentMonth] = useState("");
   const [prizePools, setPrizePools] = useState<Record<string, string>>({});
   const [loadingPrizePools, setLoadingPrizePools] = useState(false);
-  const [teamsCount, setTeamsCount] = useState<Record<string, number>>({});
-  const [loadingTeamsCount, setLoadingTeamsCount] = useState(false);
+  const [contestantsMap, setContestantsMap] = useState<Record<string, number>>(
+    {}
+  );
   const wallet = useWallet();
   const { connection } = useConnection();
   const {
@@ -58,6 +59,10 @@ const Matches = () => {
     connected,
     publicKey,
   } = wallet;
+
+  useEffect(() => {
+    console.log("admin allowed matches", matches);
+  }, [matches]);
 
   // Make sure matches is always an array and status is a valid type
   const safeMatches: MatchData[] = Array.isArray(matches)
@@ -112,20 +117,17 @@ const Matches = () => {
       const provider = new anchor.AnchorProvider(connection, wallet, {
         commitment: "confirmed",
       });
-      anchor.setProvider(provider);
-
-      // Use 'any' type to bypass TypeScript's strict checking for the Anchor program
-      const program = new Program(IDL as any, provider);
+      const program = new Program(IDL, provider);
 
       // Create a map to store prize pools
       const poolsMap: Record<string, string> = {};
-
+      const contestantsMap: Record<string, number> = {};
       // Fetch prize pools for all matches
       for (const match of filteredMatches) {
         try {
           // Use the match ID for PDA derivation
-          console.log("Fetching prize pool for match:", match.id);
-          const shortMatchId = match.id.split("-")[0];
+
+          const shortMatchId = match.id;
           const matchIdBuffer = Buffer.from(shortMatchId);
 
           // Derive the match pool PDA
@@ -134,39 +136,32 @@ const Matches = () => {
             PROGRAM_ID
           );
 
-          try {
-            // Use any type to bypass TypeScript's strict checking for account structure
-            const matchPoolAccount: any = await (
-              program.account as any
-            ).matchPool.fetch(matchPoolPDA);
+          // Fetch the match pool account data using bracket notation
+          const matchPoolAccount =
+            await program.account["matchPool"].fetch(matchPoolPDA);
+          console.log("Match pool account:", matchPoolAccount);
 
-            // Get the total deposited amount and safely convert it
-            let totalDepositedUsdc = "0.00";
-            if (matchPoolAccount && matchPoolAccount.totalDeposited) {
-              // Handle BN conversion safely
-              const totalDeposited = matchPoolAccount.totalDeposited;
-              totalDepositedUsdc = (Number(totalDeposited) / 1_000_000).toFixed(
-                2
-              );
-            }
+          // Get the total deposited amount
+          const totalDeposited = matchPoolAccount.totalDeposited;
 
-            // Store in the map
-            poolsMap[match.id] = totalDepositedUsdc;
-          } catch (accountError) {
-            console.log(
-              `Error fetching account for match ${match.id}:`,
-              accountError
-            );
-            poolsMap[match.id] = "0.00";
-          }
+          // Convert from lamports to USDC (assuming 6 decimals for USDC)
+          const totalDepositedUsdc = (
+            totalDeposited.toNumber() / 1_000_000
+          ).toFixed(2);
+
+          // Store in the map
+          poolsMap[match.id] = totalDepositedUsdc;
+          contestantsMap[match.id] = matchPoolAccount?.deposits?.length || 0;
         } catch (error) {
           console.log(`No pool found for match ${match.id}`);
           // If no pool exists, set to 0
           poolsMap[match.id] = "0.00";
+          contestantsMap[match.id] = 0;
         }
       }
       console.log("Prize pools fetched:", poolsMap);
       setPrizePools(poolsMap);
+      setContestantsMap(contestantsMap);
     } catch (error) {
       console.error("Error fetching prize pools:", error);
     } finally {
@@ -179,8 +174,6 @@ const Matches = () => {
     if (!matches || matches.length === 0) return;
 
     try {
-      setLoadingTeamsCount(true);
-
       // Create a map to store team counts
       const countsMap: Record<string, number> = {};
 
@@ -207,11 +200,9 @@ const Matches = () => {
       }
 
       console.log("Team counts fetched:", countsMap);
-      setTeamsCount(countsMap);
     } catch (error) {
       console.error("Error fetching team counts:", error);
     } finally {
-      setLoadingTeamsCount(false);
     }
   }, [matches]);
 
@@ -229,7 +220,7 @@ const Matches = () => {
     if (connected && publicKey && matches.length > 0) {
       fetchPrizePools();
     }
-  }, [connected, publicKey, matches, fetchPrizePools]);
+  }, [connected, publicKey, matches]);
 
   // Fetch team counts when matches are loaded
   useEffect(() => {
@@ -350,7 +341,7 @@ const Matches = () => {
                                 match={match}
                                 showFantasyFeatures={true}
                                 prizePool={prizePools[match.id]}
-                                teamsCount={teamsCount[match.id]}
+                                contestants={contestantsMap[match.id] || 0}
                               />
                             );
                           })}
@@ -366,7 +357,7 @@ const Matches = () => {
                       match={match}
                       showFantasyFeatures={activeTab !== "Completed"}
                       prizePool={prizePools && prizePools[match.id]}
-                      teamsCount={teamsCount[match.id]}
+                      contestants={contestantsMap[match.id] || 0}
                     />
                   ))}
                 </div>
@@ -380,10 +371,10 @@ const Matches = () => {
                     {activeTab === "Live"
                       ? "There are no live matches at the moment. Check back later or explore upcoming matches."
                       : activeTab === "Upcoming"
-                      ? "There are no upcoming matches scheduled. Check back later or create one from the admin panel."
-                      : activeTab === "Completed"
-                      ? "No completed matches found. Match history will appear here."
-                      : "No matches available. Check back later for updates."}
+                        ? "There are no upcoming matches scheduled. Check back later or create one from the admin panel."
+                        : activeTab === "Completed"
+                          ? "No completed matches found. Match history will appear here."
+                          : "No matches available. Check back later for updates."}
                   </p>
                 </div>
               )}

@@ -62,7 +62,7 @@ interface MatchCardProps {
   className?: string;
   featured?: boolean;
   prizePool?: string;
-  teamsCount?: number;
+  contestants?: number;
 }
 
 export default function MatchCard({
@@ -70,8 +70,8 @@ export default function MatchCard({
   showFantasyFeatures = false,
   className,
   featured = false,
-  prizePool,
-  teamsCount,
+  prizePool = "",
+  contestants = 0,
 }: MatchCardProps) {
   const navigate = useNavigate();
 
@@ -328,10 +328,7 @@ export default function MatchCard({
                     <div>
                       <div className="text-xs text-gray-400 mb-0.5">Teams</div>
                       <div className="text-white font-medium">
-                        {(teamsCount !== undefined
-                          ? teamsCount
-                          : 0
-                        ).toLocaleString()}
+                        {contestants}
                       </div>
                     </div>
                   </div>
@@ -360,8 +357,8 @@ export default function MatchCard({
                             fantasyData.percentageJoined > 80
                               ? "text-red-400"
                               : fantasyData.percentageJoined > 50
-                              ? "text-amber-400"
-                              : "text-neon-green"
+                                ? "text-amber-400"
+                                : "text-neon-green"
                           )}
                         >
                           {fantasyData.percentageJoined}% Full
