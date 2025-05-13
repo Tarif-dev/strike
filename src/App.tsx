@@ -25,7 +25,9 @@ import CreateMatch from "@/pages/admin/CreateMatch";
 import MatchDetailAdmin from "@/pages/admin/MatchDetailAdmin";
 import ManageMatches from "./pages/admin/ManageMatches";
 import InitializeMatches from "./pages/admin/InitializeMatches";
+import ZkCompression from "@/pages/ZkCompression";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ZkCompressionProvider } from "@/contexts/ZkCompressionContext";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
@@ -84,75 +86,84 @@ function App() {
           <WalletModalProvider>
             <BrowserRouter>
               <AuthProvider>
-                <Routes>
-                  {/* Public routes */}
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="/auth/login" element={<Login />} />
-                  <Route path="/auth/signup" element={<Signup />} />
-                  <Route path="/auth/admin-signup" element={<AdminSignup />} />
-                  <Route path="/auth/otp-login" element={<OtpLogin />} />
+                <ZkCompressionProvider>
+                  <Routes>
+                    {/* Public routes */}
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/auth/login" element={<Login />} />
+                    <Route path="/auth/signup" element={<Signup />} />
+                    <Route
+                      path="/auth/admin-signup"
+                      element={<AdminSignup />}
+                    />
+                    <Route path="/auth/otp-login" element={<OtpLogin />} />
 
-                  <Route
-                    path="/auth/forgot-password"
-                    element={<ForgotPassword />}
-                  />
-                  <Route
-                    path="/auth/reset-password"
-                    element={<ResetPassword />}
-                  />
-                  <Route path="/auth/callback" element={<AuthCallback />} />
+                    <Route
+                      path="/auth/forgot-password"
+                      element={<ForgotPassword />}
+                    />
+                    <Route
+                      path="/auth/reset-password"
+                      element={<ResetPassword />}
+                    />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
 
-                  {/* Protected routes */}
-                  <Route element={<ProtectedRoute />}>
-                    <Route path="/home" element={<Home />} />
-                    <Route path="/matches" element={<Matches />} />
-                    <Route path="/matches/:id" element={<MatchDetails />} />
-                    <Route
-                      path="/matches/:id/contests"
-                      element={<Contests />}
-                    />
-                    <Route path="/contests/:matchId" element={<Contests />} />
-                    {/* Redirect all leagues routes to matches */}
-                    <Route
-                      path="/leagues/*"
-                      element={<Navigate to="/matches" replace />}
-                    />
-                    <Route path="/teams/create" element={<CreateTeam />} />
-                    <Route path="/teams/:id" element={<TeamDetail />} />
-                    <Route path="/wallet" element={<Wallet />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/api-settings" element={<ApiSettings />} />
-                    <Route
-                      path="/nft-marketplace"
-                      element={<NFTMarketplace />}
-                    />
-                  </Route>
+                    {/* Protected routes */}
+                    <Route element={<ProtectedRoute />}>
+                      <Route path="/home" element={<Home />} />
+                      <Route path="/matches" element={<Matches />} />
+                      <Route path="/matches/:id" element={<MatchDetails />} />
+                      <Route
+                        path="/matches/:id/contests"
+                        element={<Contests />}
+                      />
+                      <Route path="/contests/:matchId" element={<Contests />} />
+                      {/* Redirect all leagues routes to matches */}
+                      <Route
+                        path="/leagues/*"
+                        element={<Navigate to="/matches" replace />}
+                      />
+                      <Route path="/teams/create" element={<CreateTeam />} />
+                      <Route path="/teams/:id" element={<TeamDetail />} />
+                      <Route path="/wallet" element={<Wallet />} />
+                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/api-settings" element={<ApiSettings />} />
+                      <Route
+                        path="/nft-marketplace"
+                        element={<NFTMarketplace />}
+                      />
+                      <Route
+                        path="/zk-compression"
+                        element={<ZkCompression />}
+                      />
+                    </Route>
 
-                  {/* Admin routes */}
-                  <Route element={<AdminRoute />}>
-                    <Route path="/admin" element={<AdminDashboard />} />
-                    <Route
-                      path="/admin/create-match"
-                      element={<AdminMatches />}
-                    />
-                    <Route
-                      path="/admin/match/:id/:matchId"
-                      element={<MatchDetailAdmin />}
-                    />
-                    <Route
-                      path="/admin/manage-matches"
-                      element={<ManageMatches />}
-                    />
-                    <Route
-                      path="/admin/initialize-matches"
-                      element={<InitializeMatches />}
-                    />
-                  </Route>
+                    {/* Admin routes */}
+                    <Route element={<AdminRoute />}>
+                      <Route path="/admin" element={<AdminDashboard />} />
+                      <Route
+                        path="/admin/create-match"
+                        element={<AdminMatches />}
+                      />
+                      <Route
+                        path="/admin/match/:id/:matchId"
+                        element={<MatchDetailAdmin />}
+                      />
+                      <Route
+                        path="/admin/manage-matches"
+                        element={<ManageMatches />}
+                      />
+                      <Route
+                        path="/admin/initialize-matches"
+                        element={<InitializeMatches />}
+                      />
+                    </Route>
 
-                  {/* Fallback for unknown routes */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                <Toaster />
+                    {/* Fallback for unknown routes */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                  <Toaster />
+                </ZkCompressionProvider>
               </AuthProvider>
             </BrowserRouter>
           </WalletModalProvider>
