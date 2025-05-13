@@ -43,8 +43,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import { cn } from "@/lib/utils"; 
-
+import { cn } from "@/lib/utils";
 
 const MatchDetails = () => {
   const { id: matchId } = useParams();
@@ -52,7 +51,6 @@ const MatchDetails = () => {
   const [matchDetail, setMatchDetail] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("summary");
- 
 
   useEffect(() => {
     // Find match from matches data
@@ -91,7 +89,7 @@ const MatchDetails = () => {
             <AlertTriangle className="w-16 h-16 text-yellow-500 mb-4" />
             <h2 className="text-2xl font-bold mb-2">Match Not Found</h2>
             <p className="text-gray-400 mb-6">
-              We couldn't find the match you're looking for.
+              We couldn&apos;t find the match you&apos;re looking for.
             </p>
             <Link
               to="/matches"
@@ -133,8 +131,8 @@ const MatchDetails = () => {
                 {matchData.status === "completed"
                   ? "Completed"
                   : matchData.status === "live"
-                  ? "Live"
-                  : "Upcoming"}
+                    ? "Live"
+                    : "Upcoming"}
               </Badge>
             </div>
 
@@ -251,8 +249,8 @@ const MatchDetails = () => {
                 Sorry, Match Details Not Available
               </h2>
               <p className="text-gray-400 max-w-md">
-                We don't have detailed statistics for this match yet. Check back
-                later for updates.
+                We don&apos;t have detailed statistics for this match yet. Check
+                back later for updates.
               </p>
             </div>
           </div>
@@ -378,20 +376,20 @@ const MatchDetails = () => {
         matchDetail.innings[0].team === homeTeamCode
           ? parseInt(matchDetail.innings[0].score.split("/")[0])
           : matchDetail.innings &&
-            matchDetail.innings.length > 1 &&
-            matchDetail.innings[1].team === homeTeamCode
-          ? parseInt(matchDetail.innings[1].score.split("/")[0])
-          : 0,
+              matchDetail.innings.length > 1 &&
+              matchDetail.innings[1].team === homeTeamCode
+            ? parseInt(matchDetail.innings[1].score.split("/")[0])
+            : 0,
       [awayTeamCode]:
         matchDetail.innings &&
         matchDetail.innings.length > 0 &&
         matchDetail.innings[0].team === awayTeamCode
           ? parseInt(matchDetail.innings[0].score.split("/")[0])
           : matchDetail.innings &&
-            matchDetail.innings.length > 1 &&
-            matchDetail.innings[1].team === awayTeamCode
-          ? parseInt(matchDetail.innings[1].score.split("/")[0])
-          : 0,
+              matchDetail.innings.length > 1 &&
+              matchDetail.innings[1].team === awayTeamCode
+            ? parseInt(matchDetail.innings[1].score.split("/")[0])
+            : 0,
     },
     {
       name: "Run Rate",
@@ -401,20 +399,20 @@ const MatchDetails = () => {
         matchDetail.innings[0].team === homeTeamCode
           ? matchDetail.innings[0].run_rate
           : matchDetail.innings &&
-            matchDetail.innings.length > 1 &&
-            matchDetail.innings[1].team === homeTeamCode
-          ? matchDetail.innings[1].run_rate
-          : 0,
+              matchDetail.innings.length > 1 &&
+              matchDetail.innings[1].team === homeTeamCode
+            ? matchDetail.innings[1].run_rate
+            : 0,
       [awayTeamCode]:
         matchDetail.innings &&
         matchDetail.innings.length > 0 &&
         matchDetail.innings[0].team === awayTeamCode
           ? matchDetail.innings[0].run_rate
           : matchDetail.innings &&
-            matchDetail.innings.length > 1 &&
-            matchDetail.innings[1].team === awayTeamCode
-          ? matchDetail.innings[1].run_rate
-          : 0,
+              matchDetail.innings.length > 1 &&
+              matchDetail.innings[1].team === awayTeamCode
+            ? matchDetail.innings[1].run_rate
+            : 0,
     },
   ];
 
@@ -484,8 +482,8 @@ const MatchDetails = () => {
               {matchData.status === "completed"
                 ? "Completed"
                 : matchData.status === "live"
-                ? "Live"
-                : "Upcoming"}
+                  ? "Live"
+                  : "Upcoming"}
             </Badge>
           </div>
 

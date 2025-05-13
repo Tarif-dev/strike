@@ -25,8 +25,12 @@ import CreateMatch from "@/pages/admin/CreateMatch";
 import MatchDetailAdmin from "@/pages/admin/MatchDetailAdmin";
 import ManageMatches from "./pages/admin/ManageMatches";
 import InitializeMatches from "./pages/admin/InitializeMatches";
+import ZkCompression from "@/pages/ZkCompression";
+import ZkCompressionPage from "@/pages/ZkCompressionPage";
+import MagicBlockPage from "@/pages/MagicBlockPage";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { NFTProvider } from "@/contexts/NFTContext";
+import { ZkCompressionProvider } from "@/contexts/ZkCompressionContext";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
@@ -89,6 +93,7 @@ function App() {
               <AuthProvider>
                 
 
+                <ZkCompressionProvider>
                   
                 <NFTProvider>
                   <Routes>
@@ -101,6 +106,16 @@ function App() {
                       element={<AdminSignup />}
                     />
                     <Route path="/auth/otp-login" element={<OtpLogin />} />
+                    {/* Public routes */}
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/auth/login" element={<Login />} />
+                    <Route path="/auth/signup" element={<Signup />} />
+                    <Route
+                      path="/auth/admin-signup"
+                      element={<AdminSignup />}
+                    />
+                    <Route path="/auth/otp-login" element={<OtpLogin />} />
+
                     <Route
                       path="/auth/forgot-password"
                       element={<ForgotPassword />}
@@ -138,34 +153,62 @@ function App() {
                         element={<NFTMarketplace />}
                       />
                     </Route>
+                    <Route
+                          path="/zk-compression"
+                          element={<ZkCompressionPage />}
+                        />
+                        <Route path="/magicblock" element={<MagicBlockPage />} />
 
                     
                     {/* Admin routes */}
-                  <Route element={<AdminRoute />}>
-                    <Route path="/admin" element={<AdminDashboard />} />
-                    <Route
-                      path="/admin/create-match"
-                      element={<AdminMatches />}
-                    />
-                    <Route
-                      path="/admin/match/:id/:matchId"
-                      element={<MatchDetailAdmin />}
-                    />
-                    <Route
-                      path="/admin/manage-matches"
-                      element={<ManageMatches />}
-                    />
-                    <Route
-                      path="/admin/initialize-matches"
-                      element={<InitializeMatches />}
-                    />
-                  </Route>
+                    <Route element={<AdminRoute />}>
+                      <Route path="/admin" element={<AdminDashboard />} />
+                      <Route
+                        path="/admin/create-match"
+                        element={<AdminMatches />}
+                      />
+                      <Route
+                        path="/admin/match/:id/:matchId"
+                        element={<MatchDetailAdmin />}
+                      />
+                      <Route
+                        path="/admin/manage-matches"
+                        element={<ManageMatches />}
+                      />
+                      <Route
+                        path="/admin/initialize-matches"
+                        element={<InitializeMatches />}
+                      />
+                    </Route>
+                        
+
+                      {/* Admin routes */}
+                      <Route element={<AdminRoute />}>
+                        <Route path="/admin" element={<AdminDashboard />} />
+                        <Route
+                          path="/admin/create-match"
+                          element={<AdminMatches />}
+                        />
+                        <Route
+                          path="/admin/match/:id/:matchId"
+                          element={<MatchDetailAdmin />}
+                        />
+                        <Route
+                          path="/admin/manage-matches"
+                          element={<ManageMatches />}
+                        />
+                        <Route
+                          path="/admin/initialize-matches"
+                          element={<InitializeMatches />}
+                        />
+                      </Route>
 
                     {/* Fallback for unknown routes */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                   <Toaster />
                 </NFTProvider>
+                </ZkCompressionProvider>
               </AuthProvider>
             </BrowserRouter>
           </WalletModalProvider>

@@ -50,6 +50,11 @@ import {
   WalletNotConnectedError,
   WalletSendTransactionError,
 } from "@solana/wallet-adapter-base";
+import MagicBlockRealTimePerformance from "@/components/common/MagicBlockRealTimePerformance";
+import MagicBlockPrizeDistribution from "@/components/common/MagicBlockPrizeDistribution";
+import MagicBlockMatchStatistics from "@/components/common/MagicBlockMatchStatistics";
+import ZkCompressionStatistics from "@/components/common/ZkCompressionStatistics";
+import ZkCompressionPrizeDistribution from "@/components/common/ZkCompressionPrizeDistribution";
 import { Program, BN } from "@coral-xyz/anchor";
 import * as anchor from "@coral-xyz/anchor";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
@@ -320,9 +325,8 @@ const TeamDetail = () => {
     // Add right before sendTransaction
     try {
       console.log("Simulating transaction before sending...");
-      const { value: simulationResult } = await connection.simulateTransaction(
-        transaction
-      );
+      const { value: simulationResult } =
+        await connection.simulateTransaction(transaction);
 
       console.log("Simulation result:", simulationResult);
 
@@ -1110,7 +1114,7 @@ const TeamDetail = () => {
                 </div>
                 <h3 className="text-xl font-medium mb-2">No Players Found</h3>
                 <p className="text-gray-400 max-w-md mx-auto">
-                  This team doesn't have any players yet.
+                  This team doesn&apos;t have any players yet.
                 </p>
               </div>
             )}
@@ -1120,6 +1124,10 @@ const TeamDetail = () => {
         {/* Stats Tab - Show statistics about the team */}
         {activeTab === "stats" && (
           <div className="space-y-6">
+            <MagicBlockMatchStatistics />
+
+            <ZkCompressionStatistics />
+
             <Card className="bg-gray-900/60 border-gray-800">
               <CardHeader>
                 <CardTitle>Team Composition</CardTitle>
@@ -1264,12 +1272,15 @@ const TeamDetail = () => {
                   <div className="space-y-4">
                     {/* Group players by team and show distribution */}
                     {Object.entries(
-                      team.playerDetails.reduce((acc, player) => {
-                        const team = player.team || "Unknown Team";
-                        if (!acc[team]) acc[team] = [];
-                        acc[team].push(player);
-                        return acc;
-                      }, {} as Record<string, any[]>)
+                      team.playerDetails.reduce(
+                        (acc, player) => {
+                          const team = player.team || "Unknown Team";
+                          if (!acc[team]) acc[team] = [];
+                          acc[team].push(player);
+                          return acc;
+                        },
+                        {} as Record<string, any[]>
+                      )
                     ).map(([teamName, players]) => (
                       <div key={teamName}>
                         <div className="flex justify-between text-sm mb-1">
@@ -1300,6 +1311,12 @@ const TeamDetail = () => {
         {/* Performance Tab */}
         {activeTab === "performance" && (
           <div className="space-y-6">
+            <MagicBlockRealTimePerformance
+              playerName={captain?.name || "Captain"}
+              teamName={matchDetails?.team1?.name || "Team"}
+              matchType={matchDetails?.match_type || "T20"}
+            />
+
             <Card className="bg-gradient-to-br from-gray-900 to-gray-950 border-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -1608,6 +1625,18 @@ const TeamDetail = () => {
         {/* Prizes Tab - Show contest prizes */}
         {activeTab === "prizes" && (
           <div className="space-y-6">
+            <MagicBlockPrizeDistribution
+              prizePool={prizePool ? `${prizePool} USDC` : "500,000 USDC"}
+              totalParticipants={150000}
+              estimatedTime="< 1 second"
+            />
+
+            <ZkCompressionPrizeDistribution
+              prizePool={prizePool ? `${prizePool} USDC` : "500,000 USDC"}
+              totalParticipants={150000}
+              estimatedTime="< 2 seconds"
+            />
+
             <Card className="bg-gray-900/60 border-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center">

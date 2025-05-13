@@ -7,6 +7,10 @@ import PlayerCard from "@/components/cricket/PlayerCard";
 import { useMatch } from "@/hooks/useCricketData";
 import { players } from "@/data/mockData";
 import InitialsAvatar from "@/components/common/InitialsAvatar";
+import MagicBlockMatchInfo from "@/components/common/MagicBlockMatchInfo";
+import MagicBlockAnalytics from "@/components/common/MagicBlockAnalytics";
+import ZkCompressionMatchInfo from "@/components/common/ZkCompressionMatchInfo";
+import ZkCompressionAnalytics from "@/components/common/ZkCompressionAnalytics";
 
 const MatchDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -177,6 +181,18 @@ const MatchDetail = () => {
       <div className="mt-4 animate-fade-in">
         {activeTab === "Info" && (
           <div className="space-y-5">
+            <MagicBlockMatchInfo
+              matchId={id}
+              matchType={match.tournament.name}
+              stadium={match.venue}
+            />
+
+            <ZkCompressionMatchInfo
+              matchId={id}
+              matchType={match.tournament.name}
+              stadium={match.venue}
+            />
+
             <div className="bg-cricket-medium-green rounded-xl p-4">
               <h3 className="font-semibold mb-3">Match Details</h3>
               <div className="space-y-3">
@@ -321,7 +337,7 @@ const MatchDetail = () => {
             ) : (
               <div className="text-center py-10">
                 <p className="text-muted-foreground">
-                  Match hasn't started yet
+                  Match hasn&apos;t started yet
                 </p>
                 <p className="mt-2 text-sm text-cricket-lime">
                   Scorecard will be available when the match begins
@@ -359,6 +375,20 @@ const MatchDetail = () => {
 
         {activeTab === "Stats" && (
           <div className="space-y-5">
+            <MagicBlockAnalytics
+              statsUpdateTime="2 seconds ago"
+              nodeCount={42}
+              transactionSpeed="10ms"
+              dataProcessed="1.2TB"
+            />
+
+            <ZkCompressionAnalytics
+              dataProcessed="750MB"
+              compressionRatio="95%"
+              costSavings="91%"
+              lastUpdate="30 seconds ago"
+            />
+
             {isLive || isCompleted ? (
               <>
                 <div className="bg-cricket-medium-green rounded-xl p-4">
@@ -493,7 +523,7 @@ const MatchDetail = () => {
             ) : (
               <div className="text-center py-10">
                 <p className="text-muted-foreground">
-                  Match hasn't started yet
+                  Match hasn&apos;t started yet
                 </p>
                 <p className="mt-2 text-sm text-cricket-lime">
                   Statistics will be available when the match begins

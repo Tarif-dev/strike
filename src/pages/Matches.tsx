@@ -25,6 +25,8 @@ import { Program, BN } from "@coral-xyz/anchor";
 import * as anchor from "@coral-xyz/anchor";
 import axios from "axios";
 import { supabase } from "@/integrations/supabase/client";
+import MagicBlockBanner from "@/components/common/MagicBlockBanner";
+import ZkCompressionBanner from "@/components/common/ZkCompressionBanner";
 
 const options = {
   method: "GET",
@@ -263,7 +265,7 @@ const Matches = () => {
                         MEGA CONTEST
                       </div>
                       <div className="bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full text-xs font-medium">
-                        ₹10 CRORE PRIZE
+                        10M USDC PRIZE
                       </div>
                     </div>
                     <h3 className="text-xl font-bold">
@@ -280,6 +282,12 @@ const Matches = () => {
               </div>
             </div>
           )}
+
+          {/* ZK Compression Banner */}
+          <ZkCompressionBanner className="rounded-xl mt-4" />
+
+          {/* MagicBlock Banner */}
+          <MagicBlockBanner className="rounded-xl" />
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

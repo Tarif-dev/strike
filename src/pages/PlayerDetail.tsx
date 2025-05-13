@@ -1,8 +1,11 @@
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Star, Loader2 } from "lucide-react";
+import { ArrowLeft, Star, Loader2, FileKey } from "lucide-react";
 import PageContainer from "@/components/layout/PageContainer";
 import { useState } from "react";
 import { usePlayer } from "@/hooks/useCricketData";
+import ZkCompressionPlayerStats from "@/components/common/ZkCompressionPlayerStats";
+import ZkCompressionPlayerBadge from "@/components/common/ZkCompressionPlayerBadge";
+import ZkCompressionNotebook from "@/components/common/ZkCompressionNotebook";
 
 const PlayerDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -129,6 +132,7 @@ const PlayerDetail = () => {
                 }}
               />
               <span className="text-sm">{player.team}</span>
+              <ZkCompressionPlayerBadge className="ml-2" />
             </div>
 
             <div className="flex items-center mt-2 gap-1">
@@ -175,6 +179,18 @@ const PlayerDetail = () => {
               <p className="font-bold text-xl">{player.stats.wickets}</p>
             </div>
           )}
+
+          {/* Add ZK Compression components */}
+          <div className="col-span-2 mt-4 space-y-6">
+            <ZkCompressionPlayerStats
+              playerName={player.name}
+              dataCompressionRatio="96.7%"
+              verificationTime="< 0.5s"
+              transactionCost="0.000012 SOL"
+            />
+
+            <ZkCompressionNotebook />
+          </div>
 
           {player.stats.average !== undefined && (
             <div>

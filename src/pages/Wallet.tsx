@@ -627,9 +627,9 @@ const Wallet = () => {
                     <AlertTriangle className="h-4 w-4" />
                     <AlertTitle>Web3 Security Notice</AlertTitle>
                     <AlertDescription>
-                      You're connected to Solana's devnet. Tokens here have no
-                      real value. Always verify transactions in your wallet
-                      before signing.
+                      You&apos;re connected to Solana&apos;s devnet. Tokens here
+                      have no real value. Always verify transactions in your
+                      wallet before signing.
                     </AlertDescription>
                   </Alert>
                 </div>
@@ -708,7 +708,7 @@ const Wallet = () => {
                         No transactions found
                       </p>
                       <p className="text-gray-400 max-w-md mt-1">
-                        This wallet doesn't have any transactions on the{" "}
+                        This wallet doesn&apos;t have any transactions on the{" "}
                         {selectedWeb3Network} network yet.
                       </p>
                     </div>
@@ -727,8 +727,8 @@ const Wallet = () => {
                       tx.type === "sol-transfer"
                         ? "bg-blue-500/20 text-blue-400"
                         : tx.type === "token-transfer"
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-gray-500/20 text-gray-400"
+                          ? "bg-green-500/20 text-green-400"
+                          : "bg-gray-500/20 text-gray-400"
                     }`}
                               >
                                 {tx.type === "sol-transfer" && (
@@ -749,8 +749,8 @@ const Wallet = () => {
                                   {tx.type === "sol-transfer"
                                     ? "SOL Transfer"
                                     : tx.type === "token-transfer"
-                                    ? "Token Transfer"
-                                    : "Transaction"}
+                                      ? "Token Transfer"
+                                      : "Transaction"}
                                 </p>
                                 <p className="text-sm text-gray-400">
                                   {tx.signature.substring(0, 8)}...
@@ -784,8 +784,8 @@ const Wallet = () => {
                                   tx.status === "completed"
                                     ? "bg-green-500/20 text-green-500 border-green-500/30"
                                     : tx.status === "pending"
-                                    ? "bg-amber-500/20 text-amber-500 border-amber-500/30"
-                                    : "bg-red-500/20 text-red-500 border-red-500/30"
+                                      ? "bg-amber-500/20 text-amber-500 border-amber-500/30"
+                                      : "bg-red-500/20 text-red-500 border-red-500/30"
                                 }`}
                               >
                                 {tx.status.charAt(0).toUpperCase() +

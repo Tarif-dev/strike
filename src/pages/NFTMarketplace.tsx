@@ -260,7 +260,7 @@ const NFTCard = ({ nft, onBuy }) => {
                   "font-semibold",
                   performanceScore >= 90
                     ? "text-electric-lime"
-                    : performanceScore >= 80
+                    : nft.performanceScore >= 80
                       ? "text-royal-blue"
                       : "text-royal-gold"
                 )}
@@ -277,7 +277,7 @@ const NFTCard = ({ nft, onBuy }) => {
               "[&>[data-state=progress]]:bg-gradient-to-r",
               performanceScore >= 90
                 ? "[&>[data-state=progress]]:from-electric-lime [&>[data-state=progress]]:to-deep-emerald"
-                : performanceScore >= 80
+                : nft.performanceScore >= 80
                   ? "[&>[data-state=progress]]:from-royal-blue [&>[data-state=progress]]:to-deep-emerald"
                   : "[&>[data-state=progress]]:from-royal-gold [&>[data-state=progress]]:to-gold-600"
             )}
@@ -922,7 +922,7 @@ export default function NFTMarketplace() {
                             Cricket Player NFTs
                           </h3>
                           <p className="text-sm text-soft-white/90 drop-shadow-md">
-                            Collect your favorite players
+                            World&apos;s Most Valuable Cricket NFT
                           </p>
 
                           <div className="mt-2 flex justify-between items-center">
