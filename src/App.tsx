@@ -91,96 +91,73 @@ function App() {
           <WalletModalProvider>
             <BrowserRouter>
               <AuthProvider>
-                
-
                 <ZkCompressionProvider>
-                  
-                <NFTProvider>
-                  <Routes>
-                    {/* Public routes */}
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/auth/login" element={<Login />} />
-                    <Route path="/auth/signup" element={<Signup />} />
-                    <Route
-                      path="/auth/admin-signup"
-                      element={<AdminSignup />}
-                    />
-                    <Route path="/auth/otp-login" element={<OtpLogin />} />
-                    {/* Public routes */}
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/auth/login" element={<Login />} />
-                    <Route path="/auth/signup" element={<Signup />} />
-                    <Route
-                      path="/auth/admin-signup"
-                      element={<AdminSignup />}
-                    />
-                    <Route path="/auth/otp-login" element={<OtpLogin />} />
+                  <NFTProvider>
+                    <Routes>
+                      {/* Public routes */}
+                      <Route path="/" element={<LandingPage />} />
+                      <Route path="/auth/login" element={<Login />} />
+                      <Route path="/auth/signup" element={<Signup />} />
+                      <Route
+                        path="/auth/admin-signup"
+                        element={<AdminSignup />}
+                      />
+                      <Route path="/auth/otp-login" element={<OtpLogin />} />
+                      {/* Public routes */}
+                      <Route path="/" element={<LandingPage />} />
+                      <Route path="/auth/login" element={<Login />} />
+                      <Route path="/auth/signup" element={<Signup />} />
+                      <Route
+                        path="/auth/admin-signup"
+                        element={<AdminSignup />}
+                      />
+                      <Route path="/auth/otp-login" element={<OtpLogin />} />
 
-                    <Route
-                      path="/auth/forgot-password"
-                      element={<ForgotPassword />}
-                    />
-                    <Route
-                      path="/auth/reset-password"
-                      element={<ResetPassword />}
-                    />
-                    <Route path="/auth/callback" element={<AuthCallback />} />
+                      <Route
+                        path="/auth/forgot-password"
+                        element={<ForgotPassword />}
+                      />
+                      <Route
+                        path="/auth/reset-password"
+                        element={<ResetPassword />}
+                      />
+                      <Route path="/auth/callback" element={<AuthCallback />} />
 
-                    {/* Protected routes */}
-                    <Route element={<ProtectedRoute />}>
-                      <Route path="/home" element={<Home />} />
-                      <Route path="/matches" element={<Matches />} />
-                      <Route path="/matches/:id" element={<MatchDetails />} />
-                      <Route
-                        path="/matches/:id/contests"
-                        element={<Contests />}
-                      />
-                      <Route path="/contests/:matchId" element={<Contests />} />
-                      <Route path="/players" element={<Players />} />
-                      <Route path="/players/:id" element={<PlayerDetail />} />
-                      {/* Redirect all leagues routes to matches */}
-                      <Route
-                        path="/leagues/*"
-                        element={<Navigate to="/matches" replace />}
-                      />
-                      <Route path="/teams/create" element={<CreateTeam />} />
-                      <Route path="/teams/:id" element={<TeamDetail />} />
-                      <Route path="/wallet" element={<Wallet />} />
-                      <Route path="/profile" element={<Profile />} />
-                      <Route path="/api-settings" element={<ApiSettings />} />
-                      <Route
-                        path="/nft-marketplace"
-                        element={<NFTMarketplace />}
-                      />
-                    </Route>
-                    <Route
-                          path="/zk-compression"
-                          element={<ZkCompressionPage />}
+                      {/* Protected routes */}
+                      <Route element={<ProtectedRoute />}>
+                        <Route path="/home" element={<Home />} />
+                        <Route path="/matches" element={<Matches />} />
+                        <Route path="/matches/:id" element={<MatchDetails />} />
+                        <Route
+                          path="/matches/:id/contests"
+                          element={<Contests />}
                         />
-                        <Route path="/magicblock" element={<MagicBlockPage />} />
-
-                    
-                    {/* Admin routes */}
-                    <Route element={<AdminRoute />}>
-                      <Route path="/admin" element={<AdminDashboard />} />
+                        <Route
+                          path="/contests/:matchId"
+                          element={<Contests />}
+                        />
+                        <Route path="/players" element={<Players />} />
+                        <Route path="/players/:id" element={<PlayerDetail />} />
+                        {/* Redirect all leagues routes to matches */}
+                        <Route
+                          path="/leagues/*"
+                          element={<Navigate to="/matches" replace />}
+                        />
+                        <Route path="/teams/create" element={<CreateTeam />} />
+                        <Route path="/teams/:id" element={<TeamDetail />} />
+                        <Route path="/wallet" element={<Wallet />} />
+                        <Route path="/profile" element={<Profile />} />
+                        <Route path="/api-settings" element={<ApiSettings />} />
+                        <Route
+                          path="/nft-marketplace"
+                          element={<NFTMarketplace />}
+                        />
+                      </Route>
                       <Route
-                        path="/admin/create-match"
-                        element={<AdminMatches />}
+                        path="/zk-compression"
+                        element={<ZkCompressionPage />}
                       />
-                      <Route
-                        path="/admin/match/:id/:matchId"
-                        element={<MatchDetailAdmin />}
-                      />
-                      <Route
-                        path="/admin/manage-matches"
-                        element={<ManageMatches />}
-                      />
-                      <Route
-                        path="/admin/initialize-matches"
-                        element={<InitializeMatches />}
-                      />
-                    </Route>
-                        
+                      <Route path="/magicblock" element={<MagicBlockPage />} />
 
                       {/* Admin routes */}
                       <Route element={<AdminRoute />}>
@@ -203,11 +180,11 @@ function App() {
                         />
                       </Route>
 
-                    {/* Fallback for unknown routes */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                  <Toaster />
-                </NFTProvider>
+                      {/* Fallback for unknown routes */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                    <Toaster />
+                  </NFTProvider>
                 </ZkCompressionProvider>
               </AuthProvider>
             </BrowserRouter>
