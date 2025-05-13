@@ -13,7 +13,14 @@ import {
 } from "@/utils/fantasy-helpers";
 import { fetchPrizePool } from "@/utils/prize-pool";
 import { calculatePrizeDistribution } from "@/utils/prize-distribution";
+import { calculateEnhancedPrizeDistribution } from "@/utils/enhanced-prize-distribution";
 import { processPrizeDistribution } from "@/utils/prize-transaction";
+import { Connection, PublicKey, SystemProgram } from "@solana/web3.js";
+import { Program } from "@coral-xyz/anchor";
+import * as anchor from "@coral-xyz/anchor";
+import { WalletContextState } from "@solana/wallet-adapter-react";
+import { IDL } from "@/idl/strike_contracts_new";
+import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import {
   ArrowLeft,
   Award,
@@ -92,13 +99,15 @@ import { Json } from "@/integrations/supabase/types";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import {sampleScoreCard} from "../../samples/sample-scorecard.js"
 import axios from "axios"
+import { API_KEY } from "@/utils/config.js";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 // Scoring rules for cricket fantasy
 const SCORING_RULES = {
   BATTING: {
     RUN: 1 as number,
-    FOUR: 1 as number,
-    SIX: 2 as number,
+    FOUR: 4 as number,
+    SIX: 6 as number,
     FIFTY: 10 as number,
     HUNDRED: 20 as number,
     DUCK: -5 as number,
@@ -168,38 +177,67 @@ const MatchDetailAdmin = () => {
   method: 'GET',
   url: `https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/${matchId}/scard`,
   headers: {
-    'x-rapidapi-key': 'bee2da4a33msh54fad7b338b78d2p19ea73jsndd8333ad3725',
+    'x-rapidapi-key': "014abe6e35msh76ef70851596118p1e000fjsn01ac2f8b6c4d",
     'x-rapidapi-host': 'cricbuzz-cricket.p.rapidapi.com'
   }
 };
 
 try {
+  
 	const response = await axios.request(options);
 	console.log(response.data);
-  const completed = response?.data?.matchHeader?.complete || false;
+  const completed = response?.data?.isMatchComplete || false;
   
   if(completed){
-    const scorecard=response?.data?.scorecard;
-    const innings1=scorecard[0].batsman;
-    const innings2=scorecard[1].batsman;
-    const bowlerinnings1=scorecard[0].bowler;
-    const bowlerinnings2=scorecard[1].bowler;
+    const scorecard=response?.data?.scoreCard;
+    console.log("Scorecard data:", response.data.scorecard);
+    const scorecard2=response?.data?.scorecard;
+    if(scorecard2&&scorecard2.length>0){
+      const innings1=Object.values(scorecard2[0].batsman);
+      innings1.forEach((batsman)=>{
+        batsman.batId=batsman.id;
+      });
+      const innings2=Object.values(scorecard2[1].batsman);
+      innings2.forEach((batsman)=>{
+        batsman.batId=batsman.id;
+      });
+      const bowlerinnings1=Object.values(scorecard2[0].bowler);
+      bowlerinnings1.forEach((bowler)=>{
+        bowler.bowlerId=bowler.id;
+      });
+      const bowlerinnings2=Object.values(scorecard2[1].bowler);
+      bowlerinnings2.forEach((bowler)=>{
+        bowler.bowlerId=bowler.id;
+      });
       const allscores=[...innings1, ...innings2, ...bowlerinnings1, ...bowlerinnings2];
-      setscoreCard(allscores)
       setIsMatchCompleted(completed);
+      setscoreCard(allscores);
+      console.log("Allscores:", allscores);
+      return allscores;
+    }
+    console.log("Scorecard data:", scorecard);
+    const innings1=Object.values(scorecard[0].batTeamDetails?.batsmenData);
+    const innings2=Object.values(scorecard[1].batTeamDetails?.batsmenData);
+    const bowlerinnings1=Object.values(scorecard[0].bowlTeamDetails?.bowlersData);
+    const bowlerinnings2=Object.values(scorecard[1].bowlTeamDetails?.bowlersData);
+      const allscores=[...innings1, ...innings2, ...bowlerinnings1, ...bowlerinnings2];
+       setIsMatchCompleted(completed);
+       setscoreCard(allscores);
+
+      return allscores;
+      
+     
   }
   else{
     console.log("Match not completed yet");
+    return
   }
 } catch (error) {
-	console.error(error);
+  
+	console.error("score card not getting error",error);
+  return
 }
 }
-   useEffect(() => {
-  if (matchId) {
-    getScoreCard();
-  }
-}, [matchId])
   useEffect(() => {
     if (!matchId) return;
     
@@ -223,7 +261,6 @@ try {
   // Fetch teams for this match
   useEffect(() => {
     if (!matchId) return;
-    
     const fetchTeams = async () => {
       try {
         setLoadingTeams(true);
@@ -256,35 +293,11 @@ try {
         if (error) {
           throw error;
         }
-        const calculateTotalPoints = (player) => {
-            let sum=0;
-            console.log("Player:", player)
-            const allplayerPerformances=scoreCard
-            console.log("All Player Performances:", allplayerPerformances)
-            console.log("all players", player)
-            if(!scoreCard || scoreCard.length==0){
-              console.log("No scorecard data available")
-              return 0;
-            }
-            player.forEach((p)=>{
-               const playerId=p.id
-               let performance1
-               const playerPerformance=allplayerPerformances.filter((performance)=>performance.id==playerId)
-               if(playerPerformance.length>1){
-                //he is allrounder
-                 performance1={...playerPerformance[0], ...playerPerformance[1]}
-               }
-               else{
-                performance1=playerPerformance[0]
-               }
-               sum+=calcFantasyPoints(performance1, SCORING_RULES)
-               console.log("Performance:", performance1)
-            })
-            return sum;
-        }
+     
         
         // Ensure proper typing for the teams data
-        console.log("Players data structure:", data[0].players)
+        // console.log("Players data structure:", data[0].players)
+        console.log("Players data structure:", data[0])
         // Log the first player to see its structure
         if (Array.isArray(data[0].players) && data[0].players.length > 0) {
           console.log("First player data:", data[0].players[0])
@@ -319,7 +332,7 @@ try {
             vice_captain_id: team.vice_captain_id,
             created_at: team.created_at,
             updated_at: team.updated_at,
-            total_points: calculateTotalPoints(team.players),
+            // total_points: calculateTotalPoints(team.players),
             match_details: team.match_details
           } as TeamData;
         });
@@ -328,16 +341,6 @@ try {
 
         setTeams(typedTeams);
         console.log("Fetched teams:", typedTeams);
-        const points=[];
-
-
-        const teamPoints = typedTeams.map((team) => {
-            return {
-                user_id: team.user_id,
-                points: calculateTotalPoints(team.players)
-            };
-        });
-        console.log("Team Points:", teamPoints);
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : "Failed to fetch teams";
         console.error("Error fetching teams:", error);
@@ -352,8 +355,54 @@ try {
     };
 
     fetchTeams();
-  }, [matchId]);
-  
+  }, []);
+     const calculateTotalPoints = async(player,allplayerPerformances) => {
+            let sum=0;
+            console.log("Player:", player)
+            console.log("All Player Performances:", allplayerPerformances)
+            console.log("all players", player)
+            if(!allplayerPerformances || allplayerPerformances.length==0){
+              console.log("No scorecard data available")
+              return 0;
+            }
+            player.forEach((p)=>{
+               const playerId=p.id
+               let performance1
+               const playerPerformance=allplayerPerformances?.filter((performance)=>(performance.batId&&performance.batId==playerId)||(!(performance.batId)&&performance.bowlerId==playerId))
+              
+               if(playerPerformance?.length>1){
+                //he is allrounder
+                 performance1={...playerPerformance[0], ...playerPerformance[1]}
+               }
+               else{
+                performance1=playerPerformance[0]
+               }
+               sum+=calcFantasyPoints(performance1, SCORING_RULES)
+              
+            })
+            return sum;
+  }
+  const calculatePoints=async()=>{
+    const scoreCard=await getScoreCard()
+    if(!scoreCard){
+      console.log("No scorecard data available")
+      return
+    }
+    console.log("Scorecard data:", scoreCard)
+    const t=[]
+    teams.forEach(async(team)=>{
+      const player=team.players
+      const totalPoints=await calculateTotalPoints(player, scoreCard)
+      console.log("Total points for team:", team.team_name, totalPoints)
+      team={
+        ...team,
+        total_points: totalPoints
+      };
+      t.push(team)
+    });
+    console.log("Teams with calculated points:", teams);
+    setTeams(t);
+  }
   // Fetch prize pool amount
   useEffect(() => {
     if (!matchId) return;
@@ -451,187 +500,336 @@ try {
   };
 
   // Calculate points for all teams based on player performances
-  const calculatePoints = async () => {
-    if (!matchId || Object.keys(playerPerformances).length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Cannot Calculate Points",
-        description: "No player performance data available",
-      });
-      return;
-    }
+  // const calculatePoints = async () => {
+  //   if (!matchId || Object.keys(playerPerformances).length === 0) {
+  //     toast({
+  //       variant: "destructive",
+  //       title: "Cannot Calculate Points",
+  //       description: "No player performance data available",
+  //     });
+  //     return;
+  //   }
     
-    try {
-      setCalculatingPoints(true);
+  //   try {
+  //     setCalculatingPoints(true);
        
-      // Process each team and calculate points
-      const updatedTeams = await Promise.all(
-        teams.map(async (team) => {
-          // Calculate points for each player in team
-          let totalTeamPoints = 0;
+  //     // Process each team and calculate points
+  //     const updatedTeams = await Promise.all(
+  //       teams.map(async (team) => {
+  //         // Calculate points for each player in team
+  //         let totalTeamPoints = 0;
           
-          // Ensure player IDs are strings and the array is valid
-          const playerIds: string[] = Array.isArray(team.players) ? team.players.map(p => String(p)) : [];
+  //         // Ensure player IDs are strings and the array is valid
+  //         const playerIds: string[] = Array.isArray(team.players) ? team.players.map(p => String(p)) : [];
           
-          const playerDetailsWithPoints: PlayerWithPoints[] = playerIds.map((playerId: string) => {
-            const performance = playerPerformances[playerId] || {};
-            console.log("Performance for player:", playerId, performance);
-            const basePoints = calcFantasyPoints(performance, SCORING_RULES);
+  //         const playerDetailsWithPoints: PlayerWithPoints[] = playerIds.map((playerId: string) => {
+  //           const performance = playerPerformances[playerId] || {};
+  //           console.log("Performance for player:", playerId, performance);
+  //           const basePoints = calcFantasyPoints(performance, SCORING_RULES);
             
-            let playerPoints = basePoints;
+  //           let playerPoints = basePoints;
             
-            // Apply captain/vice-captain multipliers
-            if (playerId === team.captain_id) {
-              playerPoints = basePoints * SCORING_RULES.CAPTAIN_MULTIPLIER;
-            } else if (playerId === team.vice_captain_id) {
-              playerPoints = basePoints * SCORING_RULES.VICE_CAPTAIN_MULTIPLIER;
-            }
+  //           // Apply captain/vice-captain multipliers
+  //           if (playerId === team.captain_id) {
+  //             playerPoints = basePoints * SCORING_RULES.CAPTAIN_MULTIPLIER;
+  //           } else if (playerId === team.vice_captain_id) {
+  //             playerPoints = basePoints * SCORING_RULES.VICE_CAPTAIN_MULTIPLIER;
+  //           }
             
-            totalTeamPoints += playerPoints;
+  //           totalTeamPoints += playerPoints;
             
-            // Try to find player details from the original data structure
-            let playerName = String(playerId);
-            let playerTeam = "unknown";
-            let playerPosition = "unknown";
+  //           // Try to find player details from the original data structure
+  //           let playerName = String(playerId);
+  //           let playerTeam = "unknown";
+  //           let playerPosition = "unknown";
             
-            // Look for player objects in all teams data
-            for (const t of teams) {
-              if (!Array.isArray(t.originalPlayers)) continue;
-              for (const p of t.originalPlayers) {
-                if (typeof p === 'object' && p !== null) {
-                  // Use explicit type interface to avoid any issues
-                  interface PlayerObject {
-                    id?: string;
-                    name?: string;
-                    team?: string;
-                    position?: string;
-                  }
-                  const playerObj = p as PlayerObject;
-                  if (playerObj.id === playerId) {
-                    playerName = String(playerObj.name || playerId);
-                    playerTeam = String(playerObj.team || "unknown");
-                    playerPosition = String(playerObj.position || "unknown");
-                    break;
-                  }
-                }
-              }
-            }
+  //           // Look for player objects in all teams data
+  //           for (const t of teams) {
+  //             if (!Array.isArray(t.originalPlayers)) continue;
+  //             for (const p of t.originalPlayers) {
+  //               if (typeof p === 'object' && p !== null) {
+  //                 // Use explicit type interface to avoid any issues
+  //                 interface PlayerObject {
+  //                   id?: string;
+  //                   name?: string;
+  //                   team?: string;
+  //                   position?: string;
+  //                 }
+  //                 const playerObj = p as PlayerObject;
+  //                 if (playerObj.id === playerId) {
+  //                   playerName = String(playerObj.name || playerId);
+  //                   playerTeam = String(playerObj.team || "unknown");
+  //                   playerPosition = String(playerObj.position || "unknown");
+  //                   break;
+  //                 }
+  //               }
+  //             }
+  //           }
             
-            return {
-              id: playerId,
-              name: playerName,
-              team: playerTeam,
-              position: playerPosition,
-              basePoints,
-              calculatedPoints: playerPoints,
-              isCaptain: playerId === team.captain_id,
-              isViceCaptain: playerId === team.vice_captain_id,
-              performance
-            };
-          });
+  //           return {
+  //             id: playerId,
+  //             name: playerName,
+  //             team: playerTeam,
+  //             position: playerPosition,
+  //             basePoints,
+  //             calculatedPoints: playerPoints,
+  //             isCaptain: playerId === team.captain_id,
+  //             isViceCaptain: playerId === team.vice_captain_id,
+  //             performance
+  //           };
+  //         });
           
-          // Round total points to 2 decimal places
-          totalTeamPoints = Math.round(totalTeamPoints * 100) / 100;
+  //         // Round total points to 2 decimal places
+  //         totalTeamPoints = Math.round(totalTeamPoints * 100) / 100;
           
-          // Update team in database with calculated points
-          const { error } = await supabase
-            .from("teams")
-            .update({
-              total_points: totalTeamPoints,
-              updated_at: new Date().toISOString()
-            })
-            .eq("id", team.id);
+  //         // Update team in database with calculated points
+  //         const { error } = await supabase
+  //           .from("teams")
+  //           .update({
+  //             total_points: totalTeamPoints,
+  //             updated_at: new Date().toISOString()
+  //           })
+  //           .eq("id", team.id);
             
-          if (error) throw error;
+  //         if (error) throw error;
           
-          return {
-            ...team,
-            total_points: totalTeamPoints,
-            playerDetails: playerDetailsWithPoints,
-            calculatedPoints: totalTeamPoints
-          };
-        })
-      );
+  //         return {
+  //           ...team,
+  //           total_points: totalTeamPoints,
+  //           playerDetails: playerDetailsWithPoints,
+  //           calculatedPoints: totalTeamPoints
+  //         };
+  //       })
+  //     );
       
-      // Sort teams by points to determine ranks
-      const rankedTeams: TeamData[] = [...updatedTeams].sort((a, b) => {
-        return (b.total_points || 0) - (a.total_points || 0);
-      }).map((team, index) => ({
-        ...team,
-        rank: index + 1
-      }));
+  //     // Sort teams by points to determine ranks
+  //     const rankedTeams: TeamData[] = [...updatedTeams].sort((a, b) => {
+  //       return (b.total_points || 0) - (a.total_points || 0);
+  //     }).map((team, index) => ({
+  //       ...team,
+  //       rank: index + 1
+  //     }));
       
-      // Save match as finalized if coming from 'completed' state
-      if (match?.status === "completed") {
-        const { error } = await supabase
-          .from("matches")
-          .update({
-            is_finalized: true
-          })
-          .eq("match_id", id);
+  //     // Save match as finalized if coming from 'completed' state
+  //     if (match?.status === "completed") {
+  //       const { error } = await supabase
+  //         .from("matches")
+  //         .update({
+  //           is_finalized: true
+  //         })
+  //         .eq("match_id", id);
           
-        if (error) throw error;
-      }
+  //       if (error) throw error;
+  //     }
       
-      // Also store player performances in match_details field of the matches table
-      const { data: existingMatch, error: fetchError } = await supabase
-        .from("matches")
-        .select("match_details")
-        .eq("match_id", id)
-        .single();
+  //     // Also store player performances in match_details field of the matches table
+  //     const { data: existingMatch, error: fetchError } = await supabase
+  //       .from("matches")
+  //       .select("match_details")
+  //       .eq("match_id", id)
+  //       .single();
       
-      if (fetchError) throw fetchError;
+  //     if (fetchError) throw fetchError;
       
-      // Prepare updated match_details with player performances
-      const existingDetails = existingMatch?.match_details;
-      const updatedMatchDetails: Record<string, unknown> = {
-        ...(typeof existingDetails === 'object' ? existingDetails : {}),
-        player_performances: playerPerformances,
-        updated_at: new Date().toISOString()
-      };
+  //     // Prepare updated match_details with player performances
+  //     const existingDetails = existingMatch?.match_details;
+  //     const updatedMatchDetails: Record<string, unknown> = {
+  //       ...(typeof existingDetails === 'object' ? existingDetails : {}),
+  //       player_performances: playerPerformances,
+  //       updated_at: new Date().toISOString()
+  //     };
       
-      // Update the match_details field
-      const { error: updateError } = await supabase
-        .from("matches")
-        .update({
-          match_details: updatedMatchDetails as Json
-        })
-        .eq("match_id", id);
+  //     // Update the match_details field
+  //     const { error: updateError } = await supabase
+  //       .from("matches")
+  //       .update({
+  //         match_details: updatedMatchDetails as Json
+  //       })
+  //       .eq("match_id", id);
         
-      if (updateError) throw updateError;
+  //     if (updateError) throw updateError;
       
-      setTeams(rankedTeams);
+  //     setTeams(rankedTeams);
       
-      toast({
-        title: "Points Calculated",
-        description: `Successfully calculated points for ${teams.length} teams`,
-      });
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to calculate points";
-      console.error("Error calculating points:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: errorMessage,
-      });
-    } finally {
-      setCalculatingPoints(false);
-    }
-  };
+  //     toast({
+  //       title: "Points Calculated",
+  //       description: `Successfully calculated points for ${teams.length} teams`,
+  //     });
+  //   } catch (error: unknown) {
+  //     const errorMessage = error instanceof Error ? error.message : "Failed to calculate points";
+  //     console.error("Error calculating points:", error);
+  //     toast({
+  //       variant: "destructive",
+  //       title: "Error",
+  //       description: errorMessage,
+  //     });
+  //   } finally {
+  //     setCalculatingPoints(false);
+  //   }
+  // };
 
   // Calculate points for an individual player
-  const calculatePlayerPoints = (performance: PlayerPerformance): number => {
-    return calcFantasyPoints(performance, SCORING_RULES);
-  };
+  
 
-  // Distribute prizes to winners
-  // Distribute prizes to winners
+  // Distribute prizes to winners via blockchain
+const distributePrizeBlockchain = async (matchId: string, amounts: {wallet_address: string, prize_amount: number}[]) => {
+  try {
+    console.log("Starting blockchain prize distribution for match:", matchId);
+    console.log("Prize amounts to distribute:", amounts);
+
+    // The program ID from your application
+    const PROGRAM_ID = new PublicKey('2Bnp9uikuv1EuAfHbcXizF8FcqNDKQg7hfuKbLC9y6hT');
+
+    // Get Solana connection
+    const connection = new Connection(import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.devnet.solana.com');
+
+    if (!wallet.connected || !wallet.publicKey) {
+      throw new Error("Wallet not connected. Please connect your wallet to distribute prizes.");
+    }
+
+    // Create provider and program
+    const provider = new anchor.AnchorProvider(connection, wallet, {
+      commitment: "confirmed",
+    });
+    const program = new Program(IDL, provider);
+
+    // Use the short match ID for PDA derivation (same as in fetchPrizePool)
+    const shortMatchId = matchId;
+    const matchIdBuffer = Buffer.from(shortMatchId);
+
+    // Derive the match pool PDA
+    const [matchPoolPDA] = await PublicKey.findProgramAddress(
+      [Buffer.from("match_pool"), matchIdBuffer],
+      PROGRAM_ID
+    );
+
+    // Derive the pool token account
+    const [poolTokenPDA] = await PublicKey.findProgramAddress(
+      [Buffer.from("pool_token"), matchIdBuffer],
+      PROGRAM_ID
+    );
+    
+    try {
+      const matchPoolAccount = await program.account["matchPool"].fetch(matchPoolPDA);
+      console.log("Match pool account:", matchPoolAccount);
+      
+      // If not finalized, call the end_match function first
+      if (!matchPoolAccount.isFinalized) {
+        console.log("Match not finalized yet. Finalizing match first...");
+        
+     
+        const endMatchTx = await program.methods
+          .endMatch()
+          .accounts({
+            matchPool: matchPoolPDA,
+            admin: wallet.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .rpc({
+            skipPreflight: true,  // Skip transaction simulation
+            commitment: 'confirmed'
+          });
+        
+        console.log("Match finalization transaction successful:", endMatchTx);
+        
+        // Wait for confirmation
+        const confirmation = await connection.confirmTransaction(endMatchTx, 'confirmed');
+        console.log("Match finalization confirmed:", confirmation);
+      } else {
+        console.log("Match is already finalized, proceeding to prize distribution");
+      }
+    } catch (error) {
+      console.error("Error checking match finalization status:", error);
+      throw new Error("Failed to check match status: " + (error instanceof Error ? error.message : String(error)));
+    }
+
+  
+    const usdcMint = new PublicKey("Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr");
+    console.log("Using USDC mint address:", usdcMint.toString());
+
+    const prizeDistributions = amounts.map((amount) => ({
+      user: new PublicKey(amount.wallet_address),
+      // Convert USDC to lamports (assuming 6 decimals for USDC)
+      amount: new anchor.BN(Math.floor(amount.prize_amount * 1_000_000))
+    }));
+    console.log("Prize distributions:", prizeDistributions);
+
+    console.log("Prepared prize distributions:", prizeDistributions);
+
+    // For each prize recipient, find or create their associated token account
+    const tokenAccountPromises = prizeDistributions.map(async (prize) => {
+      const [tokenAccount] = await PublicKey.findProgramAddress(
+        [
+          prize.user.toBuffer(),
+          TOKEN_PROGRAM_ID.toBuffer(),
+          usdcMint.toBuffer() 
+        ],
+        ASSOCIATED_TOKEN_PROGRAM_ID
+      );
+      
+      return {
+        pubkey: tokenAccount,
+        isWritable: true,
+        isSigner: false
+      };
+    });
+    
+    const remainingAccounts = await Promise.all(tokenAccountPromises);
+    console.log("Including token accounts for winners:", remainingAccounts);
+    
+    // Execute the distribute_prizes instruction with the token accounts included
+    const tx = await program.methods
+      .distributePrizes(prizeDistributions)
+      .accounts({
+        matchPool: matchPoolPDA,
+        poolTokenAccount: poolTokenPDA,
+        admin: wallet.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
+      })
+      .remainingAccounts(remainingAccounts)
+      .rpc({
+        skipPreflight: true,  // Skip transaction simulation 
+        commitment: 'confirmed'
+      });
+
+    console.log("Prize distribution transaction successful:", tx);
+    
+    // Record the transaction in the database - check if prize_distributions table exists
+    // try {
+    //   for (const team of teamsWithWallets) {
+    //     await supabase
+    //       .from("prize_distributions")
+    //       .upsert({
+    //         match_id: matchId,
+    //         team_id: team.teamId,
+    //         amount: team.amount,
+    //         transaction_signature: tx,
+    //         processed_at: new Date().toISOString()
+    //       });
+    //   }
+    // } catch (dbError) {
+    //   console.error("Error recording prize transactions in database:", dbError);
+    //   // Continue even if database update fails, as the blockchain transaction was successful
+    // }
+
+    return tx;
+  } catch (error) {
+    console.error("Error distributing prizes on blockchain:", error);
+    toast({
+      variant: "destructive",
+      title: "Blockchain Distribution Failed",
+      description: error instanceof Error ? error.message : "Failed to distribute prizes on the blockchain",
+    });
+    throw error;
+  }
+}
+
   const distributePrizes = async () => {
     if (!matchId) return;
     
     try {
       setDistributingPrizes(true);
-      
       // Ensure teams are ranked by total points
       const rankedTeams = [...teams].sort((a, b) => {
         return (b.total_points || 0) - (a.total_points || 0);
@@ -659,14 +857,46 @@ try {
         return;
       }
       
-      // Use the prize distribution utility to calculate distribution
-      const distribution = calculatePrizeDistribution(rankedTeams, totalPoolDeposits);
+      // Use the enhanced prize distribution utility to calculate distribution
+      const enhancedDistribution = calculateEnhancedPrizeDistribution(rankedTeams, totalPoolDeposits);
+      console.log("Enhanced prize distribution:", enhancedDistribution.distributions[0]);
+      const amounts= enhancedDistribution.distributions;
+      // Store the detailed explanation for display
+     
+      setPrizeDistributionMessage(enhancedDistribution.explanation);
       
-      // Process the prize distribution transactions
-      await processPrizeDistribution(matchId, rankedTeams, distribution);
+      // Process the prize distribution transactions - create a compatible format for the processor
+      const compatibleDistribution = {
+        distributions: {},
+        percentages: {},
+        amounts: {},
+        message: enhancedDistribution.explanation
+      };
       
-      // Update UI with distribution message
-      setPrizeDistributionMessage(distribution.message);
+      // Map the enhanced distributions to the format expected by processPrizeDistribution
+      rankedTeams.forEach(team => {
+        // Find the team's distribution if it exists
+        const teamDistribution = enhancedDistribution.distributions.find(
+          // @ts-expect-error - wallet_address might be added at runtime
+          dist => dist.wallet_address === team.wallet_address
+        );
+        
+        if (teamDistribution) {
+          compatibleDistribution.distributions[team.id] = `${team.team_name}: Prize awarded`;
+          compatibleDistribution.amounts[team.id] = teamDistribution.prize_amount;
+          // Calculate a percentage for reporting
+          compatibleDistribution.percentages[team.id] = 
+            (teamDistribution.prize_amount / parseFloat(totalPoolDeposits)) * 100;
+        }
+      });
+      
+      // Process the prize distribution transactions with the compatible format
+      console.log("Processing prize distribution with data:", compatibleDistribution.amounts);
+      // await processPrizeDistribution(matchId, rankedTeams, compatibleDistribution);
+
+      await distributePrizeBlockchain(matchId, amounts);
+ 
+      // Show the distribution dialog
       setShowDistributeDialog(true);
       
       toast({
@@ -814,18 +1044,10 @@ try {
           </Button>
           
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline"
-              onClick={savePlayerPerformances}
-              className="bg-cricket-dark-green border-cricket-dark-green"
-            >
-              <Save className="mr-2 h-4 w-4" />
-              Save Performance Data
-            </Button>
+           <WalletMultiButton className="bg-neon-green hover:bg-neon-green/90 text-black font-medium shadow-md transition-all duration-200 hover:shadow-lg" />
             
             <Button
               onClick={calculatePoints}
-              disabled={calculatingPoints || (isMatchCompleted === false) || Object.keys(playerPerformances).length === 0}
               title={isMatchCompleted === false ? "Cannot calculate points while match is in progress" : ""}
               className="bg-cricket-lime text-cricket-dark-green hover:bg-cricket-lime/90 disabled:opacity-50"
             >
@@ -842,7 +1064,7 @@ try {
               )}
             </Button>
             
-            {match.status === "completed" && (
+            { (
               <Button
                 onClick={distributePrizes}
                 disabled={distributingPrizes || teams.some(team => team.total_points === null)}
@@ -997,7 +1219,7 @@ try {
                     <TableRow>
                       <TableHead className="w-[80px]">Rank</TableHead>
                       <TableHead>Team Name</TableHead>
-                      <TableHead>User</TableHead>
+                      <TableHead>Wallet address</TableHead>
                       <TableHead className="text-right">Points</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -1019,7 +1241,7 @@ try {
                           </TableCell>
                           <TableCell>{team.team_name}</TableCell>
                           <TableCell>
-                            {team.user_id}
+                            {team.wallet_address }
                           </TableCell>
                           <TableCell className="text-right">
                             {team.total_points !== null ? (
@@ -1064,7 +1286,7 @@ try {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {Object.entries(playerPerformances).map(([playerId, performance]) => (
+                      {!calculatingPoints&& Object.entries(playerPerformances).map(([playerId, performance]) => (
                         <TableRow key={playerId}>
                           <TableCell className="font-medium">
                             {(() => {
@@ -1261,7 +1483,7 @@ try {
                   </div>
                   
                   {/* Top Winners List */}
-                  {teams.length > 0 && (
+                  {!calculatingPoints&& teams.length > 0 && (
                     <div>
                       <h3 className="text-lg font-semibold mb-3">Current Winners</h3>
                       <UITable>
