@@ -214,18 +214,44 @@ const Profile = () => {
   const [isLoadingTeams, setIsLoadingTeams] = useState(false);
   const [teamsError, setTeamsError] = useState<string | null>(null);
 
+  // Add state for admin status
+  const [isAdmin, setIsAdmin] = useState(false);
+
   // Add state for Play button
   const [activePlayTeamId, setActivePlayTeamId] = useState<
     string | number | null
   >(null);
   const [showPlayDialog, setShowPlayDialog] = useState(false);
-
   // Fetch teams when user loads
   useEffect(() => {
     if (user) {
       fetchUserTeams();
+      checkAdminStatus();
     }
   }, [user]);
+
+  // Check if the user is an admin
+  const checkAdminStatus = async () => {
+    if (!user) return;
+
+    try {
+      const { data: profileData, error } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error checking admin status:", error);
+        setIsAdmin(false);
+      } else {
+        setIsAdmin(Boolean(profileData?.is_admin));
+      }
+    } catch (err) {
+      console.error("Unexpected error checking admin status:", err);
+      setIsAdmin(false);
+    }
+  };
 
   // Fetch user's teams from Supabase
   const fetchUserTeams = async () => {
@@ -831,7 +857,6 @@ const Profile = () => {
                   </div>
                 </CardContent>
               </Card>
-
               <Card className="bg-gray-900/60 border-gray-800">
                 <CardHeader>
                   <CardTitle>Cricket Preferences</CardTitle>
@@ -885,7 +910,6 @@ const Profile = () => {
                   </div>
                 </CardContent>
               </Card>
-
               <Card className="bg-gray-900/60 border-gray-800">
                 <CardHeader>
                   <CardTitle>Account Settings</CardTitle>
@@ -922,9 +946,19 @@ const Profile = () => {
                     <ChevronRight className="w-5 h-5 text-gray-400" />
                   </Link>
                 </CardContent>
-              </Card>
-
+              </Card>{" "}
               <div className="flex flex-col mt-8">
+                {" "}
+                {isAdmin && (
+                  <Button
+                    variant="outline"
+                    className="bg-transparent border-blue-500 text-blue-500 hover:bg-blue-500/10 mb-3"
+                    onClick={() => navigate("/admin")}
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Admin Dashboard
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   className="bg-transparent border-red-500 text-red-500 hover:bg-red-500/10"
