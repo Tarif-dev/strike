@@ -175,7 +175,7 @@ const MatchDetailAdmin = () => {
   const getScoreCard=async()=>{
     const options = {
   method: 'GET',
-  url: `https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/${matchId}/scard`,
+  url: `https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/114960/scard`,
   headers: {
     'x-rapidapi-key': "014abe6e35msh76ef70851596118p1e000fjsn01ac2f8b6c4d",
     'x-rapidapi-host': 'cricbuzz-cricket.p.rapidapi.com'
